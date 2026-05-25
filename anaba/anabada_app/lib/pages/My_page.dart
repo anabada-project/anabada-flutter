@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
 
 class MyPage extends StatelessWidget {
-  const MyPage({super.key});
+  const MyPage({
+    super.key,
+    required this.userName,
+    required this.email,
+    required this.major,
+    required this.generation,
+  });
+
+  // 외부에서 받아오는 데이터
+
+  final String userName;
+  final String email;
+  final String major;
+  final String generation;
+  // 색상
 
   static const Color mainColor = Color(0xFFFFB800);
   static const Color grayText = Color(0xFF9E9E9E);
@@ -15,10 +29,11 @@ class MyPage extends StatelessWidget {
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
+
           children: [
             const SizedBox(height: 20),
 
-            // 상단 제목
+            // 상단바
             _topBar(),
 
             const SizedBox(height: 24),
@@ -59,11 +74,13 @@ class MyPage extends StatelessWidget {
   }
 
   // 상단바
+
   Widget _topBar() {
     return Row(
       children: [
         const Text(
           '마이페이지',
+
           style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
         ),
 
@@ -80,6 +97,7 @@ class MyPage extends StatelessWidget {
   }
 
   // 프로필 카드
+
   Widget _profileCard() {
     return Container(
       padding: const EdgeInsets.all(18),
@@ -101,36 +119,54 @@ class MyPage extends StatelessWidget {
 
           const SizedBox(width: 18),
 
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
+                // 이름
                 Text(
-                  '이승준',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  userName,
+
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
 
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
 
+                // 이메일
                 Text(
-                  's26000@gsm.hs.kr',
-                  style: TextStyle(color: grayText, fontSize: 15),
+                  email,
+
+                  style: const TextStyle(color: grayText, fontSize: 15),
                 ),
 
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
 
-                Text('디자인', style: TextStyle(color: grayText, fontSize: 15)),
+                // 전공
+                Text(
+                  major,
+
+                  style: const TextStyle(color: grayText, fontSize: 15),
+                ),
               ],
             ),
           ),
 
-          const Text('10기', style: TextStyle(color: grayText, fontSize: 15)),
+          // 기수
+          Text(
+            generation,
+
+            style: const TextStyle(color: grayText, fontSize: 15),
+          ),
         ],
       ),
     );
   }
-
   // 정보 수정 버튼
+
   Widget _editButton() {
     return SizedBox(
       height: 50,
@@ -179,8 +215,8 @@ class MyPage extends StatelessWidget {
       ],
     );
   }
+  // 가로 스크롤 물건 리스트
 
-  // 가로 스크롤 리스트
   Widget _itemList() {
     return SizedBox(
       height: 250,
@@ -197,14 +233,15 @@ class MyPage extends StatelessWidget {
         itemBuilder: (context, index) {
           return _itemCard(
             status: index == 1 ? '교환 완료' : '교환 가능',
+
             isDone: index == 1,
           );
         },
       ),
     );
   }
-
   // 물건 카드
+
   Widget _itemCard({required String status, required bool isDone}) {
     return SizedBox(
       width: 145,
@@ -220,6 +257,7 @@ class MyPage extends StatelessWidget {
 
                 decoration: BoxDecoration(
                   color: lightGray,
+
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
@@ -288,25 +326,19 @@ class MyPage extends StatelessWidget {
   Widget _bottomNavigation() {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-
       currentIndex: 4,
-
       selectedItemColor: mainColor,
       unselectedItemColor: Colors.grey,
-
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
           label: '메인페이지',
         ),
-
         BottomNavigationBarItem(icon: Icon(Icons.search), label: '물건 조회'),
-
         BottomNavigationBarItem(
           icon: Icon(Icons.add_circle_outline),
           label: '물건 등록',
         ),
-
         BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: '찜'),
 
         BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이페이지'),
