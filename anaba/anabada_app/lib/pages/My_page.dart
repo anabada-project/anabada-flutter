@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/item_card.dart';
+
 class MyPage extends StatelessWidget {
   const MyPage({
     super.key,
@@ -10,16 +12,14 @@ class MyPage extends StatelessWidget {
   });
 
   // 외부에서 받아오는 데이터
-
   final String userName;
   final String email;
   final String major;
   final String generation;
-  // 색상
 
+  // 색상
   static const Color mainColor = Color(0xFFFFB800);
   static const Color grayText = Color(0xFF9E9E9E);
-  static const Color lightGray = Color(0xFFF3F3F3);
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +74,6 @@ class MyPage extends StatelessWidget {
   }
 
   // 상단바
-
   Widget _topBar() {
     return Row(
       children: [
@@ -97,7 +96,6 @@ class MyPage extends StatelessWidget {
   }
 
   // 프로필 카드
-
   Widget _profileCard() {
     return Container(
       padding: const EdgeInsets.all(18),
@@ -165,8 +163,8 @@ class MyPage extends StatelessWidget {
       ),
     );
   }
-  // 정보 수정 버튼
 
+  // 정보 수정 버튼
   Widget _editButton() {
     return SizedBox(
       height: 50,
@@ -215,8 +213,8 @@ class MyPage extends StatelessWidget {
       ],
     );
   }
-  // 가로 스크롤 물건 리스트
 
+  // 가로 스크롤 물건 리스트
   Widget _itemList() {
     return SizedBox(
       height: 250,
@@ -231,7 +229,7 @@ class MyPage extends StatelessWidget {
         },
 
         itemBuilder: (context, index) {
-          return _itemCard(
+          return ItemCard(
             status: index == 1 ? '교환 완료' : '교환 가능',
 
             isDone: index == 1,
@@ -240,105 +238,30 @@ class MyPage extends StatelessWidget {
       ),
     );
   }
-  // 물건 카드
-
-  Widget _itemCard({required String status, required bool isDone}) {
-    return SizedBox(
-      width: 145,
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
-          Stack(
-            children: [
-              Container(
-                height: 150,
-
-                decoration: BoxDecoration(
-                  color: lightGray,
-
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-
-              Positioned(
-                top: 10,
-                left: 10,
-
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-
-                  decoration: BoxDecoration(
-                    color: isDone ? Colors.white : const Color(0xFFFFF1B8),
-
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-
-                  child: Text(
-                    status,
-
-                    style: TextStyle(
-                      fontSize: 12,
-
-                      color: isDone ? Colors.grey : mainColor,
-
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          const Text(
-            '제목',
-
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 6),
-
-          const Text('교환 물품:', style: TextStyle(color: grayText, fontSize: 15)),
-
-          const SizedBox(height: 8),
-
-          const Row(
-            children: [
-              Icon(Icons.favorite_border, size: 18, color: grayText),
-
-              SizedBox(width: 4),
-
-              Text('78', style: TextStyle(color: grayText)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   // 하단 네비게이션
   Widget _bottomNavigation() {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
+
       currentIndex: 4,
+
       selectedItemColor: mainColor,
       unselectedItemColor: Colors.grey,
+
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
           label: '메인페이지',
         ),
+
         BottomNavigationBarItem(icon: Icon(Icons.search), label: '물건 조회'),
+
         BottomNavigationBarItem(
           icon: Icon(Icons.add_circle_outline),
           label: '물건 등록',
         ),
+
         BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: '찜'),
 
         BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이페이지'),
