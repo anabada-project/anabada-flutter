@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
 
-class AppColors {
-  static const Color mainColor = Color(0xFFFFB800);
-  static const Color grayText = Color(0xFF9E9E9E);
-  static const Color lightGray = Color(0xFFF3F3F3);
-}
-
 class Login extends StatefulWidget {
   const Login({super.key});
 
@@ -147,10 +141,7 @@ class _LoginState extends State<Login> {
                     onTap: () {},
                     child: const Text(
                       '비밀번호 찾기',
-                      style: TextStyle(
-                        color: AppColors.grayText,
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: AppColors.grayText, fontSize: 12),
                     ),
                   ),
                 ),
