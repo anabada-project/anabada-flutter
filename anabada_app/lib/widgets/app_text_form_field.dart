@@ -33,20 +33,14 @@ class AppTextFormField extends StatelessWidget {
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(
-          color: AppColors.grayText,
-          fontSize: 14,
-        ),
+        hintStyle: const TextStyle(color: AppColors.grayText, fontSize: 14),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(
-            color: AppColors.mainColor,
-            width: 1.5,
-          ),
+          borderSide: const BorderSide(color: AppColors.mainColor, width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
