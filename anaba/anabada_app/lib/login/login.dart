@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
+import '../widget/app_text_form_field.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -54,86 +57,25 @@ class _LoginState extends State<Login> {
                 Container(
                   height: 56,
                   alignment: Alignment.center,
-                  child: const Text(
-                    '로그인',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: const Text('로그인', style: AppTextStyles.screenTitle),
                 ),
                 SizedBox(height: screenHeight * 0.03),
-                const Text(
-                  '이메일',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                const Text('이메일', style: AppTextStyles.fieldLabel),
                 const SizedBox(height: 8),
-                TextFormField(
+                AppTextFormField(
                   controller: _emailController,
+                  hintText: '이메일을 입력해주세요',
                   keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    hintText: '이메일을 입력해주세요',
-                    hintStyle: const TextStyle(
-                      color: AppColors.grayText,
-                      fontSize: 14,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(
-                        color: AppColors.mainColor,
-                        width: 1.5,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: AppColors.lightGray),
-                    ),
-                  ),
+                  textInputAction: TextInputAction.next,
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  '비밀번호',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                const Text('비밀번호', style: AppTextStyles.fieldLabel),
                 const SizedBox(height: 8),
-                TextFormField(
+                AppTextFormField(
                   controller: _passwordController,
+                  hintText: '비밀번호를 입력해주세요',
                   obscureText: true,
-                  decoration: InputDecoration(
-                    hintText: '비밀번호를 입력해주세요',
-                    hintStyle: const TextStyle(
-                      color: AppColors.grayText,
-                      fontSize: 14,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(
-                        color: AppColors.mainColor,
-                        width: 1.5,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: AppColors.lightGray),
-                    ),
-                  ),
+                  textInputAction: TextInputAction.done,
                 ),
                 const SizedBox(height: 12),
                 Align(
@@ -142,7 +84,7 @@ class _LoginState extends State<Login> {
                     onTap: () {},
                     child: const Text(
                       '비밀번호 찾기',
-                      style: TextStyle(color: AppColors.grayText, fontSize: 12),
+                      style: AppTextStyles.helperText,
                     ),
                   ),
                 ),
@@ -163,13 +105,9 @@ class _LoginState extends State<Login> {
                     ),
                     child: Text(
                       '로그인',
-                      style: TextStyle(
-                        color: _isButtonActive
-                            ? Colors.white
-                            : AppColors.grayText,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: _isButtonActive
+                          ? AppTextStyles.buttonText
+                          : AppTextStyles.disabledButtonText,
                     ),
                   ),
                 ),
@@ -181,13 +119,7 @@ class _LoginState extends State<Login> {
                     ),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        'or',
-                        style: TextStyle(
-                          color: AppColors.grayText,
-                          fontSize: 12,
-                        ),
-                      ),
+                      child: Text('or', style: AppTextStyles.helperText),
                     ),
                     Expanded(
                       child: Divider(color: AppColors.lightGray, thickness: 1),
@@ -210,11 +142,7 @@ class _LoginState extends State<Login> {
                     ),
                     child: const Text(
                       '회원가입',
-                      style: TextStyle(
-                        color: AppColors.mainColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTextStyles.outlineButtonText,
                     ),
                   ),
                 ),
