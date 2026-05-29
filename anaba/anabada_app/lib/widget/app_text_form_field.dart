@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 
 class AppTextFormField extends StatelessWidget {
   const AppTextFormField({
@@ -33,7 +34,7 @@ class AppTextFormField extends StatelessWidget {
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(color: AppColors.grayText, fontSize: 14),
+        hintStyle: AppTextStyles.fieldHint,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
