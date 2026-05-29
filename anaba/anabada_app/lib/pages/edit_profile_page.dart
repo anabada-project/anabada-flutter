@@ -1,8 +1,35 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
-class EditProfilePage extends StatelessWidget {
+class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
+
+  @override
+  State<EditProfilePage> createState() => _EditProfilePageState();
+}
+
+class _EditProfilePageState extends State<EditProfilePage> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _majorController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _nameController = TextEditingController(text: '이승준');
+    _emailController = TextEditingController(text: 's26000@gsm.hs.kr');
+    _majorController = TextEditingController(text: '플러터');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _majorController.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +52,7 @@ class EditProfilePage extends StatelessWidget {
                     },
                     icon: const Icon(Icons.arrow_back_ios_new, size: 22),
                   ),
+
                   const Expanded(
                     child: Center(
                       child: Text(
@@ -36,6 +64,7 @@ class EditProfilePage extends StatelessWidget {
                       ),
                     ),
                   ),
+
                   const SizedBox(width: 48),
                 ],
               ),
@@ -44,19 +73,19 @@ class EditProfilePage extends StatelessWidget {
 
               _label('이름'),
               const SizedBox(height: 10),
-              _inputBox('이승준'),
+              _inputBox(_nameController),
 
               const SizedBox(height: 30),
 
               _label('이메일'),
               const SizedBox(height: 10),
-              _inputBox('s26000@gsm.hs.kr', enabled: false),
+              _inputBox(_emailController, enabled: false),
 
               const SizedBox(height: 30),
 
               _label('전공'),
               const SizedBox(height: 10),
-              _inputBox('플러터'),
+              _inputBox(_majorController),
 
               const SizedBox(height: 30),
 
@@ -112,10 +141,10 @@ class EditProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _inputBox(String text, {bool enabled = true}) {
+  Widget _inputBox(TextEditingController controller, {bool enabled = true}) {
     return TextField(
       enabled: enabled,
-      controller: TextEditingController(text: text),
+      controller: controller,
       decoration: InputDecoration(
         filled: true,
         fillColor: enabled ? Colors.white : const Color(0xFFF4F4F4),
