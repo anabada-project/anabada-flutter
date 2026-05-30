@@ -15,7 +15,7 @@ class NoticeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 112,
+      constraints: const BoxConstraints(minHeight: 112),
 
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: Color(0xFFEFF0F2), width: 1)),
