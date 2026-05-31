@@ -13,8 +13,7 @@ class NoticeDetailHeader extends StatelessWidget {
           onPressed: () {
             Navigator.pop(context);
           },
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           icon: const Icon(Icons.arrow_back_ios_new, size: 22),
         ),
 
@@ -24,7 +23,7 @@ class NoticeDetailHeader extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(width: 22),
+        const SizedBox(width: 48),
       ],
     );
   }
