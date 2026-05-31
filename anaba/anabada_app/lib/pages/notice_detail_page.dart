@@ -23,9 +23,14 @@ class NoticeDetailPage extends StatelessWidget {
 
               SizedBox(height: 54),
 
-              NoticeDetailContent(),
-
-              Spacer(),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: 20),
+                    child: NoticeDetailContent(),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
