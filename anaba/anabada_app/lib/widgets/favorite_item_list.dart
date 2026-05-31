@@ -14,7 +14,7 @@ class FavoriteItemList extends StatelessWidget {
         return const SizedBox(height: 24);
       },
       itemBuilder: (context, index) {
-        final statuses = ['교환 가능', '교환 완료', '나눔 완료', '나눔 가능'];
+        const statuses = ['교환 가능', '교환 완료', '나눔 완료', '나눔 가능'];
 
         return FavoriteItemCard(
           title: '제목',
