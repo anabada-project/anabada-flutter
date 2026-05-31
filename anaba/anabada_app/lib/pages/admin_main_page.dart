@@ -16,23 +16,35 @@ class AdminMainPage extends StatelessWidget {
 
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: 32),
+          padding: EdgeInsets.zero,
           children: [
             SizedBox(height: 36),
 
-            AdminMainTopBar(),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 32),
+              child: AdminMainTopBar(),
+            ),
 
             SizedBox(height: 46),
 
-            AdminMainSectionTitle(title: '공지사항', showAddButton: true),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 32),
+              child: AdminMainSectionTitle(title: '공지사항', showAddButton: true),
+            ),
 
             SizedBox(height: 12),
 
-            AdminNoticePreview(),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 32),
+              child: AdminNoticePreview(),
+            ),
 
             SizedBox(height: 44),
 
-            AdminMainSectionTitle(title: '최근 올라온 물건'),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 32),
+              child: AdminMainSectionTitle(title: '최근 올라온 물건'),
+            ),
 
             SizedBox(height: 16),
 
@@ -40,7 +52,10 @@ class AdminMainPage extends StatelessWidget {
 
             SizedBox(height: 40),
 
-            AdminMainSectionTitle(title: '인기 물건'),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 32),
+              child: AdminMainSectionTitle(title: '인기 물건'),
+            ),
 
             SizedBox(height: 16),
 

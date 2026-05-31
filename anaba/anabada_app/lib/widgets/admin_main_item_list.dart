@@ -11,6 +11,7 @@ class AdminMainItemList extends StatelessWidget {
       height: 230,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 32),
         itemCount: 5,
         separatorBuilder: (context, index) {
           return const SizedBox(width: 14);
