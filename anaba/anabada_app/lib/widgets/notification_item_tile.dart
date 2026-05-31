@@ -33,7 +33,9 @@ class NotificationItemTile extends StatelessWidget {
             ),
             child: Icon(icon, size: 22, color: Colors.black87),
           ),
+
           const SizedBox(width: 16),
+
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -41,12 +43,22 @@ class NotificationItemTile extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(title, style: AppTextStyles.notificationItemTitle),
-                    const Spacer(),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: AppTextStyles.notificationItemTitle,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+
+                    const SizedBox(width: 8),
+
                     Text(time, style: AppTextStyles.notificationTime),
                   ],
                 ),
+
                 const SizedBox(height: 6),
+
                 Text(
                   content,
                   maxLines: 1,

@@ -13,7 +13,7 @@ class NotificationHeader extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.maybePop(context);
             },
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             icon: const Icon(Icons.arrow_back_ios_new, size: 22),
