@@ -4,7 +4,9 @@ import '../constants/app_colors.dart';
 import '../constants/app_text_styles.dart';
 
 class AdminNoticeContentField extends StatelessWidget {
-  const AdminNoticeContentField({super.key});
+  const AdminNoticeContentField({super.key, this.controller});
+
+  final TextEditingController? controller;
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +20,7 @@ class AdminNoticeContentField extends StatelessWidget {
         SizedBox(
           height: 330,
           child: TextField(
+            controller: controller,
             maxLines: null,
             expands: true,
             textAlignVertical: TextAlignVertical.top,

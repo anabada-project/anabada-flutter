@@ -4,7 +4,9 @@ import '../constants/app_colors.dart';
 import '../constants/app_text_styles.dart';
 
 class AdminNoticeWriteButton extends StatelessWidget {
-  const AdminNoticeWriteButton({super.key});
+  const AdminNoticeWriteButton({super.key, this.onPressed});
+
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -13,12 +15,13 @@ class AdminNoticeWriteButton extends StatelessWidget {
         padding: const EdgeInsets.only(left: 32, right: 32, bottom: 12),
         child: SizedBox(
           width: double.infinity,
-          height: 54,
+          height: 43,
           child: ElevatedButton(
-            onPressed: null,
+            onPressed: onPressed,
             style: ElevatedButton.styleFrom(
               disabledBackgroundColor: AppColors.disabledButton,
               disabledForegroundColor: AppColors.disabledText,
+              backgroundColor: AppColors.mainColor,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(11),

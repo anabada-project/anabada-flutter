@@ -63,7 +63,7 @@ class AdminNoticeWritePage extends StatelessWidget {
         ),
       ),
 
-      bottomNavigationBar: AdminNoticeWriteButton(),
+      bottomNavigationBar: AdminNoticeWriteButton(onPressed: null),
     );
   }
 }
