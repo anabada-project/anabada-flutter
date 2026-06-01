@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../widgets/admin_notice_content_field.dart';
-import '../widgets/admin_notice_title_field.dart';
+import '../widgets/admin_notice_input_field.dart';
 import '../widgets/admin_notice_write_button.dart';
 import '../widgets/admin_notice_write_header.dart';
 
@@ -29,14 +29,14 @@ class AdminNoticeWritePage extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   child: Column(
                     children: [
-                      AdminNoticeTitleField(
+                      AdminNoticeInputField(
                         label: '제목',
                         hintText: '제목을 입력해 주세요.',
                       ),
 
                       SizedBox(height: 32),
 
-                      AdminNoticeTitleField(
+                      AdminNoticeInputField(
                         label: '작성자',
                         hintText: '관리자',
                         readOnly: true,
@@ -44,7 +44,7 @@ class AdminNoticeWritePage extends StatelessWidget {
 
                       SizedBox(height: 32),
 
-                      AdminNoticeTitleField(
+                      AdminNoticeInputField(
                         label: '날짜',
                         hintText: '날짜를 입력해 주세요.',
                       ),

@@ -3,16 +3,18 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_text_styles.dart';
 
-class AdminNoticeTitleField extends StatelessWidget {
-  const AdminNoticeTitleField({
+class AdminNoticeInputField extends StatelessWidget {
+  const AdminNoticeInputField({
     super.key,
     required this.label,
     required this.hintText,
+    this.controller,
     this.readOnly = false,
   });
 
   final String label;
   final String hintText;
+  final TextEditingController? controller;
   final bool readOnly;
 
   @override
@@ -27,6 +29,7 @@ class AdminNoticeTitleField extends StatelessWidget {
         SizedBox(
           height: 44,
           child: TextField(
+            controller: controller,
             readOnly: readOnly,
             decoration: InputDecoration(
               hintText: hintText,
