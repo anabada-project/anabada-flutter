@@ -4,6 +4,7 @@ import '../data/fakedata.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../widget/app_text_form_field.dart';
+import 'find_password.dart';
 import 'sign_up.dart';
 
 class Login extends StatefulWidget {
@@ -14,9 +15,11 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  // ── 컨트롤러 ─────────────────────────────────────────────
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  // ── 상태 ────────────────────────────────────────────────
   String? _emailError;
   String? _passwordError;
 
@@ -24,20 +27,15 @@ class _LoginState extends State<Login> {
       _emailController.text.trim().isNotEmpty &&
       _passwordController.text.isNotEmpty;
 
+  // ── 핸들러 ───────────────────────────────────────────────
   void _clearEmailError(String _) {
     if (_emailError == null) return;
-
-    setState(() {
-      _emailError = null;
-    });
+    setState(() => _emailError = null);
   }
 
   void _clearPasswordError(String _) {
     if (_passwordError == null) return;
-
-    setState(() {
-      _passwordError = null;
-    });
+    setState(() => _passwordError = null);
   }
 
   void _handleLogin() {
@@ -83,6 +81,8 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.03),
+
+                // ── 이메일 ───────────────────────────────
                 const Text('이메일', style: AppTextStyles.fieldLabel),
                 const SizedBox(height: 8),
                 AppTextFormField(
@@ -94,6 +94,8 @@ class _LoginState extends State<Login> {
                   errorText: _emailError,
                 ),
                 const SizedBox(height: 20),
+
+                // ── 비밀번호 ─────────────────────────────
                 const Text('비밀번호', style: AppTextStyles.fieldLabel),
                 const SizedBox(height: 8),
                 AppTextFormField(
@@ -105,10 +107,17 @@ class _LoginState extends State<Login> {
                   errorText: _passwordError,
                 ),
                 const SizedBox(height: 12),
+
+                // ── 비밀번호 찾기 ────────────────────────
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const FindPassword()),
+                      );
+                    },
                     child: const Text(
                       '비밀번호 찾기',
                       style: AppTextStyles.helperText,
@@ -116,6 +125,8 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.05),
+
+                // ── 로그인 버튼 ──────────────────────────
                 SizedBox(
                   height: 43,
                   child: AnimatedBuilder(
@@ -148,6 +159,8 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 const SizedBox(height: 24),
+
+                // ── 구분선 ───────────────────────────────
                 const Row(
                   children: [
                     Expanded(
@@ -163,13 +176,15 @@ class _LoginState extends State<Login> {
                   ],
                 ),
                 const SizedBox(height: 24),
+
+                // ── 회원가입 버튼 ────────────────────────
                 SizedBox(
                   height: 43,
                   child: OutlinedButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SignUp()),
+                        MaterialPageRoute(builder: (_) => const SignUp()),
                       );
                     },
                     style: OutlinedButton.styleFrom(
