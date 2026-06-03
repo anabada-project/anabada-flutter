@@ -13,13 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false, // 왼쪽 디버그 지우는 코드
 
-      home: MyPage(
-        // 더미데이터
-        userName: '이승준',
-        email: 's26000@gsm.hs.kr',
-        major: '플러터',
-        generation: '10기',
-      ),
+      home: const MainPage(),
     );
   }
 }
