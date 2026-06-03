@@ -295,7 +295,7 @@ class _CodeStep extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.only(right: i < 5 ? 8 : 0),
                 child: RawKeyboardListener(
-                  focusNode: FocusNode(),
+                  focusNode: focusNodes[i],
                   onKey: (event) => onKeyDown(event, i),
                   child: TextFormField(
                     controller: controllers[i],
