@@ -8,21 +8,70 @@ class AdminNoticeDetailBottomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.only(left: 32, right: 32, bottom: 12),
-        child: SizedBox(
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 48,
+                child: OutlinedButton(
+                  onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.borderGray),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    '수정하기',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SizedBox(
+                height: 48,
+                child: OutlinedButton(
+                  onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.red),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    '삭제하기',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
           width: double.infinity,
-          height: 43,
+          height: 48,
           child: ElevatedButton(
             onPressed: () {
-              Navigator.maybePop(context);
+              Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.mainColor,
               elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(9),
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
             child: const Text(
@@ -31,7 +80,7 @@ class AdminNoticeDetailBottomButton extends StatelessWidget {
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

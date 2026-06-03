@@ -11,30 +11,24 @@ class AdminNoticeDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: Colors.white,
-
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             children: [
-              SizedBox(height: 20),
-
               AdminNoticeDetailHeader(),
-
-              SizedBox(height: 42),
+              SizedBox(height: 38),
 
               Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.zero,
-                  child: AdminNoticeDetailContent(),
-                ),
+                child: SingleChildScrollView(child: AdminNoticeDetailContent()),
               ),
+
+              AdminNoticeDetailBottomButton(),
+              SizedBox(height: 14),
             ],
           ),
         ),
       ),
-
-      bottomNavigationBar: AdminNoticeDetailBottomButton(),
     );
   }
 }

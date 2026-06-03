@@ -8,25 +8,22 @@ class AdminNoticeDetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('서비스 점검 안내', style: AppTextStyles.adminNoticeDetailTitle),
+        const Text('서비스 점검 안내', style: AppTextStyles.adminNoticeDetailTitle),
+        const SizedBox(height: 28),
 
-        SizedBox(height: 24),
-
-        Text(
+        const Text(
           '작성자 관리자 | 2026.05.18 14:00',
           style: AppTextStyles.adminNoticeDetailInfo,
         ),
+        const SizedBox(height: 34),
 
-        SizedBox(height: 28),
+        Container(height: 1, color: AppColors.borderGray),
+        const SizedBox(height: 34),
 
-        Divider(height: 1, thickness: 1, color: AppColors.borderGray),
-
-        SizedBox(height: 32),
-
-        Text('''안녕하세요, 아나바다 운영팀입니다.
+        const Text('''안녕하세요, 아나바다 운영팀입니다.
 
 보다 안정적인 서비스 제공을 위해 아래와 같이 시스템 점검을 진행할 예정입니다.
 
