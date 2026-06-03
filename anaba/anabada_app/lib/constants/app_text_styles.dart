@@ -5,26 +5,32 @@ import 'app_colors.dart';
 class AppTextStyles {
   AppTextStyles._();
 
-  static const TextStyle adminNoticeWriteHeaderTitle = TextStyle(
-    fontSize: 17,
-    fontWeight: FontWeight.bold,
-    color: Colors.black,
-  );
-
-  static const TextStyle adminNoticeWriteLabel = TextStyle(
-    fontSize: 17,
-    fontWeight: FontWeight.bold,
-    color: Colors.black,
-  );
-
-  static const TextStyle adminNoticeWriteHint = TextStyle(
+  static const TextStyle adminNoticeDetailHeaderTitle = TextStyle(
     fontSize: 15,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  static const TextStyle adminNoticeDetailTitle = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  static const TextStyle adminNoticeDetailInfo = TextStyle(
+    fontSize: 12,
     color: AppColors.grayText,
   );
 
-  static const TextStyle adminNoticeWriteButton = TextStyle(
-    fontSize: 16,
+  static const TextStyle adminNoticeDetailContent = TextStyle(
+    fontSize: 13,
+    height: 1.45,
+    color: Colors.black,
+  );
+
+  static const TextStyle adminNoticeDetailButton = TextStyle(
+    fontSize: 14,
     fontWeight: FontWeight.bold,
-    color: AppColors.disabledText,
+    color: Colors.white,
   );
 }
