@@ -6,8 +6,21 @@ import '../widgets/notification_header.dart';
 import '../widgets/notification_item.dart';
 import '../widgets/notification_section_title.dart';
 
-class NotificationPage extends StatelessWidget {
+class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
+
+  @override
+  State<NotificationPage> createState() => _NotificationPageState();
+}
+
+class _NotificationPageState extends State<NotificationPage> {
+  int _selectedTabIndex = 0;
+
+  void _changeTab(int index) {
+    setState(() {
+      _selectedTabIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +33,10 @@ class NotificationPage extends StatelessWidget {
             children: [
               const NotificationHeader(),
               const SizedBox(height: 24),
-              const NotificationFilterTabList(),
+              NotificationFilterTabList(
+                selectedIndex: _selectedTabIndex,
+                onTabSelected: _changeTab,
+              ),
               Expanded(
                 child: ListView(
                   padding: EdgeInsets.zero,

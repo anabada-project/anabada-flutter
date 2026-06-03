@@ -3,22 +3,34 @@ import 'package:flutter/material.dart';
 import 'notification_filter_tab.dart';
 
 class NotificationFilterTabList extends StatelessWidget {
-  const NotificationFilterTabList({super.key});
+  final int selectedIndex;
+  final ValueChanged<int> onTabSelected;
+
+  const NotificationFilterTabList({
+    super.key,
+    required this.selectedIndex,
+    required this.onTabSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
-      children: [
-        Expanded(child: NotificationFilterTab(title: '전체', isSelected: true)),
-        SizedBox(width: 8),
-        Expanded(child: NotificationFilterTab(title: '요청', isSelected: false)),
-        SizedBox(width: 8),
-        Expanded(child: NotificationFilterTab(title: '댓글', isSelected: false)),
-        SizedBox(width: 8),
-        Expanded(child: NotificationFilterTab(title: '찜', isSelected: false)),
-        SizedBox(width: 8),
-        Expanded(child: NotificationFilterTab(title: '공지', isSelected: false)),
-      ],
+    final tabs = ['전체', '요청', '댓글', '찜', '공지'];
+
+    return Row(
+      children: List.generate(tabs.length, (index) {
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: index == tabs.length - 1 ? 0 : 8),
+            child: NotificationFilterTab(
+              title: tabs[index],
+              isSelected: selectedIndex == index,
+              onTap: () {
+                onTabSelected(index);
+              },
+            ),
+          ),
+        );
+      }),
     );
   }
 }
