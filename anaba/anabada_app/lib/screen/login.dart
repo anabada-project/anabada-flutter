@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../data/fakedata.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
@@ -20,7 +21,8 @@ class _LoginState extends State<Login> {
   String? _passwordError;
 
   bool get _isButtonActive =>
-      _emailController.text.isNotEmpty && _passwordController.text.isNotEmpty;
+      _emailController.text.trim().isNotEmpty &&
+      _passwordController.text.isNotEmpty;
 
   void _clearEmailError(String _) {
     if (_emailError == null) return;
@@ -40,22 +42,17 @@ class _LoginState extends State<Login> {
 
   void _handleLogin() {
     setState(() {
-      if (_emailController.text != FakeData.correctEmail) {
-        _emailError = '이메일을 다시 입력해주세요.';
-      } else {
-        _emailError = null;
-      }
-
-      if (_passwordController.text != FakeData.correctPassword) {
-        _passwordError = '비밀번호를 다시 입력해주세요.';
-      } else {
-        _passwordError = null;
-      }
-
-      if (_emailError == null && _passwordError == null) {
-        print('로그인 성공! 다음 화면으로 이동');
-      }
+      _emailError = _emailController.text.trim() == FakeData.correctEmail
+          ? null
+          : '이메일을 다시 입력해주세요.';
+      _passwordError = _passwordController.text == FakeData.correctPassword
+          ? null
+          : '비밀번호를 다시 입력해주세요.';
     });
+
+    if (_emailError == null && _passwordError == null) {
+      debugPrint('로그인 성공');
+    }
   }
 
   @override
@@ -79,10 +76,11 @@ class _LoginState extends State<Login> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(height: screenHeight * 0.07),
-                Container(
+                const SizedBox(
                   height: 56,
-                  alignment: Alignment.center,
-                  child: const Text('로그인', style: AppTextStyles.screenTitle),
+                  child: Center(
+                    child: Text('로그인', style: AppTextStyles.screenTitle),
+                  ),
                 ),
                 SizedBox(height: screenHeight * 0.03),
                 const Text('이메일', style: AppTextStyles.fieldLabel),
@@ -133,6 +131,7 @@ class _LoginState extends State<Login> {
                               ? AppColors.mainColor
                               : AppColors.lightGray,
                           disabledBackgroundColor: AppColors.lightGray,
+                          disabledForegroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),

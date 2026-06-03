@@ -14,6 +14,8 @@ class AppTextFormField extends StatelessWidget {
     this.validator,
     this.onChanged,
     this.errorText,
+    this.enabled = true,
+    this.fillColor,
   });
 
   final TextEditingController controller;
@@ -24,23 +26,36 @@ class AppTextFormField extends StatelessWidget {
   final String? Function(String?)? validator;
   final ValueChanged<String>? onChanged;
   final String? errorText;
+  final bool enabled;
+  final Color? fillColor;
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Fix: always fill when disabled OR when fillColor is explicitly set
+    final bool shouldFill = fillColor != null || !enabled;
+    final Color effectiveFillColor = fillColor ?? const Color(0xFFF6F7F8);
+
     return TextFormField(
       controller: controller,
+      enabled: enabled,
       keyboardType: keyboardType,
       obscureText: obscureText,
       textInputAction: textInputAction,
       validator: validator,
       onChanged: onChanged,
+      style: AppTextStyles.fieldText,
+      cursorColor: AppColors.mainColor,
       decoration: InputDecoration(
+        isDense: true,
+        filled: shouldFill,
+        fillColor: effectiveFillColor,
         hintText: hintText,
         errorText: errorText,
+        errorMaxLines: 2,
         hintStyle: AppTextStyles.fieldHint,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
+          horizontal: 14,
+          vertical: 13,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -50,7 +65,10 @@ class AppTextFormField extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.lightGray),
         ),
-        //
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppColors.lightGray),
+        ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: Colors.red),
