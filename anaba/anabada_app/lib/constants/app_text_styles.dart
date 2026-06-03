@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'app_colors.dart';
 
 class AppTextStyles {
   AppTextStyles._();
 
+  static const TextStyle noticeDetailHeaderTitle = TextStyle(
   // 페이지 큰 제목: 마이페이지
   static const TextStyle pageTitle = TextStyle(
     fontSize: 28,
@@ -18,6 +20,8 @@ class AppTextStyles {
     color: Colors.black,
   );
 
+  static const TextStyle noticeDetailTitle = TextStyle(
+    fontSize: 22,
   // 프로필 이름
   static const TextStyle profileName = TextStyle(
     fontSize: 20,
@@ -25,6 +29,18 @@ class AppTextStyles {
     color: Colors.black,
   );
 
+  static const TextStyle noticeDetailInfo = TextStyle(
+    fontSize: 14,
+    color: AppColors.grayText,
+  );
+
+  static const TextStyle noticeDetailBody = TextStyle(
+    fontSize: 16,
+    height: 1.45,
+    color: Colors.black,
+  );
+
+  static const TextStyle noticeDetailButton = TextStyle(
   // 섹션 제목: 내가 등록한 물건, 최근 조회한 물건
   static const TextStyle sectionTitle = TextStyle(
     fontSize: 24,
