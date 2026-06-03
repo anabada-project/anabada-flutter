@@ -15,26 +15,21 @@ class NotificationHeader extends StatelessWidget {
           const Center(
             child: Text('알림', style: AppTextStyles.notificationHeaderTitle),
           ),
-
           Positioned(
             left: 0,
             top: 0,
             bottom: 0,
-            child: GestureDetector(
-              onTap: () {
+            child: IconButton(
+              onPressed: () {
                 Navigator.pop(context);
               },
-              child: const SizedBox(
-                width: 32,
-                height: 56,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Icon(
-                    Icons.arrow_back_ios_new,
-                    size: 22,
-                    color: Colors.black,
-                  ),
-                ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 56),
+              alignment: Alignment.centerLeft,
+              icon: const Icon(
+                Icons.arrow_back_ios_new,
+                size: 22,
+                color: Colors.black,
               ),
             ),
           ),
