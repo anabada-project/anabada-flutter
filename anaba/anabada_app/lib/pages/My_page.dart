@@ -44,7 +44,7 @@ class MyPage extends StatelessWidget {
             const SizedBox(height: 16),
 
             // 정보 수정 버튼
-            _editButton(),
+            _editButton(context),
 
             const SizedBox(height: 36),
 
