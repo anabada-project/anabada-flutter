@@ -249,7 +249,7 @@ class _SignUpState extends State<SignUp> {
                       child: Padding(
                         padding: EdgeInsets.only(right: i < 5 ? 8 : 0),
                         child: RawKeyboardListener(
-                          focusNode: FocusNode(),
+                          focusNode: _codeFocusNodes[i],
                           onKey: (event) => _onCodeKeyDown(event, i),
                           child: TextFormField(
                             controller: _codeControllers[i],
