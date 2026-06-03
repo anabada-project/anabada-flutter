@@ -19,9 +19,9 @@ class AdminNoticeWriteButton extends StatelessWidget {
           child: ElevatedButton(
             onPressed: onPressed,
             style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.mainColor,
               disabledBackgroundColor: AppColors.disabledButton,
               disabledForegroundColor: AppColors.disabledText,
-              backgroundColor: AppColors.mainColor,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(11),
