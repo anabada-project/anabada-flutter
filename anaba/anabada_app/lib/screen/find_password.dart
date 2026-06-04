@@ -89,8 +89,8 @@ class _FindPasswordState extends State<FindPassword> {
     setState(() {});
   }
 
-  void _onCodeKeyDown(RawKeyEvent event, int index) {
-    if (event is RawKeyDownEvent &&
+  void _onCodeKeyDown(KeyEvent event, int index) {
+    if (event is KeyDownEvent &&
         event.logicalKey == LogicalKeyboardKey.backspace &&
         _codeControllers[index].text.isEmpty &&
         index > 0) {
@@ -109,8 +109,12 @@ class _FindPasswordState extends State<FindPassword> {
   @override
   void dispose() {
     _emailController.dispose();
-    for (final c in _codeControllers) c.dispose();
-    for (final f in _codeFocusNodes) f.dispose();
+    for (final c in _codeControllers) {
+      c.dispose();
+    }
+    for (final f in _codeFocusNodes) {
+      f.dispose();
+    }
     _passwordController.dispose();
     _passwordConfirmController.dispose();
     super.dispose();
@@ -279,7 +283,7 @@ class _CodeStep extends StatelessWidget {
   final List<TextEditingController> controllers;
   final List<FocusNode> focusNodes;
   final void Function(String, int) onChanged;
-  final void Function(RawKeyEvent, int) onKeyDown;
+  final void Function(KeyEvent, int) onKeyDown;
   final VoidCallback onResend;
 
   @override
@@ -294,9 +298,9 @@ class _CodeStep extends StatelessWidget {
             return Expanded(
               child: Padding(
                 padding: EdgeInsets.only(right: i < 5 ? 8 : 0),
-                child: RawKeyboardListener(
+                child: KeyboardListener(
                   focusNode: focusNodes[i],
-                  onKey: (event) => onKeyDown(event, i),
+                  onKeyEvent: (event) => onKeyDown(event, i),
                   child: TextFormField(
                     controller: controllers[i],
                     focusNode: focusNodes[i],

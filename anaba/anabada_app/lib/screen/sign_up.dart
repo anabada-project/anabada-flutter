@@ -80,8 +80,12 @@ class _SignUpState extends State<SignUp> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
-    for (final c in _codeControllers) c.dispose();
-    for (final f in _codeFocusNodes) f.dispose();
+    for (final c in _codeControllers) {
+      c.dispose();
+    }
+    for (final f in _codeFocusNodes) {
+      f.dispose();
+    }
     _passwordController.dispose();
     _passwordConfirmController.dispose();
     super.dispose();
@@ -99,7 +103,9 @@ class _SignUpState extends State<SignUp> {
       // 이메일을 바꾸면 인증 초기화
       _isCodeSent = false;
       _isEmailVerified = false;
-      for (final c in _codeControllers) c.clear();
+      for (final c in _codeControllers) {
+        c.clear();
+      }
     });
   }
 
@@ -118,7 +124,9 @@ class _SignUpState extends State<SignUp> {
 
   /// [재전송] 클릭 → 코드 칸 초기화
   void _handleResendCode() {
-    for (final c in _codeControllers) c.clear();
+    for (final c in _codeControllers) {
+      c.clear();
+    }
     _codeFocusNodes[0].requestFocus();
     setState(() {});
   }
@@ -140,8 +148,8 @@ class _SignUpState extends State<SignUp> {
     setState(() {});
   }
 
-  void _onCodeKeyDown(RawKeyEvent event, int index) {
-    if (event is RawKeyDownEvent &&
+  void _onCodeKeyDown(KeyEvent event, int index) {
+    if (event is KeyDownEvent &&
         event.logicalKey == LogicalKeyboardKey.backspace &&
         _codeControllers[index].text.isEmpty &&
         index > 0) {
@@ -248,9 +256,9 @@ class _SignUpState extends State<SignUp> {
                     return Expanded(
                       child: Padding(
                         padding: EdgeInsets.only(right: i < 5 ? 8 : 0),
-                        child: RawKeyboardListener(
+                        child: KeyboardListener(
                           focusNode: _codeFocusNodes[i],
-                          onKey: (event) => _onCodeKeyDown(event, i),
+                          onKeyEvent: (event) => _onCodeKeyDown(event, i),
                           child: TextFormField(
                             controller: _codeControllers[i],
                             focusNode: _codeFocusNodes[i],
