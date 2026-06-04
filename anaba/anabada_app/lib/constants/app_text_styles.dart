@@ -5,6 +5,8 @@ import 'app_colors.dart';
 class AppTextStyles {
   AppTextStyles._();
 
+  static const TextStyle notificationHeaderTitle = TextStyle(
+    fontSize: 16,
   static const TextStyle noticeDetailHeaderTitle = TextStyle(
   // 페이지 큰 제목: 마이페이지
   static const TextStyle pageTitle = TextStyle(
@@ -13,6 +15,20 @@ class AppTextStyles {
     color: Colors.black,
   );
 
+  static const TextStyle notificationSelectedTab = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+  );
+
+  static const TextStyle notificationTab = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.bold,
+    color: AppColors.grayText,
+  );
+
+  static const TextStyle notificationSectionTitle = TextStyle(
+    fontSize: 16,
   // 정보 수정 페이지 상단 제목
   static const TextStyle editPageTitle = TextStyle(
     fontSize: 16,
@@ -48,6 +64,7 @@ class AppTextStyles {
     color: Colors.black,
   );
 
+  static const TextStyle notificationItemTitle = TextStyle(
   // 수정 페이지 라벨: 이름, 이메일, 전공, 기수
   static const TextStyle editLabel = TextStyle(
     fontSize: 15,
@@ -55,6 +72,13 @@ class AppTextStyles {
     color: Colors.black,
   );
 
+  static const TextStyle notificationItemContent = TextStyle(
+    fontSize: 13,
+    color: AppColors.grayText,
+  );
+
+  static const TextStyle notificationTime = TextStyle(
+    fontSize: 13,
   // 회색 일반 텍스트: 이메일, 전공, 기수
   static const TextStyle grayBody = TextStyle(
     fontSize: 15,
