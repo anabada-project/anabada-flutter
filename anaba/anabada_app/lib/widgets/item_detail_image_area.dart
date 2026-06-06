@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_colors.dart';
+
 class ItemDetailImageArea extends StatelessWidget {
   const ItemDetailImageArea({super.key});
 
@@ -35,9 +37,7 @@ class _ImageIndicator extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isSelected
-                ? AppColors.mainColor
-                : const Color(0xFFE5E5E5),
+            color: isSelected ? AppColors.mainColor : const Color(0xFFE5E5E5),
           ),
         );
       }),

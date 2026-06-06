@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_colors.dart';
+
 class ItemDetailBottomBar extends StatelessWidget {
   final String buttonText;
   final bool isLiked;
