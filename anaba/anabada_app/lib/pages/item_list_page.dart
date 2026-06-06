@@ -23,8 +23,52 @@ class _ItemListPageState extends State<ItemListPage> {
   String selectedCategory = '전체';
   ItemFilterDropdownType openedDropdown = ItemFilterDropdownType.none;
 
-  // 빈 상태 화면 확인하려면 true로 바꾸면 됨
-  final bool isEmptyState = false;
+  // 빈 상태 화면 확인: true
+  // 기본 목록 화면 확인: false
+  static const bool _showEmptyStatePreview = false;
+
+  static const List<_ItemListData> _dummyItems = [
+    _ItemListData(
+      title: '제목',
+      writer: '작성자',
+      category: '카테고리',
+      status: '교환 가능',
+      time: '3분 전',
+      isActive: true,
+    ),
+    _ItemListData(
+      title: '제목',
+      writer: '작성자',
+      category: '카테고리',
+      status: '교환 완료',
+      time: '3분 전',
+      isActive: false,
+    ),
+    _ItemListData(
+      title: '제목',
+      writer: '작성자',
+      category: '카테고리',
+      status: '나눔 완료',
+      time: '3분 전',
+      isActive: false,
+    ),
+    _ItemListData(
+      title: '제목',
+      writer: '작성자',
+      category: '카테고리',
+      status: '나눔 가능',
+      time: '3분 전',
+      isActive: true,
+    ),
+    _ItemListData(
+      title: '제목',
+      writer: '작성자',
+      category: '카테고리',
+      status: '교환 가능',
+      time: '3분 전',
+      isActive: true,
+    ),
+  ];
 
   void _toggleSortDropdown() {
     setState(() {
@@ -42,6 +86,12 @@ class _ItemListPageState extends State<ItemListPage> {
     });
   }
 
+  void _closeDropdown() {
+    setState(() {
+      openedDropdown = ItemFilterDropdownType.none;
+    });
+  }
+
   void _selectSort(String value) {
     setState(() {
       selectedSort = value;
@@ -56,8 +106,20 @@ class _ItemListPageState extends State<ItemListPage> {
     });
   }
 
+  void _handleSearchChanged(String value) {
+    // 검색 기능은 추후 API/기능 연결 단계에서 구현
+  }
+
+  void _handleSearchSubmitted(String value) {
+    // 검색 기능은 추후 API/기능 연결 단계에서 구현
+  }
+
   @override
   Widget build(BuildContext context) {
+    final List<_ItemListData> items = _showEmptyStatePreview
+        ? const []
+        : _dummyItems;
+
     return Scaffold(
       backgroundColor: Colors.white,
       bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 1),
@@ -68,7 +130,11 @@ class _ItemListPageState extends State<ItemListPage> {
             children: [
               const ItemListHeader(),
               const SizedBox(height: 12),
-              ItemSearchField(initialText: isEmptyState ? '아나바다' : null),
+              ItemSearchField(
+                initialText: _showEmptyStatePreview ? '아나바다' : null,
+                onChanged: _handleSearchChanged,
+                onSubmitted: _handleSearchSubmitted,
+              ),
               const SizedBox(height: 18),
               Expanded(
                 child: Stack(
@@ -82,64 +148,45 @@ class _ItemListPageState extends State<ItemListPage> {
                           onCategoryTap: _toggleCategoryDropdown,
                         ),
                         const SizedBox(height: 24),
-                        ItemListCountHeader(totalCount: isEmptyState ? 0 : 123),
+                        ItemListCountHeader(totalCount: items.length),
                         const SizedBox(height: 18),
                         Expanded(
-                          child: isEmptyState
+                          child: items.isEmpty
                               ? const ItemEmptyState()
-                              : ListView(
+                              : ListView.builder(
                                   padding: EdgeInsets.zero,
-                                  children: const [
-                                    ItemListCard(
-                                      title: '제목',
-                                      writer: '작성자',
-                                      category: '카테고리',
-                                      status: '교환 가능',
-                                      time: '3분 전',
-                                      isActive: true,
-                                    ),
-                                    SizedBox(height: 20),
-                                    ItemListCard(
-                                      title: '제목',
-                                      writer: '작성자',
-                                      category: '카테고리',
-                                      status: '교환 완료',
-                                      time: '3분 전',
-                                      isActive: false,
-                                    ),
-                                    SizedBox(height: 20),
-                                    ItemListCard(
-                                      title: '제목',
-                                      writer: '작성자',
-                                      category: '카테고리',
-                                      status: '나눔 완료',
-                                      time: '3분 전',
-                                      isActive: false,
-                                    ),
-                                    SizedBox(height: 20),
-                                    ItemListCard(
-                                      title: '제목',
-                                      writer: '작성자',
-                                      category: '카테고리',
-                                      status: '나눔 가능',
-                                      time: '3분 전',
-                                      isActive: true,
-                                    ),
-                                    SizedBox(height: 20),
-                                    ItemListCard(
-                                      title: '제목',
-                                      writer: '작성자',
-                                      category: '카테고리',
-                                      status: '교환 가능',
-                                      time: '3분 전',
-                                      isActive: true,
-                                    ),
-                                    SizedBox(height: 24),
-                                  ],
+                                  itemCount: items.length,
+                                  itemBuilder: (context, index) {
+                                    final item = items[index];
+
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                        bottom: index == items.length - 1
+                                            ? 24
+                                            : 20,
+                                      ),
+                                      child: ItemListCard(
+                                        title: item.title,
+                                        writer: item.writer,
+                                        category: item.category,
+                                        status: item.status,
+                                        time: item.time,
+                                        isActive: item.isActive,
+                                      ),
+                                    );
+                                  },
                                 ),
                         ),
                       ],
                     ),
+                    if (openedDropdown != ItemFilterDropdownType.none)
+                      Positioned.fill(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: _closeDropdown,
+                          child: const SizedBox.expand(),
+                        ),
+                      ),
                     if (openedDropdown == ItemFilterDropdownType.sort)
                       Positioned(
                         top: 28,
@@ -171,4 +218,22 @@ class _ItemListPageState extends State<ItemListPage> {
       ),
     );
   }
+}
+
+class _ItemListData {
+  final String title;
+  final String writer;
+  final String category;
+  final String status;
+  final String time;
+  final bool isActive;
+
+  const _ItemListData({
+    required this.title,
+    required this.writer,
+    required this.category,
+    required this.status,
+    required this.time,
+    required this.isActive,
+  });
 }

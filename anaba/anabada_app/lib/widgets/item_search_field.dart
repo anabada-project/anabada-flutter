@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 
 class ItemSearchField extends StatelessWidget {
   final String? initialText;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
 
-  const ItemSearchField({super.key, this.initialText});
+  const ItemSearchField({
+    super.key,
+    this.initialText,
+    this.onChanged,
+    this.onSubmitted,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -11,6 +18,8 @@ class ItemSearchField extends StatelessWidget {
       height: 42,
       child: TextFormField(
         initialValue: initialText,
+        onChanged: onChanged,
+        onFieldSubmitted: onSubmitted,
         decoration: InputDecoration(
           filled: true,
           fillColor: const Color(0xFFF4F4F4),

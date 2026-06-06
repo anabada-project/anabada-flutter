@@ -39,69 +39,77 @@ class ItemListCard extends StatelessWidget {
           Expanded(
             child: SizedBox(
               height: 96,
-              child: Stack(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Positioned(
-                    top: 2,
-                    left: 0,
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
+                      const SizedBox(width: 8),
+                      ItemStatusChip(status: status, isActive: isActive),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    writer,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF666666),
                     ),
                   ),
-                  Positioned(
-                    top: 27,
-                    left: 0,
-                    child: Text(
-                      writer,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF666666),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Flexible(
+                        child: Container(
+                          height: 32,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF4F4F4),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            category,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFFBDBDBD),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 0,
-                    bottom: 0,
-                    child: Container(
-                      height: 32,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF4F4F4),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        category,
+                      const SizedBox(width: 8),
+                      Text(
+                        time,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                           color: Color(0xFFBDBDBD),
                         ),
                       ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 2,
-                    right: 0,
-                    child: ItemStatusChip(status: status, isActive: isActive),
-                  ),
-                  Positioned(
-                    right: 0,
-                    bottom: 5,
-                    child: Text(
-                      time,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFFBDBDBD),
-                      ),
-                    ),
+                    ],
                   ),
                 ],
               ),
