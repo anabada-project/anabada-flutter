@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'constants/app_routes.dart';
+import 'pages/favorite_page.dart';
+import 'pages/main_page.dart';
+import 'pages/my_page.dart';
 import 'screen/login.dart';
 
 void main() {
@@ -11,6 +15,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(debugShowCheckedModeBanner: false, home: Login());
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: const Login(),
+      routes: {
+        AppRoutes.main: (_) => const MainPage(),
+        AppRoutes.favorite: (_) => const FavoritePage(),
+        AppRoutes.myPage: (_) => const MyPage(),
+      },
+    );
   }
 }

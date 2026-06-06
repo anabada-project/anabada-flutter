@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../data/fakedata.dart';
-import '../pages/main_page.dart';
+import '../constants/app_routes.dart';
+import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../widget/app_text_form_field.dart';
@@ -40,21 +40,23 @@ class _LoginState extends State<Login> {
   }
 
   void _handleLogin() {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final isRegistered = authService.isEmailRegistered(email);
+    final user = isRegistered
+        ? authService.login(email: email, password: password)
+        : null;
+
     setState(() {
-      _emailError = _emailController.text.trim() == FakeData.correctEmail
-          ? null
-          : '이메일을 다시 입력해주세요.';
-      _passwordError = _passwordController.text == FakeData.correctPassword
+      _emailError = isRegistered ? null : '이메일을 다시 입력해주세요.';
+      _passwordError = !isRegistered || user != null
           ? null
           : '비밀번호를 다시 입력해주세요.';
     });
 
-    if (_emailError == null && _passwordError == null) {
+    if (user != null) {
       debugPrint('로그인 성공');
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainPage()),
-      );
+      Navigator.pushReplacementNamed(context, AppRoutes.main);
     }
   }
 
@@ -186,11 +188,15 @@ class _LoginState extends State<Login> {
                 SizedBox(
                   height: 43,
                   child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
+                    onPressed: () async {
+                      final email = await Navigator.push<String>(
                         context,
                         MaterialPageRoute(builder: (_) => const SignUp()),
                       );
+                      if (!context.mounted || email == null) {
+                        return;
+                      }
+                      _emailController.text = email;
                     },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(

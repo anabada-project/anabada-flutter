@@ -1,11 +1,38 @@
 import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
+import '../../constants/app_routes.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   const CustomBottomNavigationBar({super.key, required this.currentIndex});
 
   final int currentIndex;
+
+  void _handleTap(BuildContext context, int index) {
+    if (index == currentIndex) {
+      return;
+    }
+
+    String? routeName;
+
+    switch (index) {
+      case 0:
+        routeName = AppRoutes.main;
+      case 3:
+        routeName = AppRoutes.favorite;
+      case 4:
+        routeName = AppRoutes.myPage;
+    }
+
+    if (routeName == null) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('아직 준비 중인 화면입니다.')));
+      return;
+    }
+
+    Navigator.of(context).pushReplacementNamed(routeName);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +51,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
       child: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: currentIndex,
+        onTap: (index) => _handleTap(context, index),
         backgroundColor: Colors.white,
         elevation: 0,
         selectedItemColor: AppColors.mainColor,

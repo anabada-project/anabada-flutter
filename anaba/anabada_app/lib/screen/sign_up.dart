@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import '../services/auth_service.dart';
 import '../widget/app_button.dart';
 import '../widget/app_selectable_button.dart';
 import '../widget/app_text_form_field.dart';
@@ -52,6 +53,7 @@ class _SignUpState extends State<SignUp> {
 
   String? _passwordError;
   String? _passwordConfirmError;
+  String? _emailError;
 
   // ── 버튼 활성화 ─────────────────────────────────────────
   bool get _isButtonActive =>
@@ -103,6 +105,7 @@ class _SignUpState extends State<SignUp> {
       // 이메일을 바꾸면 인증 초기화
       _isCodeSent = false;
       _isEmailVerified = false;
+      _emailError = null;
       for (final c in _codeControllers) {
         c.clear();
       }
@@ -148,13 +151,16 @@ class _SignUpState extends State<SignUp> {
     setState(() {});
   }
 
-  void _onCodeKeyDown(KeyEvent event, int index) {
+  KeyEventResult _onCodeKeyEvent(KeyEvent event, int index) {
     if (event is KeyDownEvent &&
         event.logicalKey == LogicalKeyboardKey.backspace &&
         _codeControllers[index].text.isEmpty &&
         index > 0) {
       _codeFocusNodes[index - 1].requestFocus();
+      return KeyEventResult.handled;
     }
+
+    return KeyEventResult.ignored;
   }
 
   // ── 비밀번호 검사 ────────────────────────────────────────
@@ -175,7 +181,25 @@ class _SignUpState extends State<SignUp> {
           : '비밀번호가 일치하지 않습니다.';
     });
     if (_passwordError == null && _passwordConfirmError == null) {
+      final didSignUp = authService.signUp(
+        name: _nameController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
+        major: _selectedMajor!,
+        gender: _selectedGender!,
+        generation: _selectedTerm!,
+      );
+
+      if (!didSignUp) {
+        setState(() {
+          _emailError = '이미 가입된 이메일입니다.';
+          _isEmailVerified = false;
+        });
+        return;
+      }
+
       debugPrint('회원가입 성공');
+      Navigator.pop(context, _emailController.text.trim().toLowerCase());
     }
   }
 
@@ -231,6 +255,7 @@ class _SignUpState extends State<SignUp> {
                       controller: _emailController,
                       hintText: '이메일을 입력해주세요',
                       keyboardType: TextInputType.emailAddress,
+                      errorText: _emailError,
                       enabled: !_isEmailVerified && !_isCodeSent,
                       fillColor: (_isEmailVerified || _isCodeSent)
                           ? const Color(0xFFF6F7F8)
@@ -256,9 +281,8 @@ class _SignUpState extends State<SignUp> {
                     return Expanded(
                       child: Padding(
                         padding: EdgeInsets.only(right: i < 5 ? 8 : 0),
-                        child: KeyboardListener(
-                          focusNode: _codeFocusNodes[i],
-                          onKeyEvent: (event) => _onCodeKeyDown(event, i),
+                        child: Focus(
+                          onKeyEvent: (_, event) => _onCodeKeyEvent(event, i),
                           child: TextFormField(
                             controller: _codeControllers[i],
                             focusNode: _codeFocusNodes[i],
