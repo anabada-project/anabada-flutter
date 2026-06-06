@@ -11,6 +11,13 @@ class CustomBottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 84,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.06),
+            blurRadius: 12,
+            offset: Offset(0, -4),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [

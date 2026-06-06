@@ -153,6 +153,70 @@ class AppTextStyles {
     color: AppColors.grayText,
   );
 
+  static const TextStyle noticeDetailHeaderTitle = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  static const TextStyle noticeDetailTitle = TextStyle(
+    fontSize: 22,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  static const TextStyle noticeDetailInfo = TextStyle(
+    fontSize: 14,
+    color: AppColors.grayText,
+  );
+
+  static const TextStyle noticeDetailBody = TextStyle(
+    fontSize: 16,
+    height: 1.45,
+    color: Colors.black,
+  );
+
+  static const TextStyle noticeDetailButton = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+  );
+
+  static const TextStyle notificationHeaderTitle = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  static const TextStyle notificationSelectedTab = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+  );
+
+  static const TextStyle notificationTab = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.bold,
+    color: AppColors.grayText,
+  );
+
+  static const TextStyle notificationSectionTitle = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  static const TextStyle notificationItemTitle = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  static const TextStyle notificationItemContent = TextStyle(
+    fontSize: 13,
+    color: AppColors.grayText,
+  );
+
   static const TextStyle notificationItemContent = TextStyle(
     fontSize: 13,
     color: AppColors.grayText,
