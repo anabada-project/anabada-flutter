@@ -36,7 +36,7 @@ class _ImageIndicator extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isSelected
-                ? const Color(0xFFFFB800)
+                ? AppColors.mainColor
                 : const Color(0xFFE5E5E5),
           ),
         );
