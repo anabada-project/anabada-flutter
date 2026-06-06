@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/fakedata.dart';
+import '../pages/main_page.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../widget/app_text_form_field.dart';
@@ -50,6 +51,10 @@ class _LoginState extends State<Login> {
 
     if (_emailError == null && _passwordError == null) {
       debugPrint('로그인 성공');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainPage()),
+      );
     }
   }
 
