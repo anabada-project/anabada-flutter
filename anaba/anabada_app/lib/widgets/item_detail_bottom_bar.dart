@@ -29,7 +29,7 @@ class ItemDetailBottomBar extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: onRequestTap,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFB800),
+                    backgroundColor: AppColors.mainColor,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
