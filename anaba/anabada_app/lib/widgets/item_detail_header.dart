@@ -22,9 +22,7 @@ class ItemDetailHeader extends StatelessWidget {
             left: 20,
             child: GestureDetector(
               onTap: () {
-                if (Navigator.canPop(context)) {
-                  Navigator.pop(context);
-                }
+                Navigator.maybePop(context);
               },
               behavior: HitTestBehavior.opaque,
               child: const SizedBox(
