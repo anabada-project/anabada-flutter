@@ -3,7 +3,19 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppTextStyles {
-  AppTextStyles._();
+  const AppTextStyles._();
+
+  static const TextStyle notificationHeaderTitle = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  static const TextStyle noticeDetailHeaderTitle = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
 
   static const TextStyle pageTitle = TextStyle(
     fontSize: 28,
@@ -19,6 +31,30 @@ class AppTextStyles {
 
   static const TextStyle sectionTitle = TextStyle(
     fontSize: 24,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  static const TextStyle notificationSelectedTab = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+  );
+
+  static const TextStyle notificationTab = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.bold,
+    color: AppColors.grayText,
+  );
+
+  static const TextStyle notificationSectionTitle = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  static const TextStyle noticeDetailTitle = TextStyle(
+    fontSize: 22,
     fontWeight: FontWeight.bold,
     color: Colors.black,
   );
@@ -49,6 +85,29 @@ class AppTextStyles {
     fontSize: 15,
     fontWeight: FontWeight.bold,
     color: Colors.white,
+  );
+
+  static const TextStyle noticeDetailInfo = TextStyle(
+    fontSize: 14,
+    color: AppColors.grayText,
+  );
+
+  static const TextStyle noticeDetailBody = TextStyle(
+    fontSize: 16,
+    height: 1.45,
+    color: Colors.black,
+  );
+
+  static const TextStyle noticeDetailButton = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+  );
+
+  static const TextStyle notificationItemTitle = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
   );
 
   static const TextStyle editLabel = TextStyle(
@@ -151,6 +210,11 @@ class AppTextStyles {
     fontSize: 15,
     fontWeight: FontWeight.bold,
     color: Colors.black,
+  );
+
+  static const TextStyle notificationItemContent = TextStyle(
+    fontSize: 13,
+    color: AppColors.grayText,
   );
 
   static const TextStyle notificationItemContent = TextStyle(
