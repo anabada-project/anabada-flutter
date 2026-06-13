@@ -6,7 +6,18 @@ import '../widgets/generation_button.dart';
 import '../widgets/save_profile_button.dart';
 
 class EditProfilePage extends StatefulWidget {
-  const EditProfilePage({super.key});
+  final String initialName;
+  final String initialEmail;
+  final String initialMajor;
+  final String initialGeneration;
+
+  const EditProfilePage({
+    super.key,
+    this.initialName = '추혜인',
+    this.initialEmail = 's26000@gsm.hs.kr',
+    this.initialMajor = '디자인',
+    this.initialGeneration = '10기',
+  });
 
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
@@ -17,7 +28,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late final TextEditingController _emailController;
   late final TextEditingController _majorController;
 
-  String selectedGeneration = '10기';
+  late String selectedGeneration;
 
   String? nameErrorText;
   String? majorErrorText;
@@ -26,9 +37,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
 
-    _nameController = TextEditingController(text: '추혜인');
-    _emailController = TextEditingController(text: 's26000@gsm.hs.kr');
-    _majorController = TextEditingController(text: '디자인');
+    _nameController = TextEditingController(text: widget.initialName);
+    _emailController = TextEditingController(text: widget.initialEmail);
+    _majorController = TextEditingController(text: widget.initialMajor);
+    selectedGeneration = widget.initialGeneration;
   }
 
   @override
@@ -79,19 +91,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
       return;
     }
 
+    ScaffoldMessenger.of(context).clearSnackBars();
+
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('프로필 정보가 저장되었습니다.')));
 
-    // API 연결 단계에서 서버에 프로필 수정 요청 연결
+    // TODO: API 연결 단계에서 서버에 프로필 수정 요청 연결
   }
 
   void _handleResetPassword() {
-    // 화면 이동/API 연결 단계에서 구현
+    // TODO: 비밀번호 재설정 화면 이동 작업에서 구현
   }
 
   void _handleLogout() {
-    // API 연결 단계에서 구현
+    // TODO: 로그아웃 기능/API 연결 작업에서 구현
   }
 
   @override
@@ -105,7 +119,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 18),
+
               const EditProfileHeader(),
+
               const SizedBox(height: 34),
 
               EditProfileInputField(
