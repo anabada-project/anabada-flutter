@@ -212,6 +212,22 @@ class AppTextStyles {
     color: AppColors.grayText,
   );
 
+  // 관리자 공지 작성 상단 제목
+  static const TextStyle adminNoticeWriteHeaderTitle = TextStyle(
+    fontSize: 17,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  // 관리자 공지 작성 라벨
+  static const TextStyle adminNoticeWriteLabel = TextStyle(
+    fontSize: 17,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  // 관리자 공지 작성 힌트
+  static const TextStyle adminNoticeWriteHint = TextStyle(
   static const TextStyle noticeDot = TextStyle(
     fontSize: 16,
     color: Colors.black54,
@@ -228,6 +244,45 @@ class AppTextStyles {
     color: AppColors.grayText,
   );
 
+  // 관리자 공지 작성 버튼
+  static const TextStyle adminNoticeWriteButton = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: AppColors.disabledText,
+  );
+
+  // 관리자 공지 상세 상단 제목
+  static const TextStyle adminNoticeDetailHeaderTitle = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  // 관리자 공지 상세 제목
+  static const TextStyle adminNoticeDetailTitle = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  );
+
+  // 관리자 공지 상세 작성자/날짜
+  static const TextStyle adminNoticeDetailInfo = TextStyle(
+    fontSize: 12,
+    color: AppColors.grayText,
+  );
+
+  // 관리자 공지 상세 본문
+  static const TextStyle adminNoticeDetailContent = TextStyle(
+    fontSize: 13,
+    height: 1.45,
+    color: Colors.black,
+  );
+
+  // 관리자 공지 상세 버튼
+  static const TextStyle adminNoticeDetailButton = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
   static const TextStyle noticeTileTitle = TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.bold,
