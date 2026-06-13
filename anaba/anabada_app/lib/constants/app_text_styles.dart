@@ -5,6 +5,8 @@ import 'app_colors.dart';
 class AppTextStyles {
   AppTextStyles._();
 
+  static const TextStyle adminNoticeWriteHeaderTitle = TextStyle(
+    fontSize: 17,
   static const TextStyle adminNoticeHeaderTitle = TextStyle(
   static const TextStyle adminMainTitle = TextStyle(
     fontSize: 28,
@@ -16,6 +18,7 @@ class AppTextStyles {
     color: Colors.black,
   );
 
+  static const TextStyle adminNoticeWriteLabel = TextStyle(
   static const TextStyle adminSectionTitle = TextStyle(
     fontSize: 20,
   static const TextStyle favoriteItemTitle = TextStyle(
@@ -24,6 +27,7 @@ class AppTextStyles {
     color: Colors.black,
   );
 
+  static const TextStyle adminNoticeWriteHint = TextStyle(
   static const TextStyle adminMoreText = TextStyle(
     fontSize: 14,
     color: AppColors.grayText,
@@ -53,6 +57,10 @@ class AppTextStyles {
     color: AppColors.grayText,
   );
 
+  static const TextStyle adminNoticeWriteButton = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: AppColors.disabledText,
   static const TextStyle favoriteStatusActive = TextStyle(
     fontSize: 13,
     fontWeight: FontWeight.w600,
