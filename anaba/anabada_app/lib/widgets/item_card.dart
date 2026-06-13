@@ -4,90 +4,103 @@ import '../constants/app_colors.dart';
 class ItemCard extends StatelessWidget {
   final String status;
   final bool isDone;
+  final VoidCallback? onTap;
 
-  const ItemCard({super.key, required this.status, required this.isDone});
+  const ItemCard({
+    super.key,
+    required this.status,
+    required this.isDone,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 145,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: SizedBox(
+        width: 145,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
 
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
-          Stack(
-            children: [
-              Container(
-                height: 150,
-
-                decoration: BoxDecoration(
-                  color: AppColors.lightGray,
-
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-
-              Positioned(
-                top: 10,
-                left: 10,
-
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
+          children: [
+            Stack(
+              children: [
+                Container(
+                  height: 150,
 
                   decoration: BoxDecoration(
-                    color: isDone ? Colors.white : const Color(0xFFFFF1B8),
+                    color: AppColors.lightGray,
 
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(16),
                   ),
+                ),
 
-                  child: Text(
-                    status,
+                Positioned(
+                  top: 10,
+                  left: 10,
 
-                    style: TextStyle(
-                      fontSize: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
 
-                      color: isDone ? Colors.grey : AppColors.mainColor,
+                    decoration: BoxDecoration(
+                      color: isDone ? Colors.white : const Color(0xFFFFF1B8),
 
-                      fontWeight: FontWeight.bold,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+
+                    child: Text(
+                      status,
+
+                      style: TextStyle(
+                        fontSize: 12,
+
+                        color: isDone ? Colors.grey : AppColors.mainColor,
+
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          const Text(
-            '제목',
+            const Text(
+              '제목',
 
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-          ),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            ),
 
-          const SizedBox(height: 6),
+            const SizedBox(height: 6),
 
-          const Text(
-            '교환 물품:',
+            const Text(
+              '교환 물품:',
 
-            style: TextStyle(color: AppColors.grayText, fontSize: 15),
-          ),
+              style: TextStyle(color: AppColors.grayText, fontSize: 15),
+            ),
 
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-          const Row(
-            children: [
-              Icon(Icons.favorite_border, size: 18, color: AppColors.grayText),
+            const Row(
+              children: [
+                Icon(
+                  Icons.favorite_border,
+                  size: 18,
+                  color: AppColors.grayText,
+                ),
 
-              SizedBox(width: 4),
+                SizedBox(width: 4),
 
-              Text('78', style: TextStyle(color: AppColors.grayText)),
-            ],
-          ),
-        ],
+                Text('78', style: TextStyle(color: AppColors.grayText)),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

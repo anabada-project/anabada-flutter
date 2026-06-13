@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../screen/find_password.dart';
+import '../screen/login.dart';
+import '../services/auth_service.dart';
 import '../widgets/edit_profile_header.dart';
 import '../widgets/edit_profile_input_field.dart';
 import '../widgets/generation_button.dart';
@@ -101,11 +104,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void _handleResetPassword() {
-    // TODO: 비밀번호 재설정 화면 이동 작업에서 구현
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const FindPassword()),
+    );
   }
 
   void _handleLogout() {
-    // TODO: 로그아웃 기능/API 연결 작업에서 구현
+    authService.logout();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const Login()),
+      (route) => false,
+    );
   }
 
   @override

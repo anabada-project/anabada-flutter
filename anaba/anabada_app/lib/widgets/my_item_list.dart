@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../pages/item_detail_page.dart';
 import 'item_card.dart';
 
 class MyItemList extends StatelessWidget {
@@ -19,6 +20,17 @@ class MyItemList extends StatelessWidget {
           return ItemCard(
             status: index == 1 ? '교환 완료' : '교환 가능',
             isDone: index == 1,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ItemDetailPage(
+                    tradeType: ItemTradeType.exchange,
+                    initialIsLiked: false,
+                  ),
+                ),
+              );
+            },
           );
         },
       ),

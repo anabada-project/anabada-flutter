@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../constants/app_colors.dart';
 import '../constants/app_text_styles.dart';
 
 class NoticeHeader extends StatelessWidget {
@@ -23,21 +22,7 @@ class NoticeHeader extends StatelessWidget {
           ),
         ),
 
-        SizedBox(
-          height: 34,
-          child: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.mainColor,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-              ),
-            ),
-            child: const Text('+ 추가', style: AppTextStyles.whiteButton),
-          ),
-        ),
+        const SizedBox(width: 48),
       ],
     );
   }

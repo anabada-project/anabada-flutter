@@ -9,15 +9,13 @@ class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
 
   void _handleTap(BuildContext context, int index) {
-    if (index == currentIndex) {
-      return;
-    }
-
     String? routeName;
 
     switch (index) {
       case 0:
         routeName = AppRoutes.main;
+      case 1:
+        routeName = AppRoutes.itemList;
       case 3:
         routeName = AppRoutes.favorite;
       case 4:
@@ -31,6 +29,11 @@ class CustomBottomNavigationBar extends StatelessWidget {
       return;
     }
 
+    final currentRouteName = ModalRoute.of(context)?.settings.name;
+    if (index == currentIndex && currentRouteName == routeName) {
+      return;
+    }
+
     Navigator.of(context).pushReplacementNamed(routeName);
   }
 
@@ -38,13 +41,6 @@ class CustomBottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 84,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.06),
-            blurRadius: 12,
-            offset: Offset(0, -4),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [

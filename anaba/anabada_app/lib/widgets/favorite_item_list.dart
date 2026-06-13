@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../pages/item_detail_page.dart';
 import 'favorite_item_card.dart';
 
 class FavoriteItemList extends StatelessWidget {
@@ -23,6 +24,19 @@ class FavoriteItemList extends StatelessWidget {
           status: statuses[index],
           time: '3분 전',
           isActive: index == 0 || index == 3,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ItemDetailPage(
+                  tradeType: statuses[index].contains('나눔')
+                      ? ItemTradeType.sharing
+                      : ItemTradeType.exchange,
+                  initialIsLiked: true,
+                ),
+              ),
+            );
+          },
         );
       },
     );

@@ -7,11 +7,15 @@ class AdminMainSectionTitle extends StatelessWidget {
   const AdminMainSectionTitle({
     super.key,
     required this.title,
+    required this.onMoreTap,
     this.showAddButton = false,
+    this.onAddTap,
   });
 
   final String title;
+  final VoidCallback onMoreTap;
   final bool showAddButton;
+  final VoidCallback? onAddTap;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +27,7 @@ class AdminMainSectionTitle extends StatelessWidget {
           const SizedBox(width: 8),
 
           GestureDetector(
-            onTap: () {},
+            onTap: onAddTap,
             child: Container(
               width: 28,
               height: 28,
@@ -42,11 +46,20 @@ class AdminMainSectionTitle extends StatelessWidget {
 
         const Spacer(),
 
-        const Text('더보기', style: AppTextStyles.adminMoreText),
-
-        const SizedBox(width: 4),
-
-        const Icon(Icons.chevron_right, color: AppColors.grayText, size: 22),
+        InkWell(
+          onTap: onMoreTap,
+          borderRadius: BorderRadius.circular(8),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                Text('더보기', style: AppTextStyles.adminMoreText),
+                SizedBox(width: 4),
+                Icon(Icons.chevron_right, color: AppColors.grayText, size: 22),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

@@ -10,10 +10,10 @@ class AdminNoticeWritePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: Colors.white,
 
-      body: SafeArea(
+      body: const SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 32),
           child: Column(
@@ -63,7 +63,11 @@ class AdminNoticeWritePage extends StatelessWidget {
         ),
       ),
 
-      bottomNavigationBar: AdminNoticeWriteButton(onPressed: null),
+      bottomNavigationBar: AdminNoticeWriteButton(
+        onPressed: () {
+          Navigator.pop(context, true);
+        },
+      ),
     );
   }
 }

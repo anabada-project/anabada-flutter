@@ -8,6 +8,7 @@ import '../widgets/item_list_card.dart';
 import '../widgets/item_list_count_header.dart';
 import '../widgets/item_list_header.dart';
 import '../widgets/item_search_field.dart';
+import 'item_detail_page.dart';
 
 enum ItemFilterDropdownType { none, sort, category }
 
@@ -172,6 +173,20 @@ class _ItemListPageState extends State<ItemListPage> {
                                         status: item.status,
                                         time: item.time,
                                         isActive: item.isActive,
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => ItemDetailPage(
+                                                tradeType:
+                                                    item.status.contains('나눔')
+                                                    ? ItemTradeType.sharing
+                                                    : ItemTradeType.exchange,
+                                                initialIsLiked: false,
+                                              ),
+                                            ),
+                                          );
+                                        },
                                       ),
                                     );
                                   },

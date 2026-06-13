@@ -53,6 +53,7 @@ class _AdminNoticeEditPageState extends State<AdminNoticeEditPage> {
 
   void _saveNotice() {
     // UI 단계라 실제 저장 기능은 나중에 연결
+    Navigator.pop(context, true);
   }
 
   @override

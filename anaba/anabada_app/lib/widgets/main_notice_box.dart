@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_text_styles.dart';
+import '../pages/notice_detail_page.dart';
 
 class MainNoticeBox extends StatelessWidget {
   const MainNoticeBox({super.key});
@@ -35,14 +36,22 @@ class NoticeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Text('•', style: AppTextStyles.noticeDot),
-        const SizedBox(width: 10),
-        Text(title, style: AppTextStyles.noticeTitle),
-        const Spacer(),
-        Text(time, style: AppTextStyles.noticeTime),
-      ],
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NoticeDetailPage()),
+        );
+      },
+      child: Row(
+        children: [
+          const Text('•', style: AppTextStyles.noticeDot),
+          const SizedBox(width: 10),
+          Text(title, style: AppTextStyles.noticeTitle),
+          const Spacer(),
+          Text(time, style: AppTextStyles.noticeTime),
+        ],
+      ),
     );
   }
 }

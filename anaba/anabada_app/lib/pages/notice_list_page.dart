@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../widgets/common/custom_bottom_navigation_bar.dart';
 import '../widgets/notice_header.dart';
 import '../widgets/notice_tile.dart';
+import 'notice_detail_page.dart';
 
 class NoticeListPage extends StatelessWidget {
   const NoticeListPage({super.key});
@@ -14,27 +15,33 @@ class NoticeListPage extends StatelessWidget {
 
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             children: [
-              SizedBox(height: 18),
+              const SizedBox(height: 18),
 
-              NoticeHeader(),
+              const NoticeHeader(),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               Expanded(
-                child: ListView(
+                child: ListView.builder(
                   padding: EdgeInsets.zero,
-                  children: [
-                    NoticeTile(title: '공지사항', content: '공지내용'),
-                    NoticeTile(title: '공지사항', content: '공지내용'),
-                    NoticeTile(title: '공지사항', content: '공지내용'),
-                    NoticeTile(title: '공지사항', content: '공지내용'),
-                    NoticeTile(title: '공지사항', content: '공지내용'),
-                    NoticeTile(title: '공지사항', content: '공지내용'),
-                    NoticeTile(title: '공지사항', content: '공지내용'),
-                  ],
+                  itemCount: 7,
+                  itemBuilder: (context, index) {
+                    return NoticeTile(
+                      title: '공지사항',
+                      content: '공지내용',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const NoticeDetailPage(),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
             ],
@@ -42,7 +49,7 @@ class NoticeListPage extends StatelessWidget {
         ),
       ),
 
-      bottomNavigationBar: CustomBottomNavigationBar(currentIndex: 0),
+      bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 0),
     );
   }
 }

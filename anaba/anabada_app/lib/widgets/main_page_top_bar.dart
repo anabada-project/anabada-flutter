@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_routes.dart';
 import '../constants/app_text_styles.dart';
 
 class MainPageTopBar extends StatelessWidget {
@@ -11,9 +12,16 @@ class MainPageTopBar extends StatelessWidget {
       children: [
         const Text('아나바다', style: AppTextStyles.pageTitle),
         const Spacer(),
-        IconButton(onPressed: () {}, icon: const Icon(Icons.search, size: 26)),
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoutes.itemList);
+          },
+          icon: const Icon(Icons.search, size: 26),
+        ),
+        IconButton(
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoutes.notifications);
+          },
           icon: const Icon(Icons.notifications_none, size: 26),
         ),
       ],

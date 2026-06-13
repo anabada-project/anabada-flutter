@@ -12,6 +12,7 @@ class FavoriteItemCard extends StatelessWidget {
     required this.status,
     required this.time,
     required this.isActive,
+    this.onTap,
   });
 
   final String title;
@@ -20,81 +21,86 @@ class FavoriteItemCard extends StatelessWidget {
   final String status;
   final String time;
   final bool isActive;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 124,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 124,
-            height: 124,
-            decoration: BoxDecoration(
-              color: AppColors.itemImageGray,
-              borderRadius: BorderRadius.circular(14),
-            ),
-          ),
-
-          const SizedBox(width: 18),
-
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 6, bottom: 6),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.favoriteItemTitle,
-                        ),
-                      ),
-
-                      const SizedBox(width: 8),
-
-                      _StatusChip(text: status, isActive: isActive),
-                    ],
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Text(author, style: AppTextStyles.favoriteItemAuthor),
-
-                  const Spacer(),
-
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 9,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.lightGray,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          category,
-                          style: AppTextStyles.favoriteCategory,
-                        ),
-                      ),
-
-                      const Spacer(),
-
-                      Text(time, style: AppTextStyles.favoriteTime),
-                    ],
-                  ),
-                ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: SizedBox(
+        height: 124,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 124,
+              height: 124,
+              decoration: BoxDecoration(
+                color: AppColors.itemImageGray,
+                borderRadius: BorderRadius.circular(14),
               ),
             ),
-          ),
-        ],
+
+            const SizedBox(width: 18),
+
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 6, bottom: 6),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.favoriteItemTitle,
+                          ),
+                        ),
+
+                        const SizedBox(width: 8),
+
+                        _StatusChip(text: status, isActive: isActive),
+                      ],
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(author, style: AppTextStyles.favoriteItemAuthor),
+
+                    const Spacer(),
+
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 9,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.lightGray,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            category,
+                            style: AppTextStyles.favoriteCategory,
+                          ),
+                        ),
+
+                        const Spacer(),
+
+                        Text(time, style: AppTextStyles.favoriteTime),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
