@@ -357,8 +357,8 @@ class _SignUpState extends State<SignUp> {
               const SizedBox(height: 20),
 
               // ── 전공 ──────────────────────────────────────
-              const _FieldLabel('전공'),
-              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: _selectedMajor,
               DropdownButtonFormField<String>(
                 initialValue: _selectedMajor,
                 isExpanded: true,
