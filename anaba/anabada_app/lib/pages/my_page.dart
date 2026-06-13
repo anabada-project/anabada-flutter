@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/auth_service.dart';
 import '../widgets/my_page_top_bar.dart';
 import '../widgets/profile_card.dart';
 import '../widgets/edit_profile_button.dart';
@@ -8,21 +9,19 @@ import '../widgets/my_item_list.dart';
 import '../widgets/common/custom_bottom_navigation_bar.dart';
 
 class MyPage extends StatelessWidget {
-  const MyPage({
-    super.key,
-    required this.userName,
-    required this.email,
-    required this.major,
-    required this.generation,
-  });
-
-  final String userName;
-  final String email;
-  final String major;
-  final String generation;
+  const MyPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = authService.currentUser;
+
+    if (user == null) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: Text('로그인이 필요합니다.')),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
 
@@ -38,10 +37,10 @@ class MyPage extends StatelessWidget {
             const SizedBox(height: 24),
 
             ProfileCard(
-              userName: userName,
-              email: email,
-              major: major,
-              generation: generation,
+              userName: user.name,
+              email: user.email,
+              major: user.major,
+              generation: user.generation,
             ),
 
             const SizedBox(height: 16),

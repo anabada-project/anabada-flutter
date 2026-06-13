@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+
+import 'constants/app_routes.dart';
+import 'pages/favorite_page.dart';
+import 'pages/main_page.dart';
 import 'pages/my_page.dart';
+import 'screen/login.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,15 +16,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false, // 왼쪽 디버그 지우는 코드
-
-      home: MyPage(
-        // 더미데이터
-        userName: '이승준',
-        email: 's26000@gsm.hs.kr',
-        major: '플러터',
-        generation: '10기',
-      ),
+      debugShowCheckedModeBanner: false,
+      home: const Login(),
+      routes: {
+        AppRoutes.main: (_) => const MainPage(),
+        AppRoutes.favorite: (_) => const FavoritePage(),
+        AppRoutes.myPage: (_) => const MyPage(),
+      },
     );
   }
 }
