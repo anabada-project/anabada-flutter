@@ -1,7 +1,43 @@
 import 'package:flutter/material.dart';
 
-class ItemDetailCommentInputBar extends StatelessWidget {
+class ItemDetailCommentInputBar extends StatefulWidget {
   const ItemDetailCommentInputBar({super.key});
+
+  @override
+  State<ItemDetailCommentInputBar> createState() =>
+      _ItemDetailCommentInputBarState();
+}
+
+class _ItemDetailCommentInputBarState extends State<ItemDetailCommentInputBar> {
+  final TextEditingController _commentController = TextEditingController();
+  String commentText = '';
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  void _handleCommentChanged(String value) {
+    setState(() {
+      commentText = value;
+    });
+  }
+
+  void _handleSubmit() {
+    final String trimmedComment = commentText.trim();
+
+    if (trimmedComment.isEmpty) {
+      return;
+    }
+
+    // 기능/API 연결 단계에서 댓글 등록 처리
+    _commentController.clear();
+
+    setState(() {
+      commentText = '';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +52,11 @@ class ItemDetailCommentInputBar extends StatelessWidget {
               child: SizedBox(
                 height: 46,
                 child: TextField(
+                  controller: _commentController,
+                  onChanged: _handleCommentChanged,
+                  onSubmitted: (_) {
+                    _handleSubmit();
+                  },
                   decoration: InputDecoration(
                     hintText: '댓글을 입력하세요.',
                     hintStyle: const TextStyle(
@@ -44,7 +85,7 @@ class ItemDetailCommentInputBar extends StatelessWidget {
               width: 64,
               height: 46,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: _handleSubmit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFFB800),
                   foregroundColor: Colors.white,

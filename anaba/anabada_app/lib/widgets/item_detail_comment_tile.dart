@@ -116,15 +116,7 @@ class _CommentMoreButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!canManage) {
-      return GestureDetector(
-        onTap: () {},
-        behavior: HitTestBehavior.opaque,
-        child: const SizedBox(
-          width: 28,
-          height: 28,
-          child: Icon(Icons.more_horiz, size: 20, color: Colors.black),
-        ),
-      );
+      return const SizedBox.shrink();
     }
 
     return PopupMenuButton<String>(
