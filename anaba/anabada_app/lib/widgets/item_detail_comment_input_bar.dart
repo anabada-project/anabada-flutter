@@ -60,6 +60,7 @@ class ItemDetailCommentInputBar extends StatelessWidget {
               ),
               const SizedBox(height: 8),
             ],
+
             Row(
               children: [
                 Expanded(
@@ -70,7 +71,9 @@ class ItemDetailCommentInputBar extends StatelessWidget {
                       focusNode: focusNode,
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) {
-                        onSubmit();
+                        if (controller.text.trim().isNotEmpty) {
+                          onSubmit();
+                        }
                       },
                       decoration: InputDecoration(
                         hintText: '댓글을 입력하세요.',
@@ -99,28 +102,42 @@ class ItemDetailCommentInputBar extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 const SizedBox(width: 10),
-                SizedBox(
-                  width: 72,
-                  height: 46,
-                  child: ElevatedButton(
-                    onPressed: onSubmit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFB800),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: controller,
+                  builder: (context, value, child) {
+                    final bool isTextEmpty = value.text.trim().isEmpty;
+
+                    return SizedBox(
+                      width: 72,
+                      height: 46,
+                      child: ElevatedButton(
+                        onPressed: isTextEmpty ? null : onSubmit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isTextEmpty
+                              ? const Color(0xFFE0E0E0)
+                              : const Color(0xFFFFB800),
+                          disabledBackgroundColor: const Color(0xFFE0E0E0),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(
+                          isEditing ? '수정' : '등록',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: isTextEmpty
+                                ? const Color(0xFF9E9E9E)
+                                : Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      isEditing ? '수정' : '등록',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ],
             ),

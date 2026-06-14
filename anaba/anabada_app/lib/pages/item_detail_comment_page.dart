@@ -91,17 +91,21 @@ class _ItemDetailCommentPageState extends State<ItemDetailCommentPage> {
   }
 
   void _updateComment(String content) {
-    final int editingId = _editingCommentId!;
+    final int? editingId = _editingCommentId;
+
+    if (editingId == null) {
+      return;
+    }
+
+    final int index = _comments.indexWhere(
+      (comment) => comment.id == editingId,
+    );
+
+    if (index == -1) {
+      return;
+    }
 
     setState(() {
-      final int index = _comments.indexWhere(
-        (comment) => comment.id == editingId,
-      );
-
-      if (index == -1) {
-        return;
-      }
-
       final _CommentData oldComment = _comments[index];
 
       _comments[index] = oldComment.copyWith(content: content, time: '방금 전');
@@ -145,6 +149,49 @@ class _ItemDetailCommentPageState extends State<ItemDetailCommentPage> {
     _commentFocusNode.unfocus();
   }
 
+  int get _commentListItemCount {
+    if (_comments.isEmpty) {
+      return 6;
+    }
+
+    return _comments.length + 5;
+  }
+
+  Widget _buildCommentListItem(BuildContext context, int index) {
+    switch (index) {
+      case 0:
+        return const SizedBox(height: 18);
+      case 1:
+        return const ItemDetailCommentTargetCard();
+      case 2:
+        return const SizedBox(height: 28);
+      case 3:
+        return ItemDetailCommentSectionTitle(count: _comments.length);
+      case 4:
+        return const SizedBox(height: 18);
+      default:
+        if (_comments.isEmpty) {
+          return const ItemDetailCommentEmptyState();
+        }
+
+        final _CommentData comment = _comments[index - 5];
+
+        return ItemDetailCommentTile(
+          author: comment.author,
+          content: comment.content,
+          time: comment.time,
+          isWriter: comment.isWriter,
+          canManage: comment.canManage,
+          onEdit: () {
+            _startEditComment(comment);
+          },
+          onDelete: () {
+            _deleteComment(comment.id);
+          },
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isEditing = _editingCommentId != null;
@@ -156,37 +203,15 @@ class _ItemDetailCommentPageState extends State<ItemDetailCommentPage> {
         child: Column(
           children: [
             const ItemDetailCommentHeader(),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                children: [
-                  const SizedBox(height: 18),
-                  const ItemDetailCommentTargetCard(),
-                  const SizedBox(height: 28),
-                  ItemDetailCommentSectionTitle(count: _comments.length),
-                  const SizedBox(height: 18),
 
-                  if (_comments.isEmpty)
-                    const ItemDetailCommentEmptyState()
-                  else
-                    ..._comments.map((comment) {
-                      return ItemDetailCommentTile(
-                        author: comment.author,
-                        content: comment.content,
-                        time: comment.time,
-                        isWriter: comment.isWriter,
-                        canManage: comment.canManage,
-                        onEdit: () {
-                          _startEditComment(comment);
-                        },
-                        onDelete: () {
-                          _deleteComment(comment.id);
-                        },
-                      );
-                    }),
-                ],
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                itemCount: _commentListItemCount,
+                itemBuilder: _buildCommentListItem,
               ),
             ),
+
             ItemDetailCommentInputBar(
               controller: _commentController,
               focusNode: _commentFocusNode,
