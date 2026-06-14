@@ -6,6 +6,7 @@ class ItemDetailHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
+      width: double.infinity,
       height: 56,
       child: Stack(
         alignment: Alignment.center,
@@ -20,6 +21,7 @@ class ItemDetailHeader extends StatelessWidget {
           ),
           Positioned(
             left: 20,
+            top: 8,
             child: GestureDetector(
               onTap: () {
                 Navigator.maybePop(context);
@@ -28,10 +30,13 @@ class ItemDetailHeader extends StatelessWidget {
               child: const SizedBox(
                 width: 40,
                 height: 40,
-                child: Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 20,
-                  color: Colors.black,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Icon(
+                    Icons.arrow_back_ios_new,
+                    size: 20,
+                    color: Colors.black,
+                  ),
                 ),
               ),
             ),
