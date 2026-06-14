@@ -8,6 +8,20 @@ import '../widgets/edit_profile_input_field.dart';
 import '../widgets/generation_button.dart';
 import '../widgets/save_profile_button.dart';
 
+class EditProfileResult {
+  final String name;
+  final String email;
+  final String major;
+  final String generation;
+
+  const EditProfileResult({
+    required this.name,
+    required this.email,
+    required this.major,
+    required this.generation,
+  });
+}
+
 class EditProfilePage extends StatefulWidget {
   final String initialName;
   final String initialEmail;
@@ -83,6 +97,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   void _saveProfile() {
     final String name = _nameController.text.trim();
+    final String email = _emailController.text.trim();
     final String major = _majorController.text.trim();
 
     setState(() {
@@ -94,11 +109,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
       return;
     }
 
-    ScaffoldMessenger.of(context).clearSnackBars();
-
-    ScaffoldMessenger.of(
+    Navigator.pop(
       context,
-    ).showSnackBar(const SnackBar(content: Text('프로필 정보가 저장되었습니다.')));
+      EditProfileResult(
+        name: name,
+        email: email,
+        major: major,
+        generation: selectedGeneration,
+      ),
+    );
 
     // TODO: API 연결 단계에서 서버에 프로필 수정 요청 연결
   }
@@ -112,6 +131,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   void _handleLogout() {
     authService.logout();
+
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const Login()),
@@ -130,9 +150,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 18),
-
               const EditProfileHeader(),
-
               const SizedBox(height: 34),
 
               EditProfileInputField(
