@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
 
 class ItemDetailCommentPreview extends StatelessWidget {
-  const ItemDetailCommentPreview({super.key});
+  final VoidCallback onMoreTap;
+
+  const ItemDetailCommentPreview({super.key, required this.onMoreTap});
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
-        SizedBox(height: 22),
-        _CommentHeader(),
-        SizedBox(height: 16),
-        _CommentTile(name: '김준수', content: '어디신가요', time: '2시간 전'),
-        SizedBox(height: 14),
-        _CommentTile(name: '안율', content: '방가방가', time: '2시간 전'),
-        SizedBox(height: 22),
-        Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+        const SizedBox(height: 22),
+        _CommentHeader(onMoreTap: onMoreTap),
+        const SizedBox(height: 16),
+        const _CommentTile(name: '김준수', content: '어디신가요', time: '2시간 전'),
+        const SizedBox(height: 14),
+        const _CommentTile(name: '안율', content: '방가방가', time: '2시간 전'),
+        const SizedBox(height: 22),
+        const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
       ],
     );
   }
 }
 
 class _CommentHeader extends StatelessWidget {
-  const _CommentHeader();
+  final VoidCallback onMoreTap;
+
+  const _CommentHeader({required this.onMoreTap});
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +41,7 @@ class _CommentHeader extends StatelessWidget {
           ),
         ),
         GestureDetector(
-          onTap: () {
-            // 댓글 전체 페이지 이동은 추후 화면 연결 단계에서 구현
-          },
+          onTap: onMoreTap,
           behavior: HitTestBehavior.opaque,
           child: const Row(
             children: [
