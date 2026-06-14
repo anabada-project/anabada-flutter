@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_colors.dart';
+
 class ItemDetailNotFoundState extends StatelessWidget {
   final VoidCallback onBackToListTap;
 
@@ -52,10 +54,10 @@ class ItemDetailNotFoundState extends StatelessWidget {
             child: ElevatedButton(
               onPressed: onBackToListTap,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFB800),
+                backgroundColor: AppColors.mainColor,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(11),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
               child: const Text(

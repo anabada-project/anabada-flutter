@@ -78,7 +78,6 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
           child: Column(
             children: [
               const ItemDetailHeader(),
-              const ItemDetailImageArea(),
               Expanded(
                 child: ItemDetailNotFoundState(onBackToListTap: _goBackToList),
               ),
