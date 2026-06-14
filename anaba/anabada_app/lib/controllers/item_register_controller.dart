@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 enum ItemCategory {
@@ -40,6 +41,9 @@ class ItemRegisterController extends ChangeNotifier {
 
   bool isSubmitted = false;
   bool isLoading = false;
+  bool _disposed = false;
+
+  String? imagePickErrorText;
 
   bool get hasImage => selectedImage != null;
 
@@ -61,6 +65,7 @@ class ItemRegisterController extends ChangeNotifier {
   }
 
   String? get imageErrorText {
+    if (imagePickErrorText != null) return imagePickErrorText;
     if (!isSubmitted) return null;
     if (!hasImage) return '사진을 등록해 주세요.';
     return null;
@@ -91,15 +96,33 @@ class ItemRegisterController extends ChangeNotifier {
   }
 
   Future<void> pickImage() async {
-    final XFile? image = await _imagePicker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
+    try {
+      imagePickErrorText = null;
 
-    if (image == null) return;
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
 
-    selectedImage = image;
-    notifyListeners();
+      if (_disposed) return;
+      if (image == null) return;
+
+      selectedImage = image;
+      imagePickErrorText = null;
+      notifyListeners();
+    } on PlatformException catch (e) {
+      if (_disposed) return;
+
+      imagePickErrorText = '사진을 불러오지 못했습니다.';
+      debugPrint('이미지 선택 중 오류 발생: ${e.message}');
+      notifyListeners();
+    } catch (e) {
+      if (_disposed) return;
+
+      imagePickErrorText = '사진을 불러오지 못했습니다.';
+      debugPrint('이미지 선택 중 오류 발생: $e');
+      notifyListeners();
+    }
   }
 
   void selectCategory(ItemCategory category) {
@@ -127,12 +150,16 @@ class ItemRegisterController extends ChangeNotifier {
       // TODO: 나중에 API 연결할 부분
       await Future<void>.delayed(const Duration(milliseconds: 700));
 
+      if (_disposed) return false;
+
       debugPrint(toRequestData().toString());
 
       return true;
     } finally {
-      isLoading = false;
-      notifyListeners();
+      if (!_disposed) {
+        isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -152,7 +179,16 @@ class ItemRegisterController extends ChangeNotifier {
   }
 
   @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
+  }
+
+  @override
   void dispose() {
+    _disposed = true;
+
     titleController.removeListener(_onInputChanged);
     descriptionController.removeListener(_onInputChanged);
     wantedItemController.removeListener(_onInputChanged);

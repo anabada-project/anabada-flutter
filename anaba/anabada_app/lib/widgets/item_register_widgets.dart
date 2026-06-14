@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -148,28 +148,14 @@ class _SelectedImagePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Uint8List>(
-      future: image.readAsBytes(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: ItemRegisterColors.mainColor,
-            ),
-          );
-        }
-
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Image.memory(
-            snapshot.data!,
-            width: double.infinity,
-            height: 150,
-            fit: BoxFit.cover,
-          ),
-        );
-      },
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Image.file(
+        File(image.path),
+        width: double.infinity,
+        height: 150,
+        fit: BoxFit.cover,
+      ),
     );
   }
 }
@@ -197,47 +183,62 @@ class ItemRegisterTextField extends StatelessWidget {
     super.key,
     required this.controller,
     required this.hintText,
+    this.maxLines = 1,
+    this.keyboardType,
   });
 
   final TextEditingController controller;
   final String hintText;
+  final int maxLines;
+  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 42,
-      child: TextField(
-        controller: controller,
-        cursorColor: ItemRegisterColors.mainColor,
-        style: const TextStyle(
-          color: ItemRegisterColors.textColor,
+    final TextField textField = TextField(
+      controller: controller,
+      maxLines: maxLines,
+      minLines: maxLines > 1 ? maxLines : 1,
+      keyboardType:
+          keyboardType ??
+          (maxLines > 1 ? TextInputType.multiline : TextInputType.text),
+      textInputAction: maxLines > 1
+          ? TextInputAction.newline
+          : TextInputAction.done,
+      cursorColor: ItemRegisterColors.mainColor,
+      style: const TextStyle(
+        color: ItemRegisterColors.textColor,
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+      ),
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: const TextStyle(
+          color: ItemRegisterColors.hintColor,
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: const TextStyle(
-            color: ItemRegisterColors.hintColor,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 11,
-          ),
-          filled: true,
-          fillColor: Colors.white,
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(7),
-            borderSide: const BorderSide(color: ItemRegisterColors.borderColor),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(7),
-            borderSide: const BorderSide(color: ItemRegisterColors.mainColor),
-          ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 11,
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(7),
+          borderSide: const BorderSide(color: ItemRegisterColors.borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(7),
+          borderSide: const BorderSide(color: ItemRegisterColors.mainColor),
         ),
       ),
     );
+
+    if (maxLines == 1) {
+      return SizedBox(height: 42, child: textField);
+    }
+
+    return textField;
   }
 }
 

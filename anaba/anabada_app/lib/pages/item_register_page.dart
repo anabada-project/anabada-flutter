@@ -153,13 +153,20 @@ class _ItemRegisterPageState extends State<ItemRegisterPage> {
     required TextEditingController textController,
     required String hintText,
     String? errorText,
+    int maxLines = 1,
+    TextInputType? keyboardType,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ItemRegisterLabel(text: label),
         const SizedBox(height: 8),
-        ItemRegisterTextField(controller: textController, hintText: hintText),
+        ItemRegisterTextField(
+          controller: textController,
+          hintText: hintText,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+        ),
         ItemRegisterErrorText(text: errorText),
       ],
     );
@@ -184,7 +191,6 @@ class _ItemRegisterPageState extends State<ItemRegisterPage> {
                 onTap: controller.pickImage,
               ),
               const SizedBox(height: 36),
-
               _buildInputSection(
                 label: '물건 제목',
                 textController: controller.titleController,
@@ -192,28 +198,26 @@ class _ItemRegisterPageState extends State<ItemRegisterPage> {
                 errorText: controller.titleErrorText,
               ),
               const SizedBox(height: 28),
-
               _buildInputSection(
                 label: '물건 설명',
                 textController: controller.descriptionController,
                 hintText: '물건 설명을 입력해 주세요.',
                 errorText: controller.descriptionErrorText,
+                maxLines: 5,
+                keyboardType: TextInputType.multiline,
               ),
               const SizedBox(height: 28),
-
               _buildInputSection(
                 label: '희망 교환 물건',
                 textController: controller.wantedItemController,
                 hintText: '희망 교환 물건을 입력해 주세요.',
               ),
               const SizedBox(height: 32),
-
               const ItemRegisterLabel(text: '카테고리'),
               const SizedBox(height: 10),
               _buildCategoryButtons(),
               ItemRegisterErrorText(text: controller.categoryErrorText),
               const SizedBox(height: 32),
-
               const ItemRegisterLabel(text: '거래 방식'),
               const SizedBox(height: 10),
               _buildTradeMethodButtons(),
