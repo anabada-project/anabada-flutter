@@ -7,6 +7,7 @@ import '../widgets/item_detail_image_area.dart';
 import '../widgets/item_detail_info_section.dart';
 import '../widgets/item_detail_wanted_section.dart';
 import '../widgets/item_detail_writer_section.dart';
+import 'item_detail_comment_page.dart';
 
 enum ItemTradeType { exchange, sharing }
 
@@ -48,7 +49,14 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
   }
 
   void _handleRequest() {
-    // 기능/API 연결 단계에서 요청 기능 구현
+    // TODO: 기능/API 연결 단계에서 요청 기능 구현
+  }
+
+  void _openCommentPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ItemDetailCommentPage()),
+    );
   }
 
   @override
@@ -74,13 +82,13 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 32),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          SizedBox(height: 28),
-                          ItemDetailInfoSection(),
-                          ItemDetailWriterSection(),
-                          ItemDetailCommentPreview(),
-                          ItemDetailWantedSection(),
-                          SizedBox(height: 32),
+                        children: [
+                          const SizedBox(height: 28),
+                          const ItemDetailInfoSection(),
+                          const ItemDetailWriterSection(),
+                          ItemDetailCommentPreview(onMoreTap: _openCommentPage),
+                          const ItemDetailWantedSection(),
+                          const SizedBox(height: 32),
                         ],
                       ),
                     ),
