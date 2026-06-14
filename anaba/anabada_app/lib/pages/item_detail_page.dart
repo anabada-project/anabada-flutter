@@ -5,6 +5,7 @@ import '../widgets/item_detail_comment_preview.dart';
 import '../widgets/item_detail_header.dart';
 import '../widgets/item_detail_image_area.dart';
 import '../widgets/item_detail_info_section.dart';
+import '../widgets/item_detail_not_found_state.dart';
 import '../widgets/item_detail_wanted_section.dart';
 import '../widgets/item_detail_writer_section.dart';
 import 'item_detail_comment_page.dart';
@@ -14,11 +15,13 @@ enum ItemTradeType { exchange, sharing }
 class ItemDetailPage extends StatefulWidget {
   final ItemTradeType tradeType;
   final bool initialIsLiked;
+  final bool initialHasItem;
 
   const ItemDetailPage({
     super.key,
     required this.tradeType,
     required this.initialIsLiked,
+    this.initialHasItem = true,
   });
 
   @override
@@ -27,11 +30,14 @@ class ItemDetailPage extends StatefulWidget {
 
 class _ItemDetailPageState extends State<ItemDetailPage> {
   late bool isLiked;
+  late bool hasItem;
 
   @override
   void initState() {
     super.initState();
+
     isLiked = widget.initialIsLiked;
+    hasItem = widget.initialHasItem;
   }
 
   String get requestButtonText {
@@ -59,8 +65,29 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
     );
   }
 
+  void _goBackToList() {
+    Navigator.maybePop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!hasItem) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Column(
+            children: [
+              const ItemDetailHeader(),
+              const ItemDetailImageArea(),
+              Expanded(
+                child: ItemDetailNotFoundState(onBackToListTap: _goBackToList),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       bottomNavigationBar: ItemDetailBottomBar(
