@@ -40,6 +40,41 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  AppUser? updateProfile({
+    required String userId,
+    required String name,
+    required String major,
+    required String generation,
+  }) {
+    for (final FakeAccount account in FakeData.accounts) {
+      if (account.user.id == userId) {
+        account.user = account.user.copyWith(
+          name: name.trim(),
+          major: major.trim(),
+          generation: generation,
+        );
+        if (FakeData.currentUser?.id == userId) {
+          FakeData.currentUser = account.user;
+        }
+        return account.user;
+      }
+    }
+    return null;
+  }
+
+  @override
+  bool resetPassword({required String email, required String newPassword}) {
+    final String normalizedEmail = _normalizeEmail(email);
+    for (final FakeAccount account in FakeData.accounts) {
+      if (_normalizeEmail(account.user.email) == normalizedEmail) {
+        account.password = newPassword;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
   void logout() {
     FakeData.currentUser = null;
   }

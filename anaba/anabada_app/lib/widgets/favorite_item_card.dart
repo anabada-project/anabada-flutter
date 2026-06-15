@@ -2,25 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/app_text_styles.dart';
+import '../models/trade_item.dart';
+import 'common/item_image.dart';
 
 class FavoriteItemCard extends StatelessWidget {
   const FavoriteItemCard({
     super.key,
-    required this.title,
-    required this.author,
-    required this.category,
-    required this.status,
+    required this.item,
     required this.time,
-    required this.isActive,
     this.onTap,
   });
 
-  final String title;
-  final String author;
-  final String category;
-  final String status;
+  final TradeItem item;
   final String time;
-  final bool isActive;
   final VoidCallback? onTap;
 
   @override
@@ -33,13 +27,13 @@ class FavoriteItemCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
+            ItemImage(
+              imageBytes: item.imageBytes,
+              imageUrl: item.imageUrl,
               width: 124,
               height: 124,
-              decoration: BoxDecoration(
-                color: AppColors.itemImageGray,
-                borderRadius: BorderRadius.circular(14),
-              ),
+              borderRadius: 14,
+              backgroundColor: AppColors.itemImageGray,
             ),
 
             const SizedBox(width: 18),
@@ -54,7 +48,7 @@ class FavoriteItemCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            title,
+                            item.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.favoriteItemTitle,
@@ -63,13 +57,19 @@ class FavoriteItemCard extends StatelessWidget {
 
                         const SizedBox(width: 8),
 
-                        _StatusChip(text: status, isActive: isActive),
+                        _StatusChip(
+                          text: item.statusLabel,
+                          isActive: item.isActive,
+                        ),
                       ],
                     ),
 
                     const SizedBox(height: 8),
 
-                    Text(author, style: AppTextStyles.favoriteItemAuthor),
+                    Text(
+                      item.ownerName,
+                      style: AppTextStyles.favoriteItemAuthor,
+                    ),
 
                     const Spacer(),
 
@@ -85,7 +85,7 @@ class FavoriteItemCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            category,
+                            item.category.label,
                             style: AppTextStyles.favoriteCategory,
                           ),
                         ),

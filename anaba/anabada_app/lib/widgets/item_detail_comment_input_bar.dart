@@ -4,6 +4,7 @@ class ItemDetailCommentInputBar extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final bool isEditing;
+  final bool isReplying;
   final VoidCallback onCancelEdit;
   final VoidCallback onSubmit;
 
@@ -12,6 +13,7 @@ class ItemDetailCommentInputBar extends StatelessWidget {
     required this.controller,
     required this.focusNode,
     required this.isEditing,
+    this.isReplying = false,
     required this.onCancelEdit,
     required this.onSubmit,
   });
@@ -29,12 +31,12 @@ class ItemDetailCommentInputBar extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (isEditing) ...[
+            if (isEditing || isReplying) ...[
               Row(
                 children: [
-                  const Text(
-                    '댓글 수정 중',
-                    style: TextStyle(
+                  Text(
+                    isEditing ? '댓글 수정 중' : '답글 작성 중',
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF9E9E9E),

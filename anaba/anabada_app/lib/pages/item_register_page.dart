@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_routes.dart';
 import '../controllers/item_register_controller.dart';
+import '../models/trade_item.dart';
+import '../services/auth_service.dart';
 import '../widgets/item_register_widgets.dart';
 
 class ItemRegisterPage extends StatefulWidget {
@@ -44,7 +47,10 @@ class _ItemRegisterPageState extends State<ItemRegisterPage> {
 
     if (Navigator.canPop(context)) {
       Navigator.pop(context);
+      return;
     }
+
+    Navigator.pushReplacementNamed(context, AppRoutes.main);
   }
 
   Future<void> _handleRegister() async {
@@ -53,19 +59,31 @@ class _ItemRegisterPageState extends State<ItemRegisterPage> {
     if (!mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('물건이 등록되었습니다.')));
+      final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+      Navigator.pushReplacementNamed(context, AppRoutes.itemList);
+      messenger.showSnackBar(
+        const SnackBar(content: Text('물건이 등록되었습니다.')),
+      );
     }
   }
 
   void _handleBottomNavigationTap(int index) {
-    // TODO: 나중에 라우팅 연결
-    // 0: 메인페이지
-    // 1: 물건 조회
-    // 2: 물건 등록
-    // 3: 찜
-    // 4: 마이페이지
+    final String? routeName = switch (index) {
+      0 => authService.currentUser?.isAdmin == true
+          ? AppRoutes.adminMain
+          : AppRoutes.main,
+      1 => AppRoutes.itemList,
+      2 => AppRoutes.itemRegister,
+      3 => AppRoutes.favorite,
+      4 => AppRoutes.myPage,
+      _ => null,
+    };
+
+    if (routeName == null || routeName == AppRoutes.itemRegister) {
+      return;
+    }
+
+    Navigator.pushReplacementNamed(context, routeName);
   }
 
   Widget _buildCategoryButtons() {
@@ -186,7 +204,7 @@ class _ItemRegisterPageState extends State<ItemRegisterPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ItemImagePickerBox(
-                image: controller.selectedImage,
+                imageBytes: controller.selectedImageBytes,
                 errorText: controller.imageErrorText,
                 onTap: controller.pickImage,
               ),

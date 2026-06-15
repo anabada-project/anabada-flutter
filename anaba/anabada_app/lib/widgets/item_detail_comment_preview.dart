@@ -1,21 +1,45 @@
 import 'package:flutter/material.dart';
 
+import '../models/item_comment.dart';
+import '../utils/time_formatter.dart';
+
 class ItemDetailCommentPreview extends StatelessWidget {
   final VoidCallback onMoreTap;
+  final List<ItemComment> comments;
 
-  const ItemDetailCommentPreview({super.key, required this.onMoreTap});
+  const ItemDetailCommentPreview({
+    super.key,
+    required this.onMoreTap,
+    required this.comments,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         const SizedBox(height: 22),
-        _CommentHeader(onMoreTap: onMoreTap),
+        _CommentHeader(onMoreTap: onMoreTap, count: comments.length),
         const SizedBox(height: 16),
-        const _CommentTile(name: '김준수', content: '어디신가요', time: '2시간 전'),
-        const SizedBox(height: 14),
-        const _CommentTile(name: '안율', content: '방가방가', time: '2시간 전'),
-        const SizedBox(height: 22),
+        if (comments.isEmpty)
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '아직 댓글이 없습니다.',
+              style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+            ),
+          )
+        else
+          ...comments.take(2).map(
+            (comment) => Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: _CommentTile(
+                name: comment.authorName,
+                content: comment.content,
+                time: formatRelativeTime(comment.createdAt),
+              ),
+            ),
+          ),
+        const SizedBox(height: 8),
         const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
       ],
     );
@@ -24,17 +48,18 @@ class ItemDetailCommentPreview extends StatelessWidget {
 
 class _CommentHeader extends StatelessWidget {
   final VoidCallback onMoreTap;
+  final int count;
 
-  const _CommentHeader({required this.onMoreTap});
+  const _CommentHeader({required this.onMoreTap, required this.count});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          '댓글 3',
-          style: TextStyle(
+        Text(
+          '댓글 $count',
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: Colors.black,

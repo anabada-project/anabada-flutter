@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../controllers/app_controller.dart';
+import '../models/trade_item.dart';
 import '../pages/item_detail_page.dart';
+import '../services/auth_service.dart';
+import '../utils/time_formatter.dart';
 import 'favorite_item_card.dart';
 
 class FavoriteItemList extends StatelessWidget {
@@ -8,33 +12,35 @@ class FavoriteItemList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: EdgeInsets.zero,
-      itemCount: 4,
-      separatorBuilder: (context, index) {
-        return const SizedBox(height: 24);
-      },
-      itemBuilder: (context, index) {
-        const statuses = ['교환 가능', '교환 완료', '나눔 완료', '나눔 가능'];
+    return AnimatedBuilder(
+      animation: Listenable.merge([appController, authService]),
+      builder: (context, child) {
+        final user = authService.currentUser;
+        final List<TradeItem> items = user == null
+            ? const []
+            : appController.favoriteItems(user.id);
 
-        return FavoriteItemCard(
-          title: '제목',
-          author: '작성자',
-          category: '카테고리',
-          status: statuses[index],
-          time: '3분 전',
-          isActive: index == 0 || index == 3,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ItemDetailPage(
-                  tradeType: statuses[index].contains('나눔')
-                      ? ItemTradeType.sharing
-                      : ItemTradeType.exchange,
-                  initialIsLiked: true,
-                ),
-              ),
+        if (items.isEmpty) {
+          return const Center(child: Text('찜한 물건이 없습니다.'));
+        }
+
+        return ListView.separated(
+          padding: EdgeInsets.zero,
+          itemCount: items.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 24),
+          itemBuilder: (context, index) {
+            final TradeItem item = items[index];
+            return FavoriteItemCard(
+              item: item,
+              time: formatRelativeTime(item.createdAt),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ItemDetailPage(itemId: item.id),
+                  ),
+                );
+              },
             );
           },
         );

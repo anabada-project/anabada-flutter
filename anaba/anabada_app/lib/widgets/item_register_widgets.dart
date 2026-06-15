@@ -1,7 +1,6 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 class ItemRegisterColors {
   static const Color mainColor = Color(0xFFFFB800);
@@ -59,12 +58,12 @@ class ItemRegisterAppBar extends StatelessWidget
 class ItemImagePickerBox extends StatelessWidget {
   const ItemImagePickerBox({
     super.key,
-    required this.image,
+    required this.imageBytes,
     required this.errorText,
     required this.onTap,
   });
 
-  final XFile? image;
+  final Uint8List? imageBytes;
   final String? errorText;
   final VoidCallback onTap;
 
@@ -83,9 +82,9 @@ class ItemImagePickerBox extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: ItemRegisterColors.borderColor),
             ),
-            child: image == null
+            child: imageBytes == null
                 ? const _EmptyImagePickerContent()
-                : _SelectedImagePreview(image: image!),
+                : _SelectedImagePreview(imageBytes: imageBytes!),
           ),
         ),
         ItemRegisterErrorText(text: errorText),
@@ -142,16 +141,16 @@ class _EmptyImagePickerContent extends StatelessWidget {
 }
 
 class _SelectedImagePreview extends StatelessWidget {
-  const _SelectedImagePreview({required this.image});
+  const _SelectedImagePreview({required this.imageBytes});
 
-  final XFile image;
+  final Uint8List imageBytes;
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
-      child: Image.file(
-        File(image.path),
+      child: Image.memory(
+        imageBytes,
         width: double.infinity,
         height: 150,
         fit: BoxFit.cover,

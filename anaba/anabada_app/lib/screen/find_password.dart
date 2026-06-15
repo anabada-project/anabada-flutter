@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import '../services/auth_service.dart';
 import '../widget/app_button.dart';
 import '../widget/app_text_form_field.dart';
 import 'login.dart';
@@ -32,6 +33,8 @@ class _FindPasswordState extends State<FindPassword> {
       TextEditingController();
 
   String? _passwordConfirmError;
+  String? _emailError;
+  String? _codeError;
 
   // ── 버튼 활성화 조건 ─────────────────────────────────────
   bool get _isEmailButtonActive => _emailController.text.trim().isNotEmpty;
@@ -45,26 +48,90 @@ class _FindPasswordState extends State<FindPassword> {
 
   // ── 핸들러 ───────────────────────────────────────────────
   void _handleSendCode() {
+    final String email = _emailController.text.trim();
+    final String? code = authService.requestVerificationCode(
+      email: email,
+      purpose: EmailVerificationPurpose.passwordReset,
+    );
+    if (code == null) {
+      setState(() {
+        _emailError = '가입된 이메일을 입력해주세요.';
+      });
+      return;
+    }
+
     FocusScope.of(context).unfocus();
-    setState(() => _currentStep = _Step.code);
+    setState(() {
+      _emailError = null;
+      _currentStep = _Step.code;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('테스트 인증코드: $code')),
+    );
   }
 
   void _handleResendCode() {
+    final String? code = authService.requestVerificationCode(
+      email: _emailController.text,
+      purpose: EmailVerificationPurpose.passwordReset,
+    );
     for (final c in _codeControllers) {
       c.clear();
     }
     _codeFocusNodes[0].requestFocus();
-    setState(() {});
+    setState(() {
+      _codeError = null;
+    });
+    if (code != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('테스트 인증코드: $code')),
+      );
+    }
   }
 
   void _handleVerifyCode() {
+    final String code = _codeControllers
+        .map((controller) => controller.text)
+        .join();
+    if (!authService.verifyCode(
+      email: _emailController.text,
+      code: code,
+    )) {
+      setState(() {
+        _codeError = '인증코드가 올바르지 않습니다.';
+      });
+      return;
+    }
+
     FocusScope.of(context).unfocus();
-    setState(() => _currentStep = _Step.newPassword);
+    setState(() {
+      _codeError = null;
+      _currentStep = _Step.newPassword;
+    });
   }
 
   void _handleChangePassword() {
+    final String password = _passwordController.text;
+    if (password.length < 8 ||
+        !RegExp(r'[A-Za-z]').hasMatch(password) ||
+        !RegExp(r'\d').hasMatch(password)) {
+      setState(() {
+        _passwordConfirmError = '영문과 숫자를 포함해 8자 이상 입력해주세요.';
+      });
+      return;
+    }
     if (_passwordController.text != _passwordConfirmController.text) {
       setState(() => _passwordConfirmError = '비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    final bool didReset = authService.resetPassword(
+      email: _emailController.text,
+      newPassword: password,
+    );
+    if (!didReset) {
+      setState(() {
+        _passwordConfirmError = '비밀번호를 변경하지 못했습니다.';
+      });
       return;
     }
     setState(() {
@@ -202,13 +269,17 @@ class _FindPasswordState extends State<FindPassword> {
   // ── Step별 본문 위젯 ─────────────────────────────────────
   Widget _buildBody() {
     return switch (_currentStep) {
-      _Step.email => _EmailStep(controller: _emailController),
+      _Step.email => _EmailStep(
+        controller: _emailController,
+        errorText: _emailError,
+      ),
       _Step.code => _CodeStep(
         controllers: _codeControllers,
         focusNodes: _codeFocusNodes,
         onChanged: _onCodeChanged,
         onKeyDown: _onCodeKeyDown,
         onResend: _handleResendCode,
+        errorText: _codeError,
       ),
       _Step.newPassword => _NewPasswordStep(
         passwordController: _passwordController,
@@ -248,9 +319,10 @@ class _FindPasswordState extends State<FindPassword> {
 
 // ── Step 1: 이메일 입력 ──────────────────────────────────
 class _EmailStep extends StatelessWidget {
-  const _EmailStep({required this.controller});
+  const _EmailStep({required this.controller, required this.errorText});
 
   final TextEditingController controller;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -264,6 +336,7 @@ class _EmailStep extends StatelessWidget {
           hintText: '이메일을 입력해주세요',
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.done,
+          errorText: errorText,
         ),
       ],
     );
@@ -278,6 +351,7 @@ class _CodeStep extends StatelessWidget {
     required this.onChanged,
     required this.onKeyDown,
     required this.onResend,
+    required this.errorText,
   });
 
   final List<TextEditingController> controllers;
@@ -285,6 +359,7 @@ class _CodeStep extends StatelessWidget {
   final void Function(String, int) onChanged;
   final void Function(KeyEvent, int) onKeyDown;
   final VoidCallback onResend;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -340,6 +415,13 @@ class _CodeStep extends StatelessWidget {
             );
           }),
         ),
+        if (errorText != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            errorText!,
+            style: const TextStyle(color: Colors.red, fontSize: 12),
+          ),
+        ],
         const SizedBox(height: 8),
         Align(
           alignment: Alignment.centerRight,

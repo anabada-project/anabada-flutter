@@ -1,26 +1,32 @@
 import 'package:flutter/material.dart';
 
+import '../models/trade_item.dart';
+
 class ItemDetailWantedSection extends StatelessWidget {
-  const ItemDetailWantedSection({super.key});
+  const ItemDetailWantedSection({super.key, required this.item});
+
+  final TradeItem item;
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 22),
+        const SizedBox(height: 22),
         Text(
-          '희망 교환 물품',
-          style: TextStyle(
+          item.tradeMethod == TradeMethod.exchange ? '희망 교환 물품' : '거래 방식',
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: Colors.black,
           ),
         ),
-        SizedBox(height: 14),
+        const SizedBox(height: 14),
         Text(
-          '설명',
-          style: TextStyle(
+          item.tradeMethod == TradeMethod.exchange
+              ? (item.wantedItem.isEmpty ? '협의 가능' : item.wantedItem)
+              : '무료 나눔',
+          style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
             color: Color(0xFF666666),

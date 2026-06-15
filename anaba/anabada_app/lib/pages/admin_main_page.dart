@@ -78,7 +78,7 @@ class AdminMainPage extends StatelessWidget {
 
             SizedBox(height: 16),
 
-            AdminMainItemList(),
+            const AdminMainItemList(),
 
             SizedBox(height: 40),
 
@@ -97,7 +97,7 @@ class AdminMainPage extends StatelessWidget {
 
             SizedBox(height: 16),
 
-            AdminMainItemList(),
+            const AdminMainItemList(popular: true),
 
             SizedBox(height: 24),
           ],

@@ -1,29 +1,32 @@
 import 'package:flutter/material.dart';
 
+import '../models/trade_item.dart';
 import 'item_detail_category_chip.dart';
 
 class ItemDetailInfoSection extends StatelessWidget {
-  const ItemDetailInfoSection({super.key});
+  const ItemDetailInfoSection({super.key, required this.item});
+
+  final TradeItem item;
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '제목',
-          style: TextStyle(
+          item.title,
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: Colors.black,
           ),
         ),
-        SizedBox(height: 14),
-        ItemDetailCategoryChip(text: '카테고리'),
-        SizedBox(height: 28),
-        Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-        SizedBox(height: 26),
-        Text(
+        const SizedBox(height: 14),
+        ItemDetailCategoryChip(text: item.category.label),
+        const SizedBox(height: 28),
+        const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+        const SizedBox(height: 26),
+        const Text(
           '물건 설명',
           style: TextStyle(
             fontSize: 16,
@@ -31,17 +34,17 @@ class ItemDetailInfoSection extends StatelessWidget {
             color: Colors.black,
           ),
         ),
-        SizedBox(height: 14),
+        const SizedBox(height: 14),
         Text(
-          '설명',
-          style: TextStyle(
+          item.description,
+          style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
             color: Color(0xFF666666),
           ),
         ),
-        SizedBox(height: 28),
-        Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+        const SizedBox(height: 28),
+        const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
       ],
     );
   }

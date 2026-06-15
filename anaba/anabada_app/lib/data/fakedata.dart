@@ -1,10 +1,10 @@
 import '../models/app_user.dart';
 
 class FakeAccount {
-  const FakeAccount({required this.user, required this.password});
+  FakeAccount({required this.user, required this.password});
 
-  final AppUser user;
-  final String password;
+  AppUser user;
+  String password;
 }
 
 class FakeData {
@@ -14,8 +14,8 @@ class FakeData {
   static const String correctPassword = 'password123!';
 
   static final List<FakeAccount> accounts = [
-    const FakeAccount(
-      user: AppUser(
+    FakeAccount(
+      user: const AppUser(
         id: 'fake-user-1',
         name: '테스트 사용자',
         email: correctEmail,
@@ -24,6 +24,18 @@ class FakeData {
         generation: '10기',
       ),
       password: correctPassword,
+    ),
+    FakeAccount(
+      user: const AppUser(
+        id: 'admin-user-1',
+        name: '관리자',
+        email: 'admin@gsm.hs.kr',
+        major: '운영팀',
+        gender: '',
+        generation: '',
+        isAdmin: true,
+      ),
+      password: 'admin123!',
     ),
   ];
 

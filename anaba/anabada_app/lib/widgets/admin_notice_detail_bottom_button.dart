@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/app_text_styles.dart';
+import '../controllers/app_controller.dart';
 import '../pages/admin_notice_edit_page.dart';
 
 class AdminNoticeDetailBottomButton extends StatelessWidget {
-  const AdminNoticeDetailBottomButton({super.key});
+  const AdminNoticeDetailBottomButton({
+    super.key,
+    required this.noticeId,
+  });
+
+  final String noticeId;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +27,7 @@ class AdminNoticeDetailBottomButton extends StatelessWidget {
                     final saved = await Navigator.push<bool>(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const AdminNoticeEditPage(),
+                        builder: (_) => AdminNoticeEditPage(noticeId: noticeId),
                       ),
                     );
                     if (!context.mounted || saved != true) {
@@ -84,6 +90,10 @@ class AdminNoticeDetailBottomButton extends StatelessWidget {
                       return;
                     }
                     final messenger = ScaffoldMessenger.of(context);
+                    await appController.deleteNotice(noticeId);
+                    if (!context.mounted) {
+                      return;
+                    }
                     Navigator.pop(context);
                     messenger.showSnackBar(
                       const SnackBar(content: Text('공지가 삭제되었습니다.')),

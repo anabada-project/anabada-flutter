@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../controllers/app_controller.dart';
 import '../screen/find_password.dart';
 import '../screen/login.dart';
 import '../services/auth_service.dart';
@@ -95,9 +96,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     });
   }
 
-  void _saveProfile() {
+  Future<void> _saveProfile() async {
     final String name = _nameController.text.trim();
-    final String email = _emailController.text.trim();
     final String major = _majorController.text.trim();
 
     setState(() {
@@ -109,17 +109,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
       return;
     }
 
+    final updatedUser = authService.updateProfile(
+      name: name,
+      major: major,
+      generation: selectedGeneration,
+    );
+    if (updatedUser == null) return;
+
+    await appController.updateOwnerProfile(
+      ownerId: updatedUser.id,
+      ownerName: updatedUser.name,
+      ownerGeneration: updatedUser.generation,
+    );
+    if (!mounted) return;
+
     Navigator.pop(
       context,
       EditProfileResult(
-        name: name,
-        email: email,
-        major: major,
-        generation: selectedGeneration,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        major: updatedUser.major,
+        generation: updatedUser.generation,
       ),
     );
-
-    // TODO: API 연결 단계에서 서버에 프로필 수정 요청 연결
   }
 
   void _handleResetPassword() {

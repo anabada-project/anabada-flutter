@@ -2,16 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/app_text_styles.dart';
+import '../models/trade_item.dart';
+import 'common/item_image.dart';
 
 class AdminMainItemCard extends StatelessWidget {
-  const AdminMainItemCard({
-    super.key,
-    required this.status,
-    required this.isDone,
-  });
+  const AdminMainItemCard({super.key, required this.item});
 
-  final String status;
-  final bool isDone;
+  final TradeItem item;
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +19,13 @@ class AdminMainItemCard extends StatelessWidget {
         children: [
           Stack(
             children: [
-              Container(
+              ItemImage(
+                imageBytes: item.imageBytes,
+                imageUrl: item.imageUrl,
                 width: 145,
                 height: 140,
-                decoration: BoxDecoration(
-                  color: AppColors.itemImageGray,
-                  borderRadius: BorderRadius.circular(14),
-                ),
+                borderRadius: 14,
+                backgroundColor: AppColors.itemImageGray,
               ),
 
               Positioned(
@@ -40,16 +37,16 @@ class AdminMainItemCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: isDone
-                        ? AppColors.lightGray
-                        : AppColors.yellowChipBackground,
+                    color: item.isActive
+                        ? AppColors.yellowChipBackground
+                        : AppColors.lightGray,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Text(
-                    status,
-                    style: isDone
-                        ? AppTextStyles.adminItemStatusDone
-                        : AppTextStyles.adminItemStatusActive,
+                    item.statusLabel,
+                    style: item.isActive
+                        ? AppTextStyles.adminItemStatusActive
+                        : AppTextStyles.adminItemStatusDone,
                   ),
                 ),
               ),
@@ -58,21 +55,37 @@ class AdminMainItemCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          const Text('제목', style: AppTextStyles.adminItemTitle),
+          Text(
+            item.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.adminItemTitle,
+          ),
 
           const SizedBox(height: 8),
 
-          const Text('교환 물건:', style: AppTextStyles.adminItemDescription),
+          Text(
+            item.tradeMethod == TradeMethod.exchange
+                ? '교환 물건: ${item.wantedItem}'
+                : '무료 나눔',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.adminItemDescription,
+          ),
 
           const SizedBox(height: 8),
 
-          const Row(
+          Row(
             children: [
-              Icon(Icons.favorite_border, size: 16, color: AppColors.grayText),
+              const Icon(
+                Icons.favorite_border,
+                size: 16,
+                color: AppColors.grayText,
+              ),
 
-              SizedBox(width: 4),
+              const SizedBox(width: 4),
 
-              Text('78', style: AppTextStyles.adminItemLike),
+              Text('${item.likeCount}', style: AppTextStyles.adminItemLike),
             ],
           ),
         ],

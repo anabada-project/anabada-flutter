@@ -40,7 +40,7 @@ class MainPage extends StatelessWidget {
               onTap: () => Navigator.pushNamed(context, AppRoutes.itemList),
             ),
             const SizedBox(height: 16),
-            const MainItemList(),
+            const MainItemList(popular: true),
             const SizedBox(height: 30),
           ],
         ),

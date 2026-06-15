@@ -1,24 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../models/trade_item.dart';
+import 'common/item_image.dart';
 import 'item_status_chip.dart';
 
 class ItemListCard extends StatelessWidget {
-  final String title;
-  final String writer;
-  final String category;
-  final String status;
+  final TradeItem item;
   final String time;
-  final bool isActive;
   final VoidCallback? onTap;
 
   const ItemListCard({
     super.key,
-    required this.title,
-    required this.writer,
-    required this.category,
-    required this.status,
+    required this.item,
     required this.time,
-    required this.isActive,
     this.onTap,
   });
 
@@ -32,13 +26,12 @@ class ItemListCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
+            ItemImage(
+              imageBytes: item.imageBytes,
+              imageUrl: item.imageUrl,
               width: 96,
               height: 96,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF0F1F3),
-                borderRadius: BorderRadius.circular(10),
-              ),
+              borderRadius: 10,
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -52,7 +45,7 @@ class ItemListCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            title,
+                            item.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -63,12 +56,15 @@ class ItemListCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        ItemStatusChip(status: status, isActive: isActive),
+                        ItemStatusChip(
+                          status: item.statusLabel,
+                          isActive: item.isActive,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      writer,
+                      item.ownerName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -92,7 +88,7 @@ class ItemListCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              category,
+                              item.category.label,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(

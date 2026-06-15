@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../controllers/app_controller.dart';
+import '../models/notice.dart';
+import '../utils/time_formatter.dart';
 import '../widgets/common/custom_bottom_navigation_bar.dart';
 import '../widgets/notice_header.dart';
 import '../widgets/notice_tile.dart';
@@ -25,19 +28,32 @@ class NoticeListPage extends StatelessWidget {
               const SizedBox(height: 20),
 
               Expanded(
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: 7,
-                  itemBuilder: (context, index) {
-                    return NoticeTile(
-                      title: '공지사항',
-                      content: '공지내용',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const NoticeDetailPage(),
-                          ),
+                child: AnimatedBuilder(
+                  animation: appController,
+                  builder: (context, child) {
+                    final List<Notice> notices = appController.notices;
+                    if (notices.isEmpty) {
+                      return const Center(child: Text('등록된 공지가 없습니다.'));
+                    }
+
+                    return ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: notices.length,
+                      itemBuilder: (context, index) {
+                        final Notice notice = notices[index];
+                        return NoticeTile(
+                          title: notice.title,
+                          content: notice.content,
+                          time: formatRelativeTime(notice.createdAt),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    NoticeDetailPage(noticeId: notice.id),
+                              ),
+                            );
+                          },
                         );
                       },
                     );
