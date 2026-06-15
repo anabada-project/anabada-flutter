@@ -18,27 +18,27 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  String? _emailError;
+  String? _idError;
   String? _passwordError;
 
   bool _isLoading = false;
 
   bool get _isButtonActive {
-    return _emailController.text.trim().isNotEmpty &&
+    return _idController.text.trim().isNotEmpty &&
         _passwordController.text.isNotEmpty &&
         !_isLoading;
   }
 
-  void _clearEmailError(String _) {
-    if (_emailError == null) {
+  void _clearIdError(String _) {
+    if (_idError == null) {
       return;
     }
 
     setState(() {
-      _emailError = null;
+      _idError = null;
     });
   }
 
@@ -53,12 +53,12 @@ class _LoginState extends State<Login> {
   }
 
   Future<void> _handleLogin() async {
-    final String id = _emailController.text.trim();
+    final String id = _idController.text.trim();
     final String password = _passwordController.text;
 
     if (id.isEmpty || password.isEmpty) {
       setState(() {
-        _emailError = id.isEmpty ? '아이디를 입력해주세요.' : null;
+        _idError = id.isEmpty ? '아이디를 입력해주세요.' : null;
         _passwordError = password.isEmpty ? '비밀번호를 입력해주세요.' : null;
       });
       return;
@@ -66,7 +66,7 @@ class _LoginState extends State<Login> {
 
     setState(() {
       _isLoading = true;
-      _emailError = null;
+      _idError = null;
       _passwordError = null;
     });
 
@@ -82,7 +82,7 @@ class _LoginState extends State<Login> {
 
       if (user == null) {
         setState(() {
-          _emailError = '아이디 또는 비밀번호를 다시 확인해주세요.';
+          _idError = '아이디 또는 비밀번호를 다시 확인해주세요.';
           _passwordError = '아이디 또는 비밀번호를 다시 확인해주세요.';
         });
         return;
@@ -102,7 +102,7 @@ class _LoginState extends State<Login> {
       }
 
       setState(() {
-        _emailError = error.message;
+        _idError = error.message;
         _passwordError = '아이디 또는 비밀번호를 다시 확인해주세요.';
       });
     } catch (error) {
@@ -111,7 +111,7 @@ class _LoginState extends State<Login> {
       }
 
       setState(() {
-        _emailError = '로그인에 실패했습니다.';
+        _idError = '로그인에 실패했습니다.';
         _passwordError = '잠시 후 다시 시도해주세요.';
       });
     } finally {
@@ -125,7 +125,7 @@ class _LoginState extends State<Login> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _idController.dispose();
     _passwordController.dispose();
 
     super.dispose();
@@ -155,17 +155,16 @@ class _LoginState extends State<Login> {
 
                 SizedBox(height: screenHeight * 0.03),
 
-                const Text('이메일', style: AppTextStyles.fieldLabel),
+                const Text('아이디', style: AppTextStyles.fieldLabel),
 
                 const SizedBox(height: 8),
 
                 AppTextFormField(
-                  controller: _emailController,
-                  hintText: '이메일을 입력해주세요',
-                  keyboardType: TextInputType.emailAddress,
+                  controller: _idController,
+                  hintText: '아이디를 입력해주세요',
                   textInputAction: TextInputAction.next,
-                  onChanged: _clearEmailError,
-                  errorText: _emailError,
+                  onChanged: _clearIdError,
+                  errorText: _idError,
                 ),
 
                 const SizedBox(height: 20),
@@ -207,7 +206,7 @@ class _LoginState extends State<Login> {
                   height: 43,
                   child: AnimatedBuilder(
                     animation: Listenable.merge([
-                      _emailController,
+                      _idController,
                       _passwordController,
                     ]),
                     builder: (context, child) {
@@ -258,16 +257,16 @@ class _LoginState extends State<Login> {
                   height: 43,
                   child: OutlinedButton(
                     onPressed: () async {
-                      final String? email = await Navigator.push<String>(
+                      final String? id = await Navigator.push<String>(
                         context,
                         MaterialPageRoute(builder: (_) => const SignUp()),
                       );
 
-                      if (!context.mounted || email == null) {
+                      if (!context.mounted || id == null) {
                         return;
                       }
 
-                      _emailController.text = email;
+                      _idController.text = id;
                     },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(
