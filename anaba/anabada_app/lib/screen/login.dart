@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_routes.dart';
+import '../models/app_user.dart';
 import '../services/auth_api_service.dart';
 import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
@@ -70,7 +71,10 @@ class _LoginState extends State<Login> {
     });
 
     try {
-      final user = await authService.loginWithApi(id: id, password: password);
+      final AppUser? user = await authService.loginWithApi(
+        id: id,
+        password: password,
+      );
 
       if (!mounted) {
         return;
@@ -208,11 +212,7 @@ class _LoginState extends State<Login> {
                     ]),
                     builder: (context, child) {
                       return ElevatedButton(
-                        onPressed: _isButtonActive
-                            ? () {
-                                _handleLogin();
-                              }
-                            : null,
+                        onPressed: _isButtonActive ? _handleLogin : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _isButtonActive
                               ? AppColors.mainColor
@@ -258,7 +258,7 @@ class _LoginState extends State<Login> {
                   height: 43,
                   child: OutlinedButton(
                     onPressed: () async {
-                      final email = await Navigator.push<String>(
+                      final String? email = await Navigator.push<String>(
                         context,
                         MaterialPageRoute(builder: (_) => const SignUp()),
                       );

@@ -41,9 +41,9 @@ class AuthService extends ChangeNotifier {
     required String gender,
     required String generation,
   }) {
-    final normalizedEmail = email.trim().toLowerCase();
+    final String normalizedEmail = email.trim().toLowerCase();
 
-    final user = AppUser(
+    final AppUser user = AppUser(
       id: 'fake-user-${DateTime.now().microsecondsSinceEpoch}',
       name: name.trim(),
       email: normalizedEmail,
@@ -195,7 +195,3 @@ class AuthService extends ChangeNotifier {
     return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email);
   }
 }
-//기존 가짜 로그인은 그대로 유지
-//서버 로그인용 loginWithApi()만 추가
-//accessToken / refreshToken 저장
-//로그인 성공 후 임시 currentUser 생성
