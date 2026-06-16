@@ -15,16 +15,6 @@ import '../widgets/item_detail_writer_section.dart';
 import 'item_detail_comment_page.dart';
 
 class ItemDetailPage extends StatefulWidget {
-  final ItemTradeType tradeType;
-  final bool initialIsLiked;
-  final bool initialHasItem;
-
-  const ItemDetailPage({
-    super.key,
-    required this.tradeType,
-    required this.initialIsLiked,
-    this.initialHasItem = true,
-  });
   const ItemDetailPage({super.key, required this.itemId});
 
   final String itemId;
@@ -34,18 +24,10 @@ class ItemDetailPage extends StatefulWidget {
 }
 
 class _ItemDetailPageState extends State<ItemDetailPage> {
-  late bool isLiked;
-  late bool hasItem;
-
   @override
   void initState() {
     super.initState();
 
-    isLiked = widget.initialIsLiked;
-    hasItem = widget.initialHasItem;
-  @override
-  void initState() {
-    super.initState();
     final user = authService.currentUser;
     if (user != null) {
       appController.recordItemView(itemId: widget.itemId, userId: user.id);
@@ -100,60 +82,27 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!hasItem) {
-      return Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: Column(
-            children: [
-              const ItemDetailHeader(),
-              Expanded(
-                child: ItemDetailNotFoundState(onBackToListTap: _goBackToList),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      bottomNavigationBar: ItemDetailBottomBar(
-        buttonText: requestButtonText,
-        isLiked: isLiked,
-        onRequestTap: _handleRequest,
-        onLikeTap: _toggleLike,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const ItemDetailHeader(),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const ItemDetailImageArea(),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 28),
-                          const ItemDetailInfoSection(),
-                          const ItemDetailWriterSection(),
-                          ItemDetailCommentPreview(onMoreTap: _openCommentPage),
-                          const ItemDetailWantedSection(),
-                          const SizedBox(height: 32),
-                        ],
-                      ),
     return AnimatedBuilder(
       animation: Listenable.merge([appController, authService]),
       builder: (context, child) {
         final TradeItem? item = appController.itemById(widget.itemId);
         final user = authService.currentUser;
+
         if (item == null) {
-          return const Scaffold(
-            body: SafeArea(child: Center(child: Text('물건을 찾을 수 없습니다.'))),
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: SafeArea(
+              child: Column(
+                children: [
+                  const ItemDetailHeader(),
+                  Expanded(
+                    child: ItemDetailNotFoundState(
+                      onBackToListTap: _goBackToList,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           );
         }
 
