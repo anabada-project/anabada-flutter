@@ -235,7 +235,9 @@ class ApiAppRepository implements AppRepository {
 
     if (comments.isEmpty) {
       final Map<String, dynamic>? data = _dataMap(response);
-      if (data != null && data.isNotEmpty) {
+      if (data != null &&
+          data.isNotEmpty &&
+          !_hasListValue(data, const ['content', 'comments', 'replies'])) {
         final ItemComment comment = _commentFromJson(data);
         _upsertComment(comment);
         return [comment];
@@ -528,9 +530,22 @@ class ApiAppRepository implements AppRepository {
     if (isLiked == true && currentUserId != null && currentUserId.isNotEmpty) {
       likedUserIds.add(currentUserId);
     }
-    if (likeCount != null && likeCount > likedUserIds.length) {
-      for (int index = likedUserIds.length; index < likeCount; index++) {
-        likedUserIds.add('like-user-$index');
+    if (likeCount != null) {
+      if (likeCount > likedUserIds.length) {
+        for (int index = likedUserIds.length; index < likeCount; index++) {
+          likedUserIds.add('like-user-$index');
+        }
+      } else if (likeCount < likedUserIds.length) {
+        int removeCount = likedUserIds.length - likeCount;
+        final List<String> dummyIds = likedUserIds
+            .where((id) => id.startsWith('like-user-'))
+            .toList(growable: false);
+
+        for (final String dummyId in dummyIds) {
+          if (removeCount <= 0) break;
+          likedUserIds.remove(dummyId);
+          removeCount--;
+        }
       }
     }
 
@@ -693,11 +708,23 @@ class ApiAppRepository implements AppRepository {
     if (dataMap == null) return const [];
 
     for (final String key in listKeys) {
-      final List<Map<String, dynamic>> maps = _mapList(dataMap[key]);
-      if (maps.isNotEmpty) return maps;
+      final dynamic value = dataMap[key];
+      if (value is List) {
+        return _mapList(value);
+      }
     }
 
     return dataMap.isEmpty ? const [] : [dataMap];
+  }
+
+  static bool _hasListValue(
+    Map<String, dynamic> map,
+    List<String> keys,
+  ) {
+    for (final String key in keys) {
+      if (map[key] is List) return true;
+    }
+    return false;
   }
 
   static List<Map<String, dynamic>> _mapList(dynamic value) {
