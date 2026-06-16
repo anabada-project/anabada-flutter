@@ -295,11 +295,20 @@ class _SignUpState extends State<SignUp> {
     return 'FEMALE';
   }
 
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   Future<void> _handleSignUp() async {
+    final String name = _nameController.text.trim();
     final String id = _idController.text.trim();
+    final String email = _emailController.text.trim();
 
     setState(() {
       _idError = id.isEmpty ? '아이디를 입력해주세요.' : null;
+      _emailError = email.isEmpty ? '이메일을 입력해주세요.' : null;
       _passwordError = _isPasswordFormatValid(_passwordController.text)
           ? null
           : '비밀번호 형식이 잘못되었습니다.';
@@ -309,7 +318,33 @@ class _SignUpState extends State<SignUp> {
           : '비밀번호가 일치하지 않습니다.';
     });
 
+    if (name.isEmpty) {
+      _showSnackBar('이름을 입력해주세요.');
+      return;
+    }
+
+    if (!_isEmailVerified) {
+      _showSnackBar('이메일 인증을 완료해주세요.');
+      return;
+    }
+
+    if (_selectedGender == null) {
+      _showSnackBar('성별을 선택해주세요.');
+      return;
+    }
+
+    if (_selectedMajor == null) {
+      _showSnackBar('전공을 선택해주세요.');
+      return;
+    }
+
+    if (_selectedTerm == null) {
+      _showSnackBar('기수를 선택해주세요.');
+      return;
+    }
+
     if (_idError != null ||
+        _emailError != null ||
         _passwordError != null ||
         _passwordConfirmError != null) {
       return;
@@ -321,9 +356,9 @@ class _SignUpState extends State<SignUp> {
 
     try {
       await authService.signUpWithApi(
-        name: _nameController.text.trim(),
+        name: name,
         id: id,
-        email: _emailController.text.trim(),
+        email: email,
         password: _passwordController.text,
         gender: _genderToApiValue(_selectedGender!),
         specialism: _selectedMajor!,
@@ -340,7 +375,7 @@ class _SignUpState extends State<SignUp> {
         context,
       ).showSnackBar(const SnackBar(content: Text('회원가입이 완료되었습니다.')));
 
-      Navigator.pop(context, _idController.text.trim());
+      Navigator.pop(context, id);
     } on AuthApiException catch (error) {
       if (!mounted) {
         return;

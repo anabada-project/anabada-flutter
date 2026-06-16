@@ -102,6 +102,10 @@ class AuthApiService {
       throw const AuthApiException('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     }
 
+    if (statusCode == 200) {
+      return;
+    }
+
     final Map<String, dynamic> body = _decodeJsonObject(responseBody);
 
     if (statusCode == 409) {
@@ -115,10 +119,8 @@ class AuthApiService {
       throw AuthApiException(message);
     }
 
-    if (statusCode != 200) {
-      final String message = body['message']?.toString() ?? '인증번호 발송에 실패했습니다.';
-      throw AuthApiException(message);
-    }
+    final String message = body['message']?.toString() ?? '인증번호 발송에 실패했습니다.';
+    throw AuthApiException(message);
   }
 
   Future<void> verifySignUpEmailCode({
@@ -144,6 +146,10 @@ class AuthApiService {
       throw const AuthApiException('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     }
 
+    if (statusCode == 200) {
+      return;
+    }
+
     final Map<String, dynamic> body = _decodeJsonObject(responseBody);
 
     if (statusCode == 401) {
@@ -157,10 +163,8 @@ class AuthApiService {
       throw AuthApiException(message);
     }
 
-    if (statusCode != 200) {
-      final String message = body['message']?.toString() ?? '인증번호 확인에 실패했습니다.';
-      throw AuthApiException(message);
-    }
+    final String message = body['message']?.toString() ?? '인증번호 확인에 실패했습니다.';
+    throw AuthApiException(message);
   }
 
   Future<void> signUp({
@@ -201,6 +205,10 @@ class AuthApiService {
       throw const AuthApiException('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     }
 
+    if (statusCode == 201) {
+      return;
+    }
+
     final Map<String, dynamic> body = _decodeJsonObject(responseBody);
 
     if (statusCode == 409) {
@@ -208,10 +216,8 @@ class AuthApiService {
       throw AuthApiException(message);
     }
 
-    if (statusCode != 201) {
-      final String message = body['message']?.toString() ?? '회원가입에 실패했습니다.';
-      throw AuthApiException(message);
-    }
+    final String message = body['message']?.toString() ?? '회원가입에 실패했습니다.';
+    throw AuthApiException(message);
   }
 
   Map<String, dynamic> _decodeJsonObject(String responseBody) {
