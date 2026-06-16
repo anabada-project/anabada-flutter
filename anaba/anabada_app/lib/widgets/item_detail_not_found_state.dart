@@ -18,7 +18,7 @@ class ItemDetailNotFoundState extends StatelessWidget {
           const Icon(
             Icons.file_copy_outlined,
             size: 82,
-            color: Color(0xFFBDBDBD),
+            color: AppColors.disabledText,
           ),
 
           const SizedBox(height: 24),
