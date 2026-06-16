@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../controllers/app_controller.dart';
 import '../screen/find_password.dart';
 import '../screen/login.dart';
+import '../services/auth_api_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/edit_profile_header.dart';
 import '../widgets/edit_profile_input_field.dart';
@@ -50,6 +51,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   String? nameErrorText;
   String? majorErrorText;
+
+  bool _isLoggingOut = false;
 
   @override
   void initState() {
@@ -114,14 +117,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
       major: major,
       generation: selectedGeneration,
     );
-    if (updatedUser == null) return;
+
+    if (updatedUser == null) {
+      return;
+    }
 
     await appController.updateOwnerProfile(
       ownerId: updatedUser.id,
       ownerName: updatedUser.name,
       ownerGeneration: updatedUser.generation,
     );
-    if (!mounted) return;
+
+    if (!mounted) {
+      return;
+    }
 
     Navigator.pop(
       context,
@@ -141,8 +150,30 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  void _handleLogout() {
-    authService.logout();
+  Future<void> _handleLogout() async {
+    if (_isLoggingOut) {
+      return;
+    }
+
+    setState(() {
+      _isLoggingOut = true;
+    });
+
+    try {
+      await authService.logoutWithApi();
+    } on AuthApiException catch (error) {
+      debugPrint('로그아웃 API 실패: ${error.message}');
+    } catch (error) {
+      debugPrint('로그아웃 처리 실패: $error');
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isLoggingOut = false;
+    });
 
     Navigator.pushAndRemoveUntil(
       context,
@@ -263,7 +294,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
               const SizedBox(height: 8),
 
-              _AccountSecurityTile(text: '로그아웃', onTap: _handleLogout),
+              _AccountSecurityTile(
+                text: _isLoggingOut ? '로그아웃 중...' : '로그아웃',
+                onTap: () {
+                  _handleLogout();
+                },
+              ),
 
               const Spacer(),
 

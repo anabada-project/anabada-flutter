@@ -100,6 +100,18 @@ class AuthService extends ChangeNotifier {
     return _apiCurrentUser;
   }
 
+  Future<void> logoutWithApi() async {
+    final String? savedAccessToken = _accessToken;
+
+    try {
+      if (savedAccessToken != null && savedAccessToken.isNotEmpty) {
+        await _authApiService.signOut(accessToken: savedAccessToken);
+      }
+    } finally {
+      logout();
+    }
+  }
+
   void logout() {
     _repository.logout();
 

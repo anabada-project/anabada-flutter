@@ -82,6 +82,46 @@ class AuthApiService {
     );
   }
 
+  Future<void> signOut({required String accessToken}) async {
+    debugPrint('로그아웃 API 요청 시작');
+    debugPrint('요청 주소: ${ApiClient.uri('/api/auth/signout')}');
+
+    final http.Response response = await http.delete(
+      ApiClient.uri('/api/auth/signout'),
+      headers: ApiClient.authHeaders(accessToken),
+    );
+
+    final int statusCode = response.statusCode;
+    final String responseBody = utf8.decode(response.bodyBytes);
+
+    debugPrint('응답 statusCode: $statusCode');
+    debugPrint('응답 body: $responseBody');
+
+    if (statusCode >= 500) {
+      throw const AuthApiException('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    }
+
+    if (statusCode == 200) {
+      return;
+    }
+
+    final Map<String, dynamic> body = _decodeJsonObject(responseBody);
+
+    if (statusCode == 401) {
+      final String message =
+          body['message']?.toString() ?? '유효하지 않거나 만료된 액세스 토큰입니다.';
+      throw AuthApiException(message);
+    }
+
+    if (statusCode == 403) {
+      final String message = body['message']?.toString() ?? '접근 권한이 없습니다.';
+      throw AuthApiException(message);
+    }
+
+    final String message = body['message']?.toString() ?? '로그아웃에 실패했습니다.';
+    throw AuthApiException(message);
+  }
+
   Map<String, dynamic> _decodeJsonObject(String responseBody) {
     try {
       final dynamic decodedBody = jsonDecode(responseBody);
