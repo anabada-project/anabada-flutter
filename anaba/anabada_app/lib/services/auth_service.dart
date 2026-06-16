@@ -64,6 +64,37 @@ class AuthService extends ChangeNotifier {
     return didRegister;
   }
 
+  Future<void> signUpWithApi({
+    required String name,
+    required String id,
+    required String email,
+    required String password,
+    required String gender,
+    required String specialism,
+    required String generation,
+  }) async {
+    await _authApiService.signUp(
+      name: name,
+      id: id,
+      email: email,
+      password: password,
+      gender: gender,
+      specialism: specialism,
+      generation: generation,
+    );
+  }
+
+  Future<void> sendSignUpVerificationCode({required String email}) async {
+    await _authApiService.sendSignUpEmailCode(email: email);
+  }
+
+  Future<void> verifySignUpVerificationCode({
+    required String email,
+    required String code,
+  }) async {
+    await _authApiService.verifySignUpEmailCode(email: email, code: code);
+  }
+
   AppUser? login({required String email, required String password}) {
     final AppUser? user = _repository.login(email: email, password: password);
 
