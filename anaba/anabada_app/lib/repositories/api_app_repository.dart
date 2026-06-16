@@ -18,6 +18,11 @@ class ApiAppRepository implements AppRepository {
   final List<ItemComment> _comments = [];
   final List<Notice> _notices = [];
   final Map<String, List<String>> _recentItemIds = {};
+  int _idCounter = 0;
+
+  String _generateUniqueId() {
+    return '${DateTime.now().microsecondsSinceEpoch}_${_idCounter++}';
+  }
 
   @override
   List<TradeItem> get cachedItems => List.unmodifiable(_items);
@@ -101,7 +106,7 @@ class ApiAppRepository implements AppRepository {
     final TradeItem item = _tradeItemFromJson(
       _dataMap(response) ?? {},
       fallback: TradeItem(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        id: _generateUniqueId(),
         title: input.title,
         description: input.description,
         wantedItem: input.wantedItem,
@@ -212,7 +217,7 @@ class ApiAppRepository implements AppRepository {
     final ItemComment comment = _commentFromJson(
       _dataMap(response) ?? {},
       fallback: ItemComment(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        id: _generateUniqueId(),
         itemId: itemId,
         authorId: authorId,
         authorName: authorName,
@@ -323,7 +328,7 @@ class ApiAppRepository implements AppRepository {
     final Notice notice = _noticeFromJson(
       _dataMap(response) ?? {},
       fallback: Notice(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        id: _generateUniqueId(),
         title: title,
         content: content,
         author: author,
@@ -494,7 +499,7 @@ class ApiAppRepository implements AppRepository {
             fallback: itemId == null
                 ? null
                 : ItemComment(
-                    id: DateTime.now().microsecondsSinceEpoch.toString(),
+                    id: _generateUniqueId(),
                     itemId: itemId,
                     authorId: '',
                     authorName: '',
@@ -552,7 +557,7 @@ class ApiAppRepository implements AppRepository {
     return TradeItem(
       id: _stringValue(json['id'] ?? json['productId'] ?? json['product_id']) ??
           fallback?.id ??
-          DateTime.now().microsecondsSinceEpoch.toString(),
+          _generateUniqueId(),
       title: _stringValue(json['title'] ?? json['name']) ??
           fallback?.title ??
           '',
@@ -595,7 +600,7 @@ class ApiAppRepository implements AppRepository {
     return ItemComment(
       id: _stringValue(json['id'] ?? json['commentId'] ?? json['comment_id']) ??
           fallback?.id ??
-          DateTime.now().microsecondsSinceEpoch.toString(),
+          _generateUniqueId(),
       itemId:
           _stringValue(json['productId'] ?? json['postId'] ?? json['itemId']) ??
           fallback?.itemId ??
@@ -621,7 +626,7 @@ class ApiAppRepository implements AppRepository {
     return Notice(
       id: _stringValue(json['id'] ?? json['noticeId'] ?? json['notice_id']) ??
           fallback?.id ??
-          DateTime.now().microsecondsSinceEpoch.toString(),
+          _generateUniqueId(),
       title: _stringValue(json['title']) ?? fallback?.title ?? '',
       content: _stringValue(json['content']) ?? fallback?.content ?? '',
       author: _stringValue(json['author'] ?? json['writer'] ?? json['userName']) ??
