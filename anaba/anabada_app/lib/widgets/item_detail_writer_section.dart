@@ -1,32 +1,36 @@
 import 'package:flutter/material.dart';
 
+import '../models/trade_item.dart';
+
 class ItemDetailWriterSection extends StatelessWidget {
-  const ItemDetailWriterSection({super.key});
+  const ItemDetailWriterSection({super.key, required this.item});
+
+  final TradeItem item;
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
-        SizedBox(height: 22),
+        const SizedBox(height: 22),
         Row(
           children: [
-            _ProfileIcon(size: 48),
-            SizedBox(width: 12),
+            const _ProfileIcon(size: 48),
+            const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '추혜인',
-                  style: TextStyle(
+                  item.ownerName,
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Colors.black,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  '10기',
-                  style: TextStyle(
+                  item.ownerGeneration,
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: Color(0xFF666666),
@@ -36,8 +40,8 @@ class ItemDetailWriterSection extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 22),
-        Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+        const SizedBox(height: 22),
+        const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
       ],
     );
   }

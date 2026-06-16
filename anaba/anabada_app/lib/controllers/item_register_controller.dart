@@ -2,32 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
-enum ItemCategory {
-  food('식품'),
-  clothes('의류'),
-  book('도서'),
-  etc('기타');
-
-  const ItemCategory(this.label);
-
-  final String label;
-}
-
-enum TradeMethod {
-  exchange('교환'),
-  share('나눔');
-
-  const TradeMethod(this.label);
-
-  final String label;
-}
+import '../models/trade_item.dart';
+import '../services/auth_service.dart';
+import 'app_controller.dart';
 
 class ItemRegisterController extends ChangeNotifier {
-  ItemRegisterController() {
+  ItemRegisterController({
+    AppController? itemController,
+    AuthService? authenticationService,
+  }) : _appController = itemController ?? appController,
+       _authService = authenticationService ?? authService {
     titleController.addListener(_onInputChanged);
     descriptionController.addListener(_onInputChanged);
     wantedItemController.addListener(_onInputChanged);
   }
+
+  final AppController _appController;
+  final AuthService _authService;
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
@@ -36,16 +27,18 @@ class ItemRegisterController extends ChangeNotifier {
   final ImagePicker _imagePicker = ImagePicker();
 
   XFile? selectedImage;
+  Uint8List? selectedImageBytes;
   ItemCategory? selectedCategory;
   TradeMethod? selectedTradeMethod;
 
   bool isSubmitted = false;
   bool isLoading = false;
   bool _disposed = false;
+  String? createdItemId;
 
   String? imagePickErrorText;
 
-  bool get hasImage => selectedImage != null;
+  bool get hasImage => selectedImage != null && selectedImageBytes != null;
 
   bool get hasTitle => titleController.text.trim().isNotEmpty;
 
@@ -107,7 +100,11 @@ class ItemRegisterController extends ChangeNotifier {
       if (_disposed) return;
       if (image == null) return;
 
+      final Uint8List imageBytes = await image.readAsBytes();
+      if (_disposed) return;
+
       selectedImage = image;
+      selectedImageBytes = imageBytes;
       imagePickErrorText = null;
       notifyListeners();
     } on PlatformException catch (e) {
@@ -147,12 +144,27 @@ class ItemRegisterController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: 나중에 API 연결할 부분
-      await Future<void>.delayed(const Duration(milliseconds: 700));
+      final user = _authService.currentUser;
+      final imageBytes = selectedImageBytes;
+      if (user == null || imageBytes == null) return false;
+
+      final item = await _appController.createItem(
+        CreateTradeItemInput(
+          title: titleController.text.trim(),
+          description: descriptionController.text.trim(),
+          wantedItem: wantedItemController.text.trim(),
+          category: selectedCategory!,
+          tradeMethod: selectedTradeMethod!,
+          ownerId: user.id,
+          ownerName: user.name,
+          ownerGeneration: user.generation,
+          imageBytes: imageBytes,
+          imagePath: selectedImage?.path,
+        ),
+      );
 
       if (_disposed) return false;
-
-      debugPrint(toRequestData().toString());
+      createdItemId = item.id;
 
       return true;
     } finally {

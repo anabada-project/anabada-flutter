@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/app_routes.dart';
+import '../../services/auth_service.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   const CustomBottomNavigationBar({super.key, required this.currentIndex});
@@ -9,28 +10,28 @@ class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
 
   void _handleTap(BuildContext context, int index) {
-    String? routeName;
-
-    switch (index) {
-      case 0:
-        routeName = AppRoutes.main;
-      case 1:
-        routeName = AppRoutes.itemList;
-      case 3:
-        routeName = AppRoutes.favorite;
-      case 4:
-        routeName = AppRoutes.myPage;
-    }
+    final String? routeName = switch (index) {
+      0 => authService.currentUser?.isAdmin == true
+          ? AppRoutes.adminMain
+          : AppRoutes.main,
+      1 => AppRoutes.itemList,
+      2 => AppRoutes.itemRegister,
+      3 => AppRoutes.favorite,
+      4 => AppRoutes.myPage,
+      _ => null,
+    };
 
     if (routeName == null) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(content: Text('아직 준비 중인 화면입니다.')));
       return;
     }
 
     final currentRouteName = ModalRoute.of(context)?.settings.name;
     if (index == currentIndex && currentRouteName == routeName) {
+      return;
+    }
+
+    if (routeName == AppRoutes.itemRegister) {
+      Navigator.of(context).pushNamed(routeName);
       return;
     }
 

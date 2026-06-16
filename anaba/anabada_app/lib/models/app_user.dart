@@ -6,6 +6,7 @@ class AppUser {
     required this.major,
     required this.gender,
     required this.generation,
+    this.isAdmin = false,
   });
 
   final String id;
@@ -14,4 +15,24 @@ class AppUser {
   final String major;
   final String gender;
   final String generation;
+  final bool isAdmin;
+
+  AppUser copyWith({
+    String? name,
+    String? email,
+    String? major,
+    String? gender,
+    String? generation,
+    bool? isAdmin,
+  }) {
+    return AppUser(
+      id: id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      major: major ?? this.major,
+      gender: gender ?? this.gender,
+      generation: generation ?? this.generation,
+      isAdmin: isAdmin ?? this.isAdmin,
+    );
+  }
 }

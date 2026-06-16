@@ -52,4 +52,37 @@ void main() {
     expect(firstResult, isTrue);
     expect(secondResult, isFalse);
   });
+
+  test('profile and password changes are stored in the repository', () {
+    final service = AuthService(FakeAuthRepository());
+    final email = 'profile-${DateTime.now().microsecondsSinceEpoch}@test.com';
+
+    service.signUp(
+      name: '변경 전',
+      email: email,
+      password: 'password123',
+      major: '플러터',
+      gender: '여자',
+      generation: '9기',
+    );
+    service.login(email: email, password: 'password123');
+
+    final updated = service.updateProfile(
+      name: '변경 후',
+      major: '백엔드',
+      generation: '10기',
+    );
+    expect(updated?.name, '변경 후');
+    expect(service.currentUser?.major, '백엔드');
+
+    expect(
+      service.resetPassword(email: email, newPassword: 'newPassword123'),
+      isTrue,
+    );
+    service.logout();
+    expect(
+      service.login(email: email, password: 'newPassword123'),
+      isNotNull,
+    );
+  });
 }

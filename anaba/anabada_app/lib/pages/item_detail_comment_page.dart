@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../controllers/app_controller.dart';
+import '../models/item_comment.dart';
+import '../models/trade_item.dart';
+import '../services/auth_service.dart';
+import '../utils/time_formatter.dart';
 import '../widgets/item_detail_comment_empty_state.dart';
 import '../widgets/item_detail_comment_header.dart';
 import '../widgets/item_detail_comment_input_bar.dart';
@@ -8,7 +13,9 @@ import '../widgets/item_detail_comment_target_card.dart';
 import '../widgets/item_detail_comment_tile.dart';
 
 class ItemDetailCommentPage extends StatefulWidget {
-  const ItemDetailCommentPage({super.key});
+  const ItemDetailCommentPage({super.key, required this.itemId});
+
+  final String itemId;
 
   @override
   State<ItemDetailCommentPage> createState() => _ItemDetailCommentPageState();
@@ -18,239 +25,188 @@ class _ItemDetailCommentPageState extends State<ItemDetailCommentPage> {
   final TextEditingController _commentController = TextEditingController();
   final FocusNode _commentFocusNode = FocusNode();
 
-  final List<_CommentData> _comments = [
-    const _CommentData(
-      id: 1,
-      author: '김준수',
-      content: 'ㅎㅇ',
-      time: '2시간 전',
-      isWriter: false,
-      canManage: true,
-    ),
-    const _CommentData(
-      id: 2,
-      author: '안율',
-      content: 'ㅎㅇ',
-      time: '2시간 전',
-      isWriter: false,
-      canManage: true,
-    ),
-    const _CommentData(
-      id: 3,
-      author: '추혜인',
-      content: 'ㅎㅇ',
-      time: '2시간 전',
-      isWriter: true,
-      canManage: true,
-    ),
-  ];
-
-  int? _editingCommentId;
+  String? _editingCommentId;
+  String? _replyingToCommentId;
 
   @override
   void dispose() {
     _commentController.dispose();
     _commentFocusNode.dispose();
-
     super.dispose();
   }
 
-  void _submitComment() {
+  Future<void> _submitComment() async {
     final String content = _commentController.text.trim();
+    final user = authService.currentUser;
+    if (content.isEmpty || user == null) return;
 
-    if (content.isEmpty) {
-      return;
-    }
-
-    if (_editingCommentId != null) {
-      _updateComment(content);
-      return;
-    }
-
-    _addComment(content);
-  }
-
-  void _addComment(String content) {
-    final int newId = DateTime.now().millisecondsSinceEpoch;
-
-    setState(() {
-      _comments.add(
-        _CommentData(
-          id: newId,
-          author: '추혜인',
+    try {
+      if (_editingCommentId != null) {
+        await appController.updateComment(
+          commentId: _editingCommentId!,
+          authorId: user.id,
           content: content,
-          time: '방금 전',
-          isWriter: true,
-          canManage: true,
-        ),
+        );
+      } else {
+        await appController.createComment(
+          itemId: widget.itemId,
+          authorId: user.id,
+          authorName: user.name,
+          content: content,
+          parentCommentId: _replyingToCommentId,
+        );
+      }
+
+      _cancelInputMode();
+    } on StateError catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message.toString())),
       );
-    });
-
-    _commentController.clear();
-    _commentFocusNode.unfocus();
+    }
   }
 
-  void _updateComment(String content) {
-    final int? editingId = _editingCommentId;
-
-    if (editingId == null) {
-      return;
-    }
-
-    final int index = _comments.indexWhere(
-      (comment) => comment.id == editingId,
-    );
-
-    if (index == -1) {
-      return;
-    }
-
+  void _startEditComment(ItemComment comment) {
     setState(() {
-      final _CommentData oldComment = _comments[index];
-
-      _comments[index] = oldComment.copyWith(content: content, time: '방금 전');
-
-      _editingCommentId = null;
-    });
-
-    _commentController.clear();
-    _commentFocusNode.unfocus();
-  }
-
-  void _startEditComment(_CommentData comment) {
-    setState(() {
+      _replyingToCommentId = null;
       _editingCommentId = comment.id;
       _commentController.text = comment.content;
-      _commentController.selection = TextSelection.fromPosition(
-        TextPosition(offset: _commentController.text.length),
+      _commentController.selection = TextSelection.collapsed(
+        offset: comment.content.length,
       );
     });
-
     _commentFocusNode.requestFocus();
   }
 
-  void _deleteComment(int commentId) {
-    setState(() {
-      _comments.removeWhere((comment) => comment.id == commentId);
-
-      if (_editingCommentId == commentId) {
-        _editingCommentId = null;
-        _commentController.clear();
-      }
-    });
-  }
-
-  void _cancelEdit() {
+  void _startReply(ItemComment comment) {
     setState(() {
       _editingCommentId = null;
+      _replyingToCommentId = comment.id;
       _commentController.clear();
     });
+    _commentFocusNode.requestFocus();
+  }
 
+  Future<void> _deleteComment(String commentId) async {
+    final user = authService.currentUser;
+    if (user == null) return;
+
+    try {
+      await appController.deleteComment(
+        commentId: commentId,
+        authorId: user.id,
+      );
+      if (_editingCommentId == commentId ||
+          _replyingToCommentId == commentId) {
+        _cancelInputMode();
+      }
+    } on StateError catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message.toString())),
+      );
+    }
+  }
+
+  void _cancelInputMode() {
+    setState(() {
+      _editingCommentId = null;
+      _replyingToCommentId = null;
+      _commentController.clear();
+    });
     _commentFocusNode.unfocus();
   }
 
-  int get _commentListItemCount {
-    if (_comments.isEmpty) {
-      return 6;
+  List<ItemComment> _orderedComments(List<ItemComment> comments) {
+    final List<ItemComment> ordered = [];
+    final List<ItemComment> roots = comments
+        .where((comment) => comment.parentCommentId == null)
+        .toList();
+    for (final ItemComment root in roots) {
+      ordered.add(root);
+      ordered.addAll(
+        comments.where((comment) => comment.parentCommentId == root.id),
+      );
     }
-
-    return _comments.length + 5;
-  }
-
-  Widget _buildCommentListItem(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        return const SizedBox(height: 18);
-      case 1:
-        return const ItemDetailCommentTargetCard();
-      case 2:
-        return const SizedBox(height: 28);
-      case 3:
-        return ItemDetailCommentSectionTitle(count: _comments.length);
-      case 4:
-        return const SizedBox(height: 18);
-      default:
-        if (_comments.isEmpty) {
-          return const ItemDetailCommentEmptyState();
-        }
-
-        final _CommentData comment = _comments[index - 5];
-
-        return ItemDetailCommentTile(
-          author: comment.author,
-          content: comment.content,
-          time: comment.time,
-          isWriter: comment.isWriter,
-          canManage: comment.canManage,
-          onEdit: () {
-            _startEditComment(comment);
-          },
-          onDelete: () {
-            _deleteComment(comment.id);
-          },
-        );
-    }
+    return ordered;
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isEditing = _editingCommentId != null;
+    return AnimatedBuilder(
+      animation: Listenable.merge([appController, authService]),
+      builder: (context, child) {
+        final TradeItem? item = appController.itemById(widget.itemId);
+        final user = authService.currentUser;
+        if (item == null) {
+          return const Scaffold(body: Center(child: Text('물건을 찾을 수 없습니다.')));
+        }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: true,
-      body: SafeArea(
-        child: Column(
-          children: [
-            const ItemDetailCommentHeader(),
+        final List<ItemComment> comments = appController.commentsFor(item.id);
+        final List<ItemComment> orderedComments = _orderedComments(comments);
 
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                itemCount: _commentListItemCount,
-                itemBuilder: _buildCommentListItem,
-              ),
+        return Scaffold(
+          backgroundColor: Colors.white,
+          resizeToAvoidBottomInset: true,
+          body: SafeArea(
+            child: Column(
+              children: [
+                const ItemDetailCommentHeader(),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    children: [
+                      const SizedBox(height: 18),
+                      ItemDetailCommentTargetCard(
+                        item: item,
+                        onTap: () => Navigator.pop(context),
+                      ),
+                      const SizedBox(height: 28),
+                      ItemDetailCommentSectionTitle(count: comments.length),
+                      const SizedBox(height: 18),
+                      if (orderedComments.isEmpty)
+                        const ItemDetailCommentEmptyState()
+                      else
+                        ...orderedComments.map((comment) {
+                          final ItemComment? parent =
+                              comment.parentCommentId == null
+                              ? null
+                              : appController.commentById(
+                                  comment.parentCommentId!,
+                                );
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              left: comment.parentCommentId == null ? 0 : 32,
+                            ),
+                            child: ItemDetailCommentTile(
+                              author: comment.authorName,
+                              content: comment.content,
+                              time: formatRelativeTime(comment.createdAt),
+                              isWriter: comment.authorId == item.ownerId,
+                              canManage: user?.id == comment.authorId,
+                              replyToName: parent?.authorName,
+                              onReply: () => _startReply(comment),
+                              onEdit: () => _startEditComment(comment),
+                              onDelete: () => _deleteComment(comment.id),
+                            ),
+                          );
+                        }),
+                    ],
+                  ),
+                ),
+                ItemDetailCommentInputBar(
+                  controller: _commentController,
+                  focusNode: _commentFocusNode,
+                  isEditing: _editingCommentId != null,
+                  isReplying: _replyingToCommentId != null,
+                  onCancelEdit: _cancelInputMode,
+                  onSubmit: _submitComment,
+                ),
+              ],
             ),
-
-            ItemDetailCommentInputBar(
-              controller: _commentController,
-              focusNode: _commentFocusNode,
-              isEditing: isEditing,
-              onCancelEdit: _cancelEdit,
-              onSubmit: _submitComment,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CommentData {
-  final int id;
-  final String author;
-  final String content;
-  final String time;
-  final bool isWriter;
-  final bool canManage;
-
-  const _CommentData({
-    required this.id,
-    required this.author,
-    required this.content,
-    required this.time,
-    required this.isWriter,
-    required this.canManage,
-  });
-
-  _CommentData copyWith({String? content, String? time}) {
-    return _CommentData(
-      id: id,
-      author: author,
-      content: content ?? this.content,
-      time: time ?? this.time,
-      isWriter: isWriter,
-      canManage: canManage,
+          ),
+        );
+      },
     );
   }
 }

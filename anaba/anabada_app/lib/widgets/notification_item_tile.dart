@@ -10,18 +10,25 @@ class NotificationItemTile extends StatelessWidget {
     required this.title,
     required this.content,
     required this.time,
+    this.isRead = false,
+    this.onTap,
   });
 
   final IconData icon;
   final String title;
   final String content;
   final String time;
+  final bool isRead;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minHeight: 84),
-      child: Row(
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 84),
+        color: isRead ? Colors.transparent : const Color(0xFFFFFCF2),
+        child: Row(
         children: [
           Container(
             width: 40,
@@ -69,6 +76,7 @@ class NotificationItemTile extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

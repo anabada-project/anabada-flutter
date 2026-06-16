@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../controllers/app_controller.dart';
+import '../models/notice.dart';
 import '../pages/admin_notice_detail_page.dart';
+import '../utils/time_formatter.dart';
 import 'admin_notice_tile.dart';
 
 class AdminNoticeList extends StatelessWidget {
@@ -8,18 +11,32 @@ class AdminNoticeList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: EdgeInsets.zero,
-      itemCount: 7,
-      itemBuilder: (context, index) {
-        return AdminNoticeTile(
-          title: '공지사항',
-          content: '공지내용',
-          time: '1일 전',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AdminNoticeDetailPage()),
+    return AnimatedBuilder(
+      animation: appController,
+      builder: (context, child) {
+        final List<Notice> notices = appController.notices;
+        if (notices.isEmpty) {
+          return const Center(child: Text('등록된 공지가 없습니다.'));
+        }
+
+        return ListView.builder(
+          padding: EdgeInsets.zero,
+          itemCount: notices.length,
+          itemBuilder: (context, index) {
+            final Notice notice = notices[index];
+            return AdminNoticeTile(
+              title: notice.title,
+              content: notice.content,
+              time: formatRelativeTime(notice.createdAt),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        AdminNoticeDetailPage(noticeId: notice.id),
+                  ),
+                );
+              },
             );
           },
         );

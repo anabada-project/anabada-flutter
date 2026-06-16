@@ -114,11 +114,29 @@ class _SignUpState extends State<SignUp> {
 
   /// [인증하기] 버튼 클릭 → 코드 입력칸 등장
   void _handleSendCode() {
-    if (_emailController.text.trim().isEmpty) return;
+    final String email = _emailController.text.trim();
+    if (email.isEmpty) return;
+    final String? code = authService.requestVerificationCode(
+      email: email,
+      purpose: EmailVerificationPurpose.signUp,
+    );
+    if (code == null) {
+      setState(() {
+        _emailError = authService.isEmailRegistered(email)
+            ? '이미 가입된 이메일입니다.'
+            : '올바른 이메일을 입력해주세요.';
+      });
+      return;
+    }
+
     FocusScope.of(context).unfocus();
     setState(() {
+      _emailError = null;
       _isCodeSent = true;
     });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('테스트 인증코드: $code')),
+    );
     // 첫 번째 칸에 자동 포커스
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) _codeFocusNodes[0].requestFocus();
@@ -127,17 +145,40 @@ class _SignUpState extends State<SignUp> {
 
   /// [재전송] 클릭 → 코드 칸 초기화
   void _handleResendCode() {
+    final String? code = authService.requestVerificationCode(
+      email: _emailController.text,
+      purpose: EmailVerificationPurpose.signUp,
+    );
     for (final c in _codeControllers) {
       c.clear();
     }
     _codeFocusNodes[0].requestFocus();
     setState(() {});
+    if (code != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('테스트 인증코드: $code')),
+      );
+    }
   }
 
   /// [인증완료] 버튼 클릭 → 인증 완료 처리
   void _handleVerifyCode() {
+    final String code = _codeControllers.map((controller) {
+      return controller.text;
+    }).join();
+    if (!authService.verifyCode(
+      email: _emailController.text,
+      code: code,
+    )) {
+      setState(() {
+        _emailError = '인증코드가 올바르지 않습니다.';
+      });
+      return;
+    }
+
     FocusScope.of(context).unfocus();
     setState(() {
+      _emailError = null;
       _isEmailVerified = true;
       _isCodeSent = false; // 코드 입력칸 숨기기
     });

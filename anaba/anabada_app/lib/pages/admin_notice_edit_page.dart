@@ -1,46 +1,42 @@
 import 'package:flutter/material.dart';
 
+import '../controllers/app_controller.dart';
 import '../widgets/admin_notice_edit_button.dart';
 import '../widgets/admin_notice_edit_content_field.dart';
 import '../widgets/admin_notice_edit_header.dart';
 import '../widgets/admin_notice_edit_input_field.dart';
 
 class AdminNoticeEditPage extends StatefulWidget {
-  const AdminNoticeEditPage({super.key});
+  const AdminNoticeEditPage({super.key, required this.noticeId});
+
+  final String noticeId;
 
   @override
   State<AdminNoticeEditPage> createState() => _AdminNoticeEditPageState();
 }
 
 class _AdminNoticeEditPageState extends State<AdminNoticeEditPage> {
-  final TextEditingController _titleController = TextEditingController(
-    text: '서비스 점검 안내',
-  );
+  late final TextEditingController _titleController;
+  late final TextEditingController _writerController;
+  late final TextEditingController _dateController;
+  late final TextEditingController _contentController;
 
-  final TextEditingController _writerController = TextEditingController(
-    text: '관리자',
-  );
+  bool _isSaving = false;
 
-  final TextEditingController _dateController = TextEditingController(
-    text: '2026.05.18',
-  );
-
-  final TextEditingController _contentController = TextEditingController(
-    text: '''안녕하세요, 아나바다 운영팀입니다.
-
-보다 안정적인 서비스 제공을 위해 아래와 같이 시스템 점검을 진행할 예정입니다.
-
-점검 일시
-2024년 5월 21일 02:00 ~ 06:00
-
-점검 내용
-서비스 안정화 작업
-데이터베이스 최적화
-시스템 성능 개선
-
-점검 시간 동안 서비스 이용이 일시적으로 제한될 수 있습니다.
-이용에 불편을 드려 죄송합니다.''',
-  );
+  @override
+  void initState() {
+    super.initState();
+    final notice = appController.noticeById(widget.noticeId);
+    final DateTime createdAt = notice?.createdAt ?? DateTime.now();
+    _titleController = TextEditingController(text: notice?.title ?? '');
+    _writerController = TextEditingController(text: notice?.author ?? '관리자');
+    _dateController = TextEditingController(
+      text:
+          '${createdAt.year}.${createdAt.month.toString().padLeft(2, '0')}.'
+          '${createdAt.day.toString().padLeft(2, '0')}',
+    );
+    _contentController = TextEditingController(text: notice?.content ?? '');
+  }
 
   @override
   void dispose() {
@@ -51,9 +47,38 @@ class _AdminNoticeEditPageState extends State<AdminNoticeEditPage> {
     super.dispose();
   }
 
-  void _saveNotice() {
-    // UI 단계라 실제 저장 기능은 나중에 연결
+  Future<void> _saveNotice() async {
+    final String title = _titleController.text.trim();
+    final String content = _contentController.text.trim();
+    if (title.isEmpty || content.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('제목과 내용을 입력해주세요.')),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    await appController.updateNotice(
+      noticeId: widget.noticeId,
+      title: title,
+      content: content,
+      author: _writerController.text.trim(),
+      createdAt: _parseDate(_dateController.text),
+    );
+    if (!mounted) return;
     Navigator.pop(context, true);
+  }
+
+  DateTime _parseDate(String value) {
+    final List<int> parts = value
+        .split('.')
+        .map((part) => int.tryParse(part.trim()))
+        .whereType<int>()
+        .toList();
+    if (parts.length == 3) {
+      return DateTime(parts[0], parts[1], parts[2]);
+    }
+    return DateTime.now();
   }
 
   @override
@@ -91,7 +116,9 @@ class _AdminNoticeEditPageState extends State<AdminNoticeEditPage> {
                         controller: _contentController,
                       ),
                       const SizedBox(height: 36),
-                      AdminNoticeEditButton(onPressed: _saveNotice),
+                      AdminNoticeEditButton(
+                        onPressed: _isSaving ? null : _saveNotice,
+                      ),
                       const SizedBox(height: 24),
                     ],
                   ),

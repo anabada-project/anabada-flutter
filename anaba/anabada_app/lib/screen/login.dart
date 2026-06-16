@@ -56,7 +56,10 @@ class _LoginState extends State<Login> {
 
     if (user != null) {
       debugPrint('로그인 성공');
-      Navigator.pushReplacementNamed(context, AppRoutes.main);
+      Navigator.pushReplacementNamed(
+        context,
+        user.isAdmin ? AppRoutes.adminMain : AppRoutes.main,
+      );
     }
   }
 

@@ -5,6 +5,7 @@ import '../constants/app_colors.dart';
 class ItemDetailBottomBar extends StatelessWidget {
   final String buttonText;
   final bool isLiked;
+  final bool isRequestEnabled;
   final VoidCallback onRequestTap;
   final VoidCallback onLikeTap;
 
@@ -12,6 +13,7 @@ class ItemDetailBottomBar extends StatelessWidget {
     super.key,
     required this.buttonText,
     required this.isLiked,
+    this.isRequestEnabled = true,
     required this.onRequestTap,
     required this.onLikeTap,
   });
@@ -29,9 +31,10 @@ class ItemDetailBottomBar extends StatelessWidget {
               child: SizedBox(
                 height: 43,
                 child: ElevatedButton(
-                  onPressed: onRequestTap,
+                  onPressed: isRequestEnabled ? onRequestTap : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.mainColor,
+                    disabledBackgroundColor: const Color(0xFFE0E0E0),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(

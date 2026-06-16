@@ -6,6 +6,8 @@ class ItemDetailCommentTile extends StatelessWidget {
   final String time;
   final bool isWriter;
   final bool canManage;
+  final String? replyToName;
+  final VoidCallback onReply;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -16,8 +18,10 @@ class ItemDetailCommentTile extends StatelessWidget {
     required this.time,
     required this.isWriter,
     required this.canManage,
+    required this.onReply,
     required this.onEdit,
     required this.onDelete,
+    this.replyToName,
   });
 
   @override
@@ -75,6 +79,17 @@ class ItemDetailCommentTile extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
+                if (replyToName != null) ...[
+                  Text(
+                    '$replyToName님에게 답글',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFFFB800),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                ],
                 Text(
                   content,
                   style: const TextStyle(
@@ -95,12 +110,19 @@ class ItemDetailCommentTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 20),
-                    const Text(
-                      '답글',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                    GestureDetector(
+                      onTap: onReply,
+                      behavior: HitTestBehavior.opaque,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          '답글',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
                     ),
                   ],

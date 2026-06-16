@@ -9,5 +9,14 @@ abstract class AuthRepository {
 
   AppUser? login({required String email, required String password});
 
+  AppUser? updateProfile({
+    required String userId,
+    required String name,
+    required String major,
+    required String generation,
+  });
+
+  bool resetPassword({required String email, required String newPassword});
+
   void logout();
 }
