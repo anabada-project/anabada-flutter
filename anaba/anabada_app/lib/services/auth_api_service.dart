@@ -97,15 +97,15 @@ class AuthApiService {
     debugPrint('응답 statusCode: $statusCode');
     debugPrint('응답 body: $responseBody');
 
+    if (statusCode >= 200 && statusCode < 300) {
+      return;
+    }
+
     if (statusCode >= 500) {
       throw const AuthApiException('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     }
 
-    if (statusCode == 200) {
-      return;
-    }
-
-    final Map<String, dynamic> body = _decodeJsonObject(responseBody);
+    final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
 
     if (statusCode == 401) {
       final String message =
@@ -133,6 +133,24 @@ class AuthApiService {
       throw const AuthApiException('서버 응답 형식이 올바르지 않습니다.');
     } on FormatException {
       throw const AuthApiException('서버 응답을 읽을 수 없습니다.');
+    }
+  }
+
+  Map<String, dynamic> _decodeJsonObjectOrEmpty(String responseBody) {
+    if (responseBody.trim().isEmpty) {
+      return {};
+    }
+
+    try {
+      final dynamic decodedBody = jsonDecode(responseBody);
+
+      if (decodedBody is Map<String, dynamic>) {
+        return decodedBody;
+      }
+
+      return {};
+    } on FormatException {
+      return {};
     }
   }
 }
