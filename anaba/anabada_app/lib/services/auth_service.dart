@@ -100,6 +100,48 @@ class AuthService extends ChangeNotifier {
     return _apiCurrentUser;
   }
 
+  Future<bool> refreshTokenWithApi() async {
+    final String? savedRefreshToken = _refreshToken;
+
+    if (savedRefreshToken == null || savedRefreshToken.isEmpty) {
+      logout();
+      return false;
+    }
+
+    try {
+      final AuthApiTokenResult result = await _authApiService.reissueToken(
+        refreshToken: savedRefreshToken,
+      );
+
+      _accessToken = result.accessToken;
+      _refreshToken = result.refreshToken;
+
+      notifyListeners();
+
+      return true;
+    } on AuthApiException catch (error) {
+      debugPrint('토큰 재발급 실패: ${error.message}');
+      logout();
+      return false;
+    } catch (error) {
+      debugPrint('토큰 재발급 처리 실패: $error');
+      logout();
+      return false;
+    }
+  }
+
+  Future<void> logoutWithApi() async {
+    final String? savedAccessToken = _accessToken;
+
+    try {
+      if (savedAccessToken != null && savedAccessToken.isNotEmpty) {
+        await _authApiService.signOut(accessToken: savedAccessToken);
+      }
+    } finally {
+      logout();
+    }
+  }
+
   void logout() {
     _repository.logout();
 
