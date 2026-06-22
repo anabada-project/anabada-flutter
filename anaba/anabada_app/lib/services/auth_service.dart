@@ -121,11 +121,14 @@ class AuthService extends ChangeNotifier {
       return true;
     } on AuthApiException catch (error) {
       debugPrint('토큰 재발급 실패: ${error.message}');
-      logout();
+
+      if (error.statusCode == 401 || error.statusCode == 403) {
+        logout();
+      }
+
       return false;
     } catch (error) {
       debugPrint('토큰 재발급 처리 실패: $error');
-      logout();
       return false;
     }
   }

@@ -31,8 +31,9 @@ class AuthApiTokenResult {
 
 class AuthApiException implements Exception {
   final String message;
+  final int? statusCode;
 
-  const AuthApiException(this.message);
+  const AuthApiException(this.message, {this.statusCode});
 
   @override
   String toString() {
@@ -62,19 +63,22 @@ class AuthApiService {
     debugPrint('응답 body: $responseBody');
 
     if (statusCode >= 500) {
-      throw const AuthApiException('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      throw AuthApiException(
+        '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+        statusCode: statusCode,
+      );
     }
 
     final Map<String, dynamic> body = _decodeJsonObject(responseBody);
 
     if (statusCode == 400 || statusCode == 401 || statusCode == 403) {
       final String message = body['message']?.toString() ?? '로그인에 실패했습니다.';
-      throw AuthApiException(message);
+      throw AuthApiException(message, statusCode: statusCode);
     }
 
     if (statusCode != 200) {
       final String message = body['message']?.toString() ?? '로그인 요청에 실패했습니다.';
-      throw AuthApiException(message);
+      throw AuthApiException(message, statusCode: statusCode);
     }
 
     final dynamic rawData = body['data'];
@@ -116,7 +120,10 @@ class AuthApiService {
     }
 
     if (statusCode >= 500) {
-      throw const AuthApiException('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      throw AuthApiException(
+        '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+        statusCode: statusCode,
+      );
     }
 
     final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
@@ -124,16 +131,16 @@ class AuthApiService {
     if (statusCode == 401) {
       final String message =
           body['message']?.toString() ?? '유효하지 않거나 만료된 액세스 토큰입니다.';
-      throw AuthApiException(message);
+      throw AuthApiException(message, statusCode: statusCode);
     }
 
     if (statusCode == 403) {
       final String message = body['message']?.toString() ?? '접근 권한이 없습니다.';
-      throw AuthApiException(message);
+      throw AuthApiException(message, statusCode: statusCode);
     }
 
     final String message = body['message']?.toString() ?? '로그아웃에 실패했습니다.';
-    throw AuthApiException(message);
+    throw AuthApiException(message, statusCode: statusCode);
   }
 
   Future<AuthApiTokenResult> reissueToken({
@@ -154,7 +161,10 @@ class AuthApiService {
     debugPrint('응답 body: $responseBody');
 
     if (statusCode >= 500) {
-      throw const AuthApiException('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      throw AuthApiException(
+        '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+        statusCode: statusCode,
+      );
     }
 
     final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
@@ -162,25 +172,31 @@ class AuthApiService {
     if (statusCode == 401) {
       final String message =
           body['message']?.toString() ?? '유효하지 않거나 만료된 리프레시 토큰입니다.';
-      throw AuthApiException(message);
+      throw AuthApiException(message, statusCode: statusCode);
     }
 
     if (statusCode == 403) {
       final String message = body['message']?.toString() ?? '토큰 재발급 권한이 없습니다.';
-      throw AuthApiException(message);
+      throw AuthApiException(message, statusCode: statusCode);
     }
 
     if (statusCode != 200) {
       final String message = body['message']?.toString() ?? '토큰 재발급에 실패했습니다.';
-      throw AuthApiException(message);
+      throw AuthApiException(message, statusCode: statusCode);
     }
 
-    final String? newAccessToken = body['accessToken'] as String?;
-    final String? newRefreshToken = body['refreshToken'] as String?;
+    final dynamic rawData = body['data'];
+
+    final Map<String, dynamic> tokenBody = rawData is Map<String, dynamic>
+        ? rawData
+        : body;
+
+    final String? newAccessToken = tokenBody['accessToken'] as String?;
+    final String? newRefreshToken = tokenBody['refreshToken'] as String?;
     final String? accessTokenExpiresIn =
-        body['accessTokenExpiresIn'] as String?;
+        tokenBody['accessTokenExpiresIn'] as String?;
     final String? refreshTokenExpiresIn =
-        body['refreshTokenExpiresIn'] as String?;
+        tokenBody['refreshTokenExpiresIn'] as String?;
 
     if (newAccessToken == null || newRefreshToken == null) {
       throw const AuthApiException('재발급된 토큰 정보를 받을 수 없습니다.');
