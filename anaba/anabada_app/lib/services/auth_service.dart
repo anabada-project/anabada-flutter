@@ -35,6 +35,7 @@ class AuthService extends ChangeNotifier {
 
   bool signUp({
     required String name,
+    String? id,
     required String email,
     required String password,
     required String major,
@@ -44,7 +45,9 @@ class AuthService extends ChangeNotifier {
     final String normalizedEmail = email.trim().toLowerCase();
 
     final AppUser user = AppUser(
-      id: 'fake-user-${DateTime.now().microsecondsSinceEpoch}',
+      id: id?.trim().isNotEmpty == true
+          ? id!.trim()
+          : 'fake-user-${DateTime.now().microsecondsSinceEpoch}',
       name: name.trim(),
       email: normalizedEmail,
       major: major,

@@ -17,6 +17,7 @@ class SignUp extends StatefulWidget {
 
 class _SignUpState extends State<SignUp> {
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _idController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _passwordConfirmController =
@@ -51,6 +52,7 @@ class _SignUpState extends State<SignUp> {
   bool _isCodeSent = false;
   bool _isEmailVerified = false;
 
+  String? _idError;
   String? _passwordError;
   String? _passwordConfirmError;
   String? _emailError;
@@ -58,6 +60,7 @@ class _SignUpState extends State<SignUp> {
   // ── 버튼 활성화 ─────────────────────────────────────────
   bool get _isButtonActive =>
       _nameController.text.trim().isNotEmpty &&
+      _idController.text.trim().isNotEmpty &&
       _emailController.text.trim().isNotEmpty &&
       _passwordController.text.isNotEmpty &&
       _passwordConfirmController.text.isNotEmpty &&
@@ -73,6 +76,7 @@ class _SignUpState extends State<SignUp> {
   void initState() {
     super.initState();
     _nameController.addListener(_refresh);
+    _idController.addListener(_handleIdChanged);
     _emailController.addListener(_handleEmailChanged);
     _passwordController.addListener(_refresh);
     _passwordConfirmController.addListener(_refresh);
@@ -81,13 +85,17 @@ class _SignUpState extends State<SignUp> {
   @override
   void dispose() {
     _nameController.dispose();
+    _idController.dispose();
     _emailController.dispose();
+
     for (final c in _codeControllers) {
       c.dispose();
     }
+
     for (final f in _codeFocusNodes) {
       f.dispose();
     }
+
     _passwordController.dispose();
     _passwordConfirmController.dispose();
     super.dispose();
@@ -99,6 +107,14 @@ class _SignUpState extends State<SignUp> {
     setState(() {});
   }
 
+  void _handleIdChanged() {
+    if (!mounted) return;
+
+    setState(() {
+      _idError = null;
+    });
+  }
+
   void _handleEmailChanged() {
     if (!mounted) return;
     setState(() {
@@ -106,6 +122,7 @@ class _SignUpState extends State<SignUp> {
       _isCodeSent = false;
       _isEmailVerified = false;
       _emailError = null;
+
       for (final c in _codeControllers) {
         c.clear();
       }
@@ -115,11 +132,19 @@ class _SignUpState extends State<SignUp> {
   /// [인증하기] 버튼 클릭 → 코드 입력칸 등장
   void _handleSendCode() {
     final String email = _emailController.text.trim();
-    if (email.isEmpty) return;
+
+    if (email.isEmpty) {
+      setState(() {
+        _emailError = '이메일을 입력해주세요.';
+      });
+      return;
+    }
+
     final String? code = authService.requestVerificationCode(
       email: email,
       purpose: EmailVerificationPurpose.signUp,
     );
+
     if (code == null) {
       setState(() {
         _emailError = authService.isEmailRegistered(email)
@@ -130,13 +155,16 @@ class _SignUpState extends State<SignUp> {
     }
 
     FocusScope.of(context).unfocus();
+
     setState(() {
       _emailError = null;
       _isCodeSent = true;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('테스트 인증코드: $code')),
-    );
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('테스트 인증코드: $code')));
+
     // 첫 번째 칸에 자동 포커스
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) _codeFocusNodes[0].requestFocus();
@@ -149,15 +177,18 @@ class _SignUpState extends State<SignUp> {
       email: _emailController.text,
       purpose: EmailVerificationPurpose.signUp,
     );
+
     for (final c in _codeControllers) {
       c.clear();
     }
+
     _codeFocusNodes[0].requestFocus();
     setState(() {});
+
     if (code != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('테스트 인증코드: $code')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('테스트 인증코드: $code')));
     }
   }
 
@@ -166,10 +197,8 @@ class _SignUpState extends State<SignUp> {
     final String code = _codeControllers.map((controller) {
       return controller.text;
     }).join();
-    if (!authService.verifyCode(
-      email: _emailController.text,
-      code: code,
-    )) {
+
+    if (!authService.verifyCode(email: _emailController.text, code: code)) {
       setState(() {
         _emailError = '인증코드가 올바르지 않습니다.';
       });
@@ -177,6 +206,7 @@ class _SignUpState extends State<SignUp> {
     }
 
     FocusScope.of(context).unfocus();
+
     setState(() {
       _emailError = null;
       _isEmailVerified = true;
@@ -189,6 +219,7 @@ class _SignUpState extends State<SignUp> {
     if (value.length == 1 && index < 5) {
       _codeFocusNodes[index + 1].requestFocus();
     }
+
     setState(() {});
   }
 
@@ -212,36 +243,49 @@ class _SignUpState extends State<SignUp> {
   }
 
   void _handleSignUp() {
+    final String id = _idController.text.trim();
+
     setState(() {
+      _idError = id.isEmpty ? '아이디를 입력해주세요.' : null;
+
       _passwordError = _isPasswordFormatValid(_passwordController.text)
           ? null
           : '비밀번호 형식이 잘못되었습니다.';
+
       _passwordConfirmError =
           _passwordController.text == _passwordConfirmController.text
           ? null
           : '비밀번호가 일치하지 않습니다.';
     });
-    if (_passwordError == null && _passwordConfirmError == null) {
-      final didSignUp = authService.signUp(
-        name: _nameController.text,
-        email: _emailController.text,
-        password: _passwordController.text,
-        major: _selectedMajor!,
-        gender: _selectedGender!,
-        generation: _selectedTerm!,
-      );
 
-      if (!didSignUp) {
-        setState(() {
-          _emailError = '이미 가입된 이메일입니다.';
-          _isEmailVerified = false;
-        });
-        return;
-      }
-
-      debugPrint('회원가입 성공');
-      Navigator.pop(context, _emailController.text.trim().toLowerCase());
+    if (_idError != null ||
+        _passwordError != null ||
+        _passwordConfirmError != null) {
+      return;
     }
+
+    final didSignUp = authService.signUp(
+      name: _nameController.text,
+      id: id,
+      email: _emailController.text,
+      password: _passwordController.text,
+      major: _selectedMajor!,
+      gender: _selectedGender!,
+      generation: _selectedTerm!,
+    );
+
+    if (!didSignUp) {
+      setState(() {
+        _emailError = '이미 가입된 이메일입니다.';
+        _isEmailVerified = false;
+      });
+      return;
+    }
+
+    debugPrint('회원가입 성공');
+    debugPrint('입력한 아이디: $id');
+
+    Navigator.pop(context, _emailController.text.trim().toLowerCase());
   }
 
   // ── 빌드 ────────────────────────────────────────────────
@@ -249,6 +293,7 @@ class _SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -269,6 +314,7 @@ class _SignUpState extends State<SignUp> {
         title: const Text('회원가입', style: AppTextStyles.screenTitle),
         actions: const [SizedBox(width: 100)],
       ),
+
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(
@@ -283,6 +329,18 @@ class _SignUpState extends State<SignUp> {
                 controller: _nameController,
                 hintText: '이름을 입력해주세요',
               ),
+
+              const SizedBox(height: 20),
+
+              // ── 아이디 ────────────────────────────────────
+              const _FieldLabel('아이디'),
+              const SizedBox(height: 8),
+              AppTextFormField(
+                controller: _idController,
+                hintText: '아이디를 입력해주세요',
+                errorText: _idError,
+              ),
+
               const SizedBox(height: 20),
 
               // ── 이메일 ────────────────────────────────────
@@ -408,6 +466,7 @@ class _SignUpState extends State<SignUp> {
                 obscureText: true,
                 errorText: _passwordError,
               ),
+
               const SizedBox(height: 20),
 
               // ── 비밀번호 확인 ─────────────────────────────
@@ -419,6 +478,7 @@ class _SignUpState extends State<SignUp> {
                 obscureText: true,
                 errorText: _passwordConfirmError,
               ),
+
               const SizedBox(height: 20),
 
               // ── 전공 ──────────────────────────────────────
@@ -462,6 +522,7 @@ class _SignUpState extends State<SignUp> {
                 }).toList(),
                 onChanged: (v) => setState(() => _selectedMajor = v),
               ),
+
               const SizedBox(height: 20),
 
               // ── 성별 ──────────────────────────────────────
@@ -488,6 +549,7 @@ class _SignUpState extends State<SignUp> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 20),
 
               // ── 기수 ──────────────────────────────────────
@@ -520,6 +582,7 @@ class _SignUpState extends State<SignUp> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 40),
 
               // ── 회원가입 버튼 ─────────────────────────────
