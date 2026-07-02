@@ -77,7 +77,10 @@ class AuthApiService {
       throw AuthApiException(_serverErrorMessage, statusCode: statusCode);
     }
 
-    final Map<String, dynamic> body = _decodeJsonObject(responseBody);
+    final Map<String, dynamic> body = _decodeJsonObject(
+      responseBody,
+      statusCode: statusCode,
+    );
 
     if (statusCode != 201) {
       final String message =
@@ -85,7 +88,7 @@ class AuthApiService {
       throw AuthApiException(message, statusCode: statusCode);
     }
 
-    final bool success = body['success'] == true;
+    final bool success = body['success'] as bool? ?? true;
     final String message =
         body['message']?.toString() ??
         '\uD68C\uC6D0\uAC00\uC785\uC774 \uC644\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4.';
@@ -125,7 +128,10 @@ class AuthApiService {
       throw AuthApiException(_serverErrorMessage, statusCode: statusCode);
     }
 
-    final Map<String, dynamic> body = _decodeJsonObject(responseBody);
+    final Map<String, dynamic> body = _decodeJsonObject(
+      responseBody,
+      statusCode: statusCode,
+    );
 
     if (statusCode == 400 || statusCode == 401 || statusCode == 403) {
       final String message =
@@ -180,7 +186,10 @@ class AuthApiService {
     };
   }
 
-  Map<String, dynamic> _decodeJsonObject(String responseBody) {
+  Map<String, dynamic> _decodeJsonObject(
+    String responseBody, {
+    int? statusCode,
+  }) {
     if (responseBody.trim().isEmpty) {
       return <String, dynamic>{};
     }
@@ -192,12 +201,14 @@ class AuthApiService {
         return decodedBody;
       }
 
-      throw const AuthApiException(
+      throw AuthApiException(
         '\uC11C\uBC84 \uC751\uB2F5 \uD615\uC2DD\uC774 \uC62C\uBC14\uB974\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.',
+        statusCode: statusCode,
       );
     } on FormatException {
-      throw const AuthApiException(
+      throw AuthApiException(
         '\uC11C\uBC84 \uC751\uB2F5\uC744 \uC77D\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.',
+        statusCode: statusCode,
       );
     }
   }

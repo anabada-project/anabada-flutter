@@ -302,7 +302,10 @@ class _SignUpState extends State<SignUp> {
     if (_idError != null ||
         _emailError != null ||
         _passwordError != null ||
-        _passwordConfirmError != null) {
+        _passwordConfirmError != null ||
+        _selectedMajor == null ||
+        _selectedGender == null ||
+        _selectedTerm == null) {
       return;
     }
 
