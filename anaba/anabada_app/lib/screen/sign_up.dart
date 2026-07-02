@@ -266,6 +266,7 @@ class _SignUpState extends State<SignUp> {
 
     final didSignUp = authService.signUp(
       name: _nameController.text,
+      id: id,
       email: _emailController.text,
       password: _passwordController.text,
       major: _selectedMajor!,
