@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
+import '../../theme/app_colors.dart';
 
 class AppSelectableButton extends StatelessWidget {
   final String text;
@@ -26,10 +26,7 @@ class AppSelectableButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? AppColors.mainColor : Colors.white,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: AppColors.mainColor,
-            width: 1,
-          ),
+          border: Border.all(color: AppColors.mainColor, width: 1),
         ),
         child: Text(
           text,

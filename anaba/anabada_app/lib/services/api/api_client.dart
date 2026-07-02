@@ -4,6 +4,9 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import 'api_request.dart';
+import 'api_response.dart';
+
 typedef TokenProvider = FutureOr<String?> Function();
 
 class ApiClient {
@@ -25,28 +28,23 @@ class ApiClient {
     Map<String, String?> queryParameters = const {},
     bool authenticated = true,
   }) {
-    return _send(
-      'GET',
-      path,
-      queryParameters: queryParameters,
-      authenticated: authenticated,
+    return send(
+      ApiRequest.get(
+        path,
+        queryParameters: queryParameters,
+        authenticated: authenticated,
+      ),
     );
   }
 
-  Future<dynamic> post(
-    String path, {
-    Object? body,
-    bool authenticated = true,
-  }) {
-    return _send('POST', path, body: body, authenticated: authenticated);
+  Future<dynamic> post(String path, {Object? body, bool authenticated = true}) {
+    return send(
+      ApiRequest.post(path, body: body, authenticated: authenticated),
+    );
   }
 
-  Future<dynamic> put(
-    String path, {
-    Object? body,
-    bool authenticated = true,
-  }) {
-    return _send('PUT', path, body: body, authenticated: authenticated);
+  Future<dynamic> put(String path, {Object? body, bool authenticated = true}) {
+    return send(ApiRequest.put(path, body: body, authenticated: authenticated));
   }
 
   Future<dynamic> patch(
@@ -54,11 +52,77 @@ class ApiClient {
     Object? body,
     bool authenticated = true,
   }) {
-    return _send('PATCH', path, body: body, authenticated: authenticated);
+    return send(
+      ApiRequest.patch(path, body: body, authenticated: authenticated),
+    );
   }
 
   Future<dynamic> delete(String path, {bool authenticated = true}) {
-    return _send('DELETE', path, authenticated: authenticated);
+    return send(ApiRequest.delete(path, authenticated: authenticated));
+  }
+
+  Future<ApiResponse<T>> getResponse<T>(
+    String path, {
+    required ApiResponseParser<T> parser,
+    Map<String, String?> queryParameters = const {},
+    bool authenticated = true,
+  }) {
+    return sendResponse<T>(
+      ApiRequest.get(
+        path,
+        queryParameters: queryParameters,
+        authenticated: authenticated,
+      ),
+      parser: parser,
+    );
+  }
+
+  Future<ApiResponse<T>> postResponse<T>(
+    String path, {
+    required ApiResponseParser<T> parser,
+    Object? body,
+    bool authenticated = true,
+  }) {
+    return sendResponse<T>(
+      ApiRequest.post(path, body: body, authenticated: authenticated),
+      parser: parser,
+    );
+  }
+
+  Future<ApiResponse<T>> putResponse<T>(
+    String path, {
+    required ApiResponseParser<T> parser,
+    Object? body,
+    bool authenticated = true,
+  }) {
+    return sendResponse<T>(
+      ApiRequest.put(path, body: body, authenticated: authenticated),
+      parser: parser,
+    );
+  }
+
+  Future<ApiResponse<T>> patchResponse<T>(
+    String path, {
+    required ApiResponseParser<T> parser,
+    Object? body,
+    bool authenticated = true,
+  }) {
+    return sendResponse<T>(
+      ApiRequest.patch(path, body: body, authenticated: authenticated),
+      parser: parser,
+    );
+  }
+
+  Future<dynamic> send(ApiRequest request) {
+    return _send(request);
+  }
+
+  Future<ApiResponse<T>> sendResponse<T>(
+    ApiRequest request, {
+    required ApiResponseParser<T> parser,
+  }) async {
+    final dynamic response = await send(request);
+    return ApiResponse<T>.fromRaw(response, parser: parser);
   }
 
   Future<void> putBytes(
@@ -81,27 +145,23 @@ class ApiClient {
     }
   }
 
-  Future<dynamic> _send(
-    String method,
-    String path, {
-    Object? body,
-    Map<String, String?> queryParameters = const {},
-    bool authenticated = true,
-  }) async {
-    final Uri uri = _uri(path, queryParameters);
+  Future<dynamic> _send(ApiRequest request) async {
+    final Uri uri = _uri(request.path, request.queryParameters);
     final Map<String, String> headers = {'Accept': 'application/json'};
 
-    if (body != null) {
+    if (request.body != null) {
       headers['Content-Type'] = 'application/json';
     }
 
     final String? token = await tokenProvider?.call();
-    if (authenticated && token != null && token.trim().isNotEmpty) {
+    if (request.authenticated && token != null && token.trim().isNotEmpty) {
       headers['Authorization'] = 'Bearer ${token.trim()}';
     }
 
-    final String? encodedBody = body == null ? null : jsonEncode(body);
-    final http.Response response = switch (method) {
+    final String? encodedBody = request.body == null
+        ? null
+        : jsonEncode(request.body);
+    final http.Response response = switch (request.method) {
       'GET' => await _httpClient.get(uri, headers: headers),
       'POST' => await _httpClient.post(
         uri,
@@ -115,7 +175,11 @@ class ApiClient {
         body: encodedBody,
       ),
       'DELETE' => await _httpClient.delete(uri, headers: headers),
-      _ => throw ArgumentError.value(method, 'method', '지원하지 않는 method'),
+      _ => throw ArgumentError.value(
+        request.method,
+        'method',
+        '지원하지 않는 method',
+      ),
     };
 
     final dynamic decodedBody = _decodeBody(response.body);
@@ -140,7 +204,9 @@ class ApiClient {
   }
 
   Uri _uri(String path, Map<String, String?> queryParameters) {
-    final String normalizedPath = path.startsWith('/') ? path.substring(1) : path;
+    final String normalizedPath = path.startsWith('/')
+        ? path.substring(1)
+        : path;
     final Uri resolved = _baseUri.resolve(normalizedPath);
     final Map<String, String> mergedQuery = {...resolved.queryParameters};
 
