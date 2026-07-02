@@ -1,5 +1,5 @@
 class ApiClient {
-  static const String baseUrl = 'https://anabada.shop';
+  static const String baseUrl = 'https://anabada.shop:22124';
 
   static Uri uri(String path) {
     return Uri.parse('$baseUrl$path');
