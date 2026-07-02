@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../constants/app_routes.dart';
+import '../../models/app_user.dart';
+import '../../services/auth_api_service.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
@@ -16,50 +18,108 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  // ── 컨트롤러 ─────────────────────────────────────────────
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // ── 상태 ────────────────────────────────────────────────
   String? _emailError;
   String? _passwordError;
 
-  bool get _isButtonActive =>
-      _emailController.text.trim().isNotEmpty &&
-      _passwordController.text.isNotEmpty;
+  bool _isLoading = false;
 
-  // ── 핸들러 ───────────────────────────────────────────────
+  bool get _isButtonActive {
+    return _emailController.text.trim().isNotEmpty &&
+        _passwordController.text.isNotEmpty &&
+        !_isLoading;
+  }
+
   void _clearEmailError(String _) {
-    if (_emailError == null) return;
-    setState(() => _emailError = null);
+    if (_emailError == null) {
+      return;
+    }
+
+    setState(() {
+      _emailError = null;
+    });
   }
 
   void _clearPasswordError(String _) {
-    if (_passwordError == null) return;
-    setState(() => _passwordError = null);
-  }
-
-  void _handleLogin() {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-    final isRegistered = authService.isEmailRegistered(email);
-    final user = isRegistered
-        ? authService.login(email: email, password: password)
-        : null;
+    if (_passwordError == null) {
+      return;
+    }
 
     setState(() {
-      _emailError = isRegistered ? null : '이메일을 다시 입력해주세요.';
-      _passwordError = !isRegistered || user != null
-          ? null
-          : '비밀번호를 다시 입력해주세요.';
+      _passwordError = null;
+    });
+  }
+
+  Future<void> _handleLogin() async {
+    final String id = _emailController.text.trim();
+    final String password = _passwordController.text;
+
+    if (id.isEmpty || password.isEmpty) {
+      setState(() {
+        _emailError = id.isEmpty ? '아이디를 입력해주세요.' : null;
+        _passwordError = password.isEmpty ? '비밀번호를 입력해주세요.' : null;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _emailError = null;
+      _passwordError = null;
     });
 
-    if (user != null) {
+    try {
+      final AppUser? user = await authService.loginWithApi(
+        id: id,
+        password: password,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (user == null) {
+        setState(() {
+          _emailError = '아이디 또는 비밀번호를 다시 확인해주세요.';
+          _passwordError = '아이디 또는 비밀번호를 다시 확인해주세요.';
+        });
+        return;
+      }
+
       debugPrint('로그인 성공');
+      debugPrint('accessToken: ${authService.accessToken}');
+      debugPrint('refreshToken: ${authService.refreshToken}');
+
       Navigator.pushReplacementNamed(
         context,
         user.isAdmin ? AppRoutes.adminMain : AppRoutes.main,
       );
+    } on AuthApiException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _emailError = error.message;
+        _passwordError = '아이디 또는 비밀번호를 다시 확인해주세요.';
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _emailError = '로그인에 실패했습니다.';
+        _passwordError = '잠시 후 다시 시도해주세요.';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -91,8 +151,6 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.03),
-
-                // ── 이메일 ───────────────────────────────
                 const Text('이메일', style: AppTextStyles.fieldLabel),
                 const SizedBox(height: 8),
                 AppTextFormField(
@@ -104,8 +162,6 @@ class _LoginState extends State<Login> {
                   errorText: _emailError,
                 ),
                 const SizedBox(height: 20),
-
-                // ── 비밀번호 ─────────────────────────────
                 const Text('비밀번호', style: AppTextStyles.fieldLabel),
                 const SizedBox(height: 8),
                 AppTextFormField(
@@ -117,8 +173,6 @@ class _LoginState extends State<Login> {
                   errorText: _passwordError,
                 ),
                 const SizedBox(height: 12),
-
-                // ── 비밀번호 찾기 ────────────────────────
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
@@ -135,8 +189,6 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.05),
-
-                // ── 로그인 버튼 ──────────────────────────
                 SizedBox(
                   height: 43,
                   child: AnimatedBuilder(
@@ -159,7 +211,7 @@ class _LoginState extends State<Login> {
                           ),
                         ),
                         child: Text(
-                          '로그인',
+                          _isLoading ? '로그인 중...' : '로그인',
                           style: _isButtonActive
                               ? AppTextStyles.buttonText
                               : AppTextStyles.disabledButtonText,
@@ -169,8 +221,6 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // ── 구분선 ───────────────────────────────
                 const Row(
                   children: [
                     Expanded(
@@ -186,19 +236,19 @@ class _LoginState extends State<Login> {
                   ],
                 ),
                 const SizedBox(height: 24),
-
-                // ── 회원가입 버튼 ────────────────────────
                 SizedBox(
                   height: 43,
                   child: OutlinedButton(
                     onPressed: () async {
-                      final email = await Navigator.push<String>(
+                      final String? email = await Navigator.push<String>(
                         context,
                         MaterialPageRoute(builder: (_) => const SignUp()),
                       );
+
                       if (!context.mounted || email == null) {
                         return;
                       }
+
                       _emailController.text = email;
                     },
                     style: OutlinedButton.styleFrom(

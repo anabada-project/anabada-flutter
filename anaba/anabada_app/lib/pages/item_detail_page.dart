@@ -9,6 +9,7 @@ import '../widgets/item_detail_comment_preview.dart';
 import '../widgets/item_detail_header.dart';
 import '../widgets/item_detail_image_area.dart';
 import '../widgets/item_detail_info_section.dart';
+import '../widgets/item_detail_not_found_state.dart';
 import '../widgets/item_detail_wanted_section.dart';
 import '../widgets/item_detail_writer_section.dart';
 import 'item_detail_comment_page.dart';
@@ -26,6 +27,7 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
   @override
   void initState() {
     super.initState();
+
     final user = authService.currentUser;
     if (user != null) {
       appController.recordItemView(itemId: widget.itemId, userId: user.id);
@@ -74,6 +76,10 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
     );
   }
 
+  void _goBackToList() {
+    Navigator.maybePop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -81,9 +87,22 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
       builder: (context, child) {
         final TradeItem? item = appController.itemById(widget.itemId);
         final user = authService.currentUser;
+
         if (item == null) {
-          return const Scaffold(
-            body: SafeArea(child: Center(child: Text('물건을 찾을 수 없습니다.'))),
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: SafeArea(
+              child: Column(
+                children: [
+                  const ItemDetailHeader(),
+                  Expanded(
+                    child: ItemDetailNotFoundState(
+                      onBackToListTap: _goBackToList,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           );
         }
 
