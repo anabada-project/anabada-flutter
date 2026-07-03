@@ -59,6 +59,7 @@ class _SignUpState extends State<SignUp> {
 
   bool _isCodeSent = false;
   bool _isEmailVerified = false;
+  bool _isEmailActionLoading = false;
   bool _isSubmitting = false;
 
   String? _idError;
@@ -76,10 +77,13 @@ class _SignUpState extends State<SignUp> {
         _selectedGender != null &&
         _selectedTerm != null &&
         _isEmailVerified &&
+        !_isEmailActionLoading &&
         !_isSubmitting;
   }
 
-  bool get _isCodeFilled => _codeControllers.every((c) => c.text.isNotEmpty);
+  bool get _isCodeFilled =>
+      _codeControllers.every((c) => c.text.isNotEmpty) &&
+      !_isEmailActionLoading;
 
   @override
   void initState() {
@@ -136,6 +140,7 @@ class _SignUpState extends State<SignUp> {
     setState(() {
       _isCodeSent = false;
       _isEmailVerified = false;
+      _isEmailActionLoading = false;
       _emailError = null;
 
       for (final TextEditingController controller in _codeControllers) {
@@ -166,6 +171,18 @@ class _SignUpState extends State<SignUp> {
   }
 
   void _handleSendCode() {
+    _sendCode();
+  }
+
+  void _handleResendCode() {
+    _sendCode(clearCurrentCode: true);
+  }
+
+  Future<void> _sendCode({bool clearCurrentCode = false}) async {
+    if (_isEmailActionLoading) {
+      return;
+    }
+
     final String email = _emailController.text.trim();
 
     if (email.isEmpty) {
@@ -175,77 +192,152 @@ class _SignUpState extends State<SignUp> {
       return;
     }
 
-    final String? code = authService.requestVerificationCode(
-      email: email,
-      purpose: EmailVerificationPurpose.signUp,
-    );
-
-    if (code == null) {
-      setState(() {
-        _emailError = authService.isEmailRegistered(email)
-            ? '이미 가입된 이메일입니다.'
-            : '올바른 이메일을 입력해주세요.';
-      });
-      return;
-    }
-
     FocusScope.of(context).unfocus();
 
     setState(() {
       _emailError = null;
-      _isCodeSent = true;
+      _isEmailActionLoading = true;
     });
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('테스트 인증코드: $code')));
+    try {
+      final AuthApiMessageResult result = await authService
+          .requestSignUpEmailCodeWithApi(email: email);
 
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (mounted) {
-        _codeFocusNodes[0].requestFocus();
+      if (!mounted) {
+        return;
       }
-    });
-  }
 
-  void _handleResendCode() {
-    final String? code = authService.requestVerificationCode(
-      email: _emailController.text,
-      purpose: EmailVerificationPurpose.signUp,
-    );
+      if (clearCurrentCode) {
+        for (final TextEditingController controller in _codeControllers) {
+          controller.clear();
+        }
+      }
 
-    for (final TextEditingController controller in _codeControllers) {
-      controller.clear();
-    }
+      setState(() {
+        _emailError = null;
+        _isCodeSent = true;
+        _isEmailVerified = false;
+      });
 
-    _codeFocusNodes[0].requestFocus();
-    setState(() {});
-
-    if (code != null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('테스트 인증코드: $code')));
+      ).showSnackBar(SnackBar(content: Text(result.message)));
+
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          _codeFocusNodes[0].requestFocus();
+        }
+      });
+    } on AuthApiException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _emailError = error.message;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      debugPrint('회원가입 인증번호 발송 실패: $error');
+
+      const String message = '인증번호 발송에 실패했습니다. 잠시 후 다시 시도해주세요.';
+      setState(() {
+        _emailError = message;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(message)));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isEmailActionLoading = false;
+        });
+      }
     }
   }
 
   void _handleVerifyCode() {
+    _verifyCode();
+  }
+
+  Future<void> _verifyCode() async {
+    if (_isEmailActionLoading) {
+      return;
+    }
+
     final String code = _codeControllers.map((controller) {
       return controller.text;
     }).join();
 
-    if (!authService.verifyCode(email: _emailController.text, code: code)) {
-      setState(() {
-        _emailError = '인증코드가 올바르지 않습니다.';
-      });
-      return;
-    }
-
-    FocusScope.of(context).unfocus();
-
     setState(() {
       _emailError = null;
-      _isEmailVerified = true;
-      _isCodeSent = false;
+      _isEmailActionLoading = true;
     });
+
+    try {
+      final AuthApiMessageResult result = await authService
+          .verifySignUpEmailCodeWithApi(
+            email: _emailController.text,
+            code: code,
+          );
+
+      if (!mounted) {
+        return;
+      }
+
+      FocusScope.of(context).unfocus();
+
+      setState(() {
+        _emailError = null;
+        _isEmailVerified = true;
+        _isCodeSent = false;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.message)));
+    } on AuthApiException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _emailError = error.message;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      debugPrint('회원가입 이메일 인증 실패: $error');
+
+      const String message = '이메일 인증에 실패했습니다. 잠시 후 다시 시도해주세요.';
+      setState(() {
+        _emailError = message;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(message)));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isEmailActionLoading = false;
+        });
+      }
+    }
   }
 
   void _onCodeChanged(String value, int index) {
@@ -421,7 +513,10 @@ class _SignUpState extends State<SignUp> {
                       hintText: '이메일을 입력해주세요',
                       keyboardType: TextInputType.emailAddress,
                       errorText: _emailError,
-                      enabled: !_isEmailVerified && !_isCodeSent,
+                      enabled:
+                          !_isEmailVerified &&
+                          !_isCodeSent &&
+                          !_isEmailActionLoading,
                       fillColor: (_isEmailVerified || _isCodeSent)
                           ? const Color(0xFFF6F7F8)
                           : null,
@@ -491,7 +586,7 @@ class _SignUpState extends State<SignUp> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
-                    onTap: _handleResendCode,
+                    onTap: _isEmailActionLoading ? null : _handleResendCode,
                     child: const Text('재전송', style: AppTextStyles.helperText),
                   ),
                 ),
@@ -542,10 +637,7 @@ class _SignUpState extends State<SignUp> {
                 isExpanded: true,
                 dropdownColor: Colors.white,
                 menuMaxHeight: 360,
-                hint: const Text(
-                  '전공을 선택해주세요',
-                  style: AppTextStyles.fieldHint,
-                ),
+                hint: const Text('전공을 선택해주세요', style: AppTextStyles.fieldHint),
                 icon: const Icon(
                   Icons.keyboard_arrow_down,
                   color: AppColors.grayText,

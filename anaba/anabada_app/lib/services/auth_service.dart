@@ -84,6 +84,19 @@ class AuthService extends ChangeNotifier {
     );
   }
 
+  Future<AuthApiMessageResult> requestSignUpEmailCodeWithApi({
+    required String email,
+  }) {
+    return _authApiService.sendSignUpEmailCode(email: email);
+  }
+
+  Future<AuthApiMessageResult> verifySignUpEmailCodeWithApi({
+    required String email,
+    required String code,
+  }) {
+    return _authApiService.verifySignUpEmailCode(email: email, code: code);
+  }
+
   AppUser? login({required String email, required String password}) {
     final AppUser? user = _repository.login(email: email, password: password);
 
