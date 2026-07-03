@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
-import '../services/auth_service.dart';
-import '../widget/app_button.dart';
-import '../widget/app_text_form_field.dart';
-import 'login.dart';
+import '../../services/auth_service.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_text_styles.dart';
+import '../../widgets/auth/password_reset_steps.dart';
+import '../../widgets/common/app_button.dart';
+import 'login_page.dart';
 
 // ── Step 열거형 ──────────────────────────────────────────
 enum _Step { email, code, newPassword, success }
@@ -65,9 +65,9 @@ class _FindPasswordState extends State<FindPassword> {
       _emailError = null;
       _currentStep = _Step.code;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('테스트 인증코드: $code')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('테스트 인증코드: $code')));
   }
 
   void _handleResendCode() {
@@ -83,9 +83,9 @@ class _FindPasswordState extends State<FindPassword> {
       _codeError = null;
     });
     if (code != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('테스트 인증코드: $code')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('테스트 인증코드: $code')));
     }
   }
 
@@ -93,10 +93,7 @@ class _FindPasswordState extends State<FindPassword> {
     final String code = _codeControllers
         .map((controller) => controller.text)
         .join();
-    if (!authService.verifyCode(
-      email: _emailController.text,
-      code: code,
-    )) {
+    if (!authService.verifyCode(email: _emailController.text, code: code)) {
       setState(() {
         _codeError = '인증코드가 올바르지 않습니다.';
       });
@@ -269,11 +266,11 @@ class _FindPasswordState extends State<FindPassword> {
   // ── Step별 본문 위젯 ─────────────────────────────────────
   Widget _buildBody() {
     return switch (_currentStep) {
-      _Step.email => _EmailStep(
+      _Step.email => PasswordResetEmailStep(
         controller: _emailController,
         errorText: _emailError,
       ),
-      _Step.code => _CodeStep(
+      _Step.code => PasswordResetCodeStep(
         controllers: _codeControllers,
         focusNodes: _codeFocusNodes,
         onChanged: _onCodeChanged,
@@ -281,12 +278,12 @@ class _FindPasswordState extends State<FindPassword> {
         onResend: _handleResendCode,
         errorText: _codeError,
       ),
-      _Step.newPassword => _NewPasswordStep(
+      _Step.newPassword => PasswordResetNewPasswordStep(
         passwordController: _passwordController,
         confirmController: _passwordConfirmController,
         passwordConfirmError: _passwordConfirmError,
       ),
-      _Step.success => const _SuccessStep(),
+      _Step.success => const PasswordResetSuccessStep(),
     };
   }
 
@@ -314,214 +311,5 @@ class _FindPasswordState extends State<FindPassword> {
         onPressed: _handleGoLogin,
       ),
     };
-  }
-}
-
-// ── Step 1: 이메일 입력 ──────────────────────────────────
-class _EmailStep extends StatelessWidget {
-  const _EmailStep({required this.controller, required this.errorText});
-
-  final TextEditingController controller;
-  final String? errorText;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text('이메일', style: AppTextStyles.fieldLabel),
-        const SizedBox(height: 8),
-        AppTextFormField(
-          controller: controller,
-          hintText: '이메일을 입력해주세요',
-          keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.done,
-          errorText: errorText,
-        ),
-      ],
-    );
-  }
-}
-
-// ── Step 2: 인증코드 입력 ────────────────────────────────
-class _CodeStep extends StatelessWidget {
-  const _CodeStep({
-    required this.controllers,
-    required this.focusNodes,
-    required this.onChanged,
-    required this.onKeyDown,
-    required this.onResend,
-    required this.errorText,
-  });
-
-  final List<TextEditingController> controllers;
-  final List<FocusNode> focusNodes;
-  final void Function(String, int) onChanged;
-  final void Function(KeyEvent, int) onKeyDown;
-  final VoidCallback onResend;
-  final String? errorText;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text('인증코드', style: AppTextStyles.fieldLabel),
-        const SizedBox(height: 8),
-        Row(
-          children: List.generate(6, (i) {
-            return Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(right: i < 5 ? 8 : 0),
-                child: KeyboardListener(
-                  focusNode: focusNodes[i],
-                  onKeyEvent: (event) => onKeyDown(event, i),
-                  child: TextFormField(
-                    controller: controllers[i],
-                    focusNode: focusNodes[i],
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(1),
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    cursorColor: AppColors.mainColor,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 13),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(
-                          color: AppColors.lightGray,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(
-                          color: AppColors.mainColor,
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                    onChanged: (v) => onChanged(v, i),
-                  ),
-                ),
-              ),
-            );
-          }),
-        ),
-        if (errorText != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            errorText!,
-            style: const TextStyle(color: Colors.red, fontSize: 12),
-          ),
-        ],
-        const SizedBox(height: 8),
-        Align(
-          alignment: Alignment.centerRight,
-          child: GestureDetector(
-            onTap: onResend,
-            child: const Text('재전송', style: AppTextStyles.helperText),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ── Step 3: 새 비밀번호 설정 ─────────────────────────────
-class _NewPasswordStep extends StatelessWidget {
-  const _NewPasswordStep({
-    required this.passwordController,
-    required this.confirmController,
-    required this.passwordConfirmError,
-  });
-
-  final TextEditingController passwordController;
-  final TextEditingController confirmController;
-  final String? passwordConfirmError;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text('새 비밀번호', style: AppTextStyles.fieldLabel),
-        const SizedBox(height: 8),
-        AppTextFormField(
-          controller: passwordController,
-          hintText: '비밀번호를 입력하세요.',
-          obscureText: true,
-          textInputAction: TextInputAction.next,
-        ),
-        const SizedBox(height: 20),
-        const Text('새 비밀번호 확인', style: AppTextStyles.fieldLabel),
-        const SizedBox(height: 8),
-        AppTextFormField(
-          controller: confirmController,
-          hintText: '비밀번호를 다시 입력하세요.',
-          obscureText: true,
-          textInputAction: TextInputAction.done,
-          errorText: passwordConfirmError,
-        ),
-        // ── 에러 메시지 ──────────────────────────────────
-        if (passwordConfirmError != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            passwordConfirmError!,
-            style: const TextStyle(color: Colors.red, fontSize: 12),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-// ── Step 4: 성공 화면 ────────────────────────────────────
-class _SuccessStep extends StatelessWidget {
-  const _SuccessStep();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 60),
-        Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            color: AppColors.mainColor.withValues(alpha: 0.15),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.check, color: AppColors.mainColor, size: 36),
-        ),
-        const SizedBox(height: 24),
-        const Text(
-          '비밀번호가 성공적으로 변경되었습니다.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(height: 12),
-        const Text(
-          '새 비밀번호로 로그인 할 수 있습니다.\n안전한 계정 사용을 위해 주기적으로\n비밀번호를 변경해주세요.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.grayText,
-            height: 1.6,
-          ),
-        ),
-      ],
-    );
   }
 }

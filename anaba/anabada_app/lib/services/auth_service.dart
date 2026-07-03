@@ -64,6 +64,26 @@ class AuthService extends ChangeNotifier {
     return didRegister;
   }
 
+  Future<AuthApiSignUpResult> signUpWithApi({
+    required String name,
+    required String id,
+    required String email,
+    required String password,
+    required String specialism,
+    required String gender,
+    required String generation,
+  }) {
+    return _authApiService.signUp(
+      name: name,
+      id: id,
+      email: email,
+      password: password,
+      specialism: specialism,
+      gender: gender,
+      generation: generation,
+    );
+  }
+
   AppUser? login({required String email, required String password}) {
     final AppUser? user = _repository.login(email: email, password: password);
 
