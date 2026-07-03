@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'constants/app_routes.dart';
+import 'pages/auth/login_page.dart';
 import 'pages/admin_main_page.dart';
 import 'pages/favorite_page.dart';
 import 'pages/item_list_page.dart';
@@ -9,7 +10,6 @@ import 'pages/main_page.dart';
 import 'pages/my_page.dart';
 import 'pages/notice_list_page.dart';
 import 'pages/notification_page.dart';
-import 'screen/login.dart';
 
 void main() {
   runApp(const MyApp());

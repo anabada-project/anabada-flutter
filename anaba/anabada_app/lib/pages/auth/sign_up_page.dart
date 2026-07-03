@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
-import '../services/auth_service.dart';
-import '../widget/app_button.dart';
-import '../widget/app_selectable_button.dart';
-import '../widget/app_text_form_field.dart';
+import '../../services/auth_api_service.dart';
+import '../../services/auth_service.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_text_styles.dart';
+import '../../widgets/auth/sign_up_widgets.dart';
+import '../../widgets/common/app_button.dart';
+import '../../widgets/common/app_selectable_button.dart';
+import '../../widgets/common/app_text_form_field.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -17,109 +19,167 @@ class SignUp extends StatefulWidget {
 
 class _SignUpState extends State<SignUp> {
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _idController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _passwordConfirmController =
       TextEditingController();
 
-  // ── 인증코드 6칸 ──────────────────────────────────────
   final List<TextEditingController> _codeControllers = List.generate(
     6,
     (_) => TextEditingController(),
   );
   final List<FocusNode> _codeFocusNodes = List.generate(6, (_) => FocusNode());
 
-  // ── 전공 목록 ──────────────────────────────────────────
-  final List<String> _majors = const [
-    '백엔드',
-    '프론트엔드',
-    '디자인',
-    '플러터',
-    'iOS',
-    '안드로이드',
-    '기능반',
-    'AI',
+  final List<_Option> _majorOptions = const [
+    _Option(label: '백엔드', value: 'BACKEND'),
+    _Option(label: '프론트엔드', value: 'FRONTEND'),
+    _Option(label: '디자인', value: 'DESIGN'),
+    _Option(label: '플러터', value: 'FLUTTER'),
+    _Option(label: 'iOS', value: 'IOS'),
+    _Option(label: '안드로이드', value: 'ANDROID'),
+    _Option(label: '기획', value: 'PM'),
+    _Option(label: 'AI', value: 'AI'),
   ];
 
-  // ── 상태 ────────────────────────────────────────────────
+  final List<_Option> _genderOptions = const [
+    _Option(label: '남자', value: 'MALE'),
+    _Option(label: '여자', value: 'FEMALE'),
+  ];
+
+  final List<_Option> _termOptions = const [
+    _Option(label: '8기', value: '8기'),
+    _Option(label: '9기', value: '9기'),
+    _Option(label: '10기', value: '10기'),
+  ];
+
   String? _selectedMajor;
   String? _selectedGender;
   String? _selectedTerm;
 
-  /// false  → 인증 전
-  /// true   → [인증하기] 눌러서 코드 입력칸 보이는 중
   bool _isCodeSent = false;
   bool _isEmailVerified = false;
+  bool _isSubmitting = false;
 
+  String? _idError;
   String? _passwordError;
   String? _passwordConfirmError;
   String? _emailError;
 
-  // ── 버튼 활성화 ─────────────────────────────────────────
-  bool get _isButtonActive =>
-      _nameController.text.trim().isNotEmpty &&
-      _emailController.text.trim().isNotEmpty &&
-      _passwordController.text.isNotEmpty &&
-      _passwordConfirmController.text.isNotEmpty &&
-      _selectedMajor != null &&
-      _selectedGender != null &&
-      _selectedTerm != null &&
-      _isEmailVerified;
+  bool get _isButtonActive {
+    return _nameController.text.trim().isNotEmpty &&
+        _idController.text.trim().isNotEmpty &&
+        _emailController.text.trim().isNotEmpty &&
+        _passwordController.text.isNotEmpty &&
+        _passwordConfirmController.text.isNotEmpty &&
+        _selectedMajor != null &&
+        _selectedGender != null &&
+        _selectedTerm != null &&
+        _isEmailVerified &&
+        !_isSubmitting;
+  }
 
   bool get _isCodeFilled => _codeControllers.every((c) => c.text.isNotEmpty);
 
-  // ── 초기화 / 해제 ────────────────────────────────────────
   @override
   void initState() {
     super.initState();
     _nameController.addListener(_refresh);
+    _idController.addListener(_handleIdChanged);
     _emailController.addListener(_handleEmailChanged);
-    _passwordController.addListener(_refresh);
-    _passwordConfirmController.addListener(_refresh);
+    _passwordController.addListener(_handlePasswordChanged);
+    _passwordConfirmController.addListener(_handlePasswordConfirmChanged);
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _idController.dispose();
     _emailController.dispose();
-    for (final c in _codeControllers) {
-      c.dispose();
-    }
-    for (final f in _codeFocusNodes) {
-      f.dispose();
-    }
     _passwordController.dispose();
     _passwordConfirmController.dispose();
+
+    for (final TextEditingController controller in _codeControllers) {
+      controller.dispose();
+    }
+
+    for (final FocusNode focusNode in _codeFocusNodes) {
+      focusNode.dispose();
+    }
+
     super.dispose();
   }
 
-  // ── 핸들러 ───────────────────────────────────────────────
   void _refresh() {
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
+
     setState(() {});
   }
 
-  void _handleEmailChanged() {
-    if (!mounted) return;
+  void _handleIdChanged() {
+    if (!mounted) {
+      return;
+    }
+
     setState(() {
-      // 이메일을 바꾸면 인증 초기화
+      _idError = null;
+    });
+  }
+
+  void _handleEmailChanged() {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
       _isCodeSent = false;
       _isEmailVerified = false;
       _emailError = null;
-      for (final c in _codeControllers) {
-        c.clear();
+
+      for (final TextEditingController controller in _codeControllers) {
+        controller.clear();
       }
     });
   }
 
-  /// [인증하기] 버튼 클릭 → 코드 입력칸 등장
+  void _handlePasswordChanged() {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _passwordError = null;
+      _passwordConfirmError = null;
+    });
+  }
+
+  void _handlePasswordConfirmChanged() {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _passwordConfirmError = null;
+    });
+  }
+
   void _handleSendCode() {
     final String email = _emailController.text.trim();
-    if (email.isEmpty) return;
+
+    if (email.isEmpty) {
+      setState(() {
+        _emailError = '이메일을 입력해주세요.';
+      });
+      return;
+    }
+
     final String? code = authService.requestVerificationCode(
       email: email,
       purpose: EmailVerificationPurpose.signUp,
     );
+
     if (code == null) {
       setState(() {
         _emailError = authService.isEmailRegistered(email)
@@ -130,46 +190,49 @@ class _SignUpState extends State<SignUp> {
     }
 
     FocusScope.of(context).unfocus();
+
     setState(() {
       _emailError = null;
       _isCodeSent = true;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('테스트 인증코드: $code')),
-    );
-    // 첫 번째 칸에 자동 포커스
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('테스트 인증코드: $code')));
+
     Future.delayed(const Duration(milliseconds: 100), () {
-      if (mounted) _codeFocusNodes[0].requestFocus();
+      if (mounted) {
+        _codeFocusNodes[0].requestFocus();
+      }
     });
   }
 
-  /// [재전송] 클릭 → 코드 칸 초기화
   void _handleResendCode() {
     final String? code = authService.requestVerificationCode(
       email: _emailController.text,
       purpose: EmailVerificationPurpose.signUp,
     );
-    for (final c in _codeControllers) {
-      c.clear();
+
+    for (final TextEditingController controller in _codeControllers) {
+      controller.clear();
     }
+
     _codeFocusNodes[0].requestFocus();
     setState(() {});
+
     if (code != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('테스트 인증코드: $code')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('테스트 인증코드: $code')));
     }
   }
 
-  /// [인증완료] 버튼 클릭 → 인증 완료 처리
   void _handleVerifyCode() {
     final String code = _codeControllers.map((controller) {
       return controller.text;
     }).join();
-    if (!authService.verifyCode(
-      email: _emailController.text,
-      code: code,
-    )) {
+
+    if (!authService.verifyCode(email: _emailController.text, code: code)) {
       setState(() {
         _emailError = '인증코드가 올바르지 않습니다.';
       });
@@ -177,18 +240,19 @@ class _SignUpState extends State<SignUp> {
     }
 
     FocusScope.of(context).unfocus();
+
     setState(() {
       _emailError = null;
       _isEmailVerified = true;
-      _isCodeSent = false; // 코드 입력칸 숨기기
+      _isCodeSent = false;
     });
   }
 
-  // ── 인증코드 입력 핸들러 ─────────────────────────────────
   void _onCodeChanged(String value, int index) {
     if (value.length == 1 && index < 5) {
       _codeFocusNodes[index + 1].requestFocus();
     }
+
     setState(() {});
   }
 
@@ -204,47 +268,102 @@ class _SignUpState extends State<SignUp> {
     return KeyEventResult.ignored;
   }
 
-  // ── 비밀번호 검사 ────────────────────────────────────────
   bool _isPasswordFormatValid(String password) {
     return password.length >= 8 &&
         RegExp(r'[A-Za-z]').hasMatch(password) &&
         RegExp(r'\d').hasMatch(password);
   }
 
-  void _handleSignUp() {
+  Future<void> _handleSignUp() async {
+    final String id = _idController.text.trim();
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text;
+
     setState(() {
-      _passwordError = _isPasswordFormatValid(_passwordController.text)
+      _idError = id.isEmpty ? '아이디를 입력해주세요.' : null;
+      _emailError = _isEmailVerified ? null : '이메일 인증을 완료해주세요.';
+      _passwordError = _isPasswordFormatValid(password)
           ? null
-          : '비밀번호 형식이 잘못되었습니다.';
-      _passwordConfirmError =
-          _passwordController.text == _passwordConfirmController.text
+          : '비밀번호는 영문과 숫자를 포함해 8자 이상이어야 합니다.';
+      _passwordConfirmError = password == _passwordConfirmController.text
           ? null
           : '비밀번호가 일치하지 않습니다.';
     });
-    if (_passwordError == null && _passwordConfirmError == null) {
-      final didSignUp = authService.signUp(
+
+    if (_idError != null ||
+        _emailError != null ||
+        _passwordError != null ||
+        _passwordConfirmError != null ||
+        _selectedMajor == null ||
+        _selectedGender == null ||
+        _selectedTerm == null) {
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      final AuthApiSignUpResult result = await authService.signUpWithApi(
         name: _nameController.text,
-        email: _emailController.text,
-        password: _passwordController.text,
-        major: _selectedMajor!,
+        id: id,
+        email: email,
+        password: password,
+        specialism: _selectedMajor!,
         gender: _selectedGender!,
         generation: _selectedTerm!,
       );
 
-      if (!didSignUp) {
-        setState(() {
-          _emailError = '이미 가입된 이메일입니다.';
-          _isEmailVerified = false;
-        });
+      if (!mounted) {
         return;
       }
 
-      debugPrint('회원가입 성공');
-      Navigator.pop(context, _emailController.text.trim().toLowerCase());
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.message)));
+
+      Navigator.pop(context, id);
+    } on AuthApiException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        if (error.statusCode == 401) {
+          _emailError = error.message;
+          _isEmailVerified = false;
+        } else if (error.statusCode == 409) {
+          _idError = error.message;
+        } else {
+          _emailError = error.message;
+        }
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      const String message = '회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.';
+      setState(() {
+        _emailError = message;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(message)));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
-  // ── 빌드 ────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -276,17 +395,22 @@ class _SignUpState extends State<SignUp> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ── 이름 ──────────────────────────────────────
-              const _FieldLabel('이름'),
+              const AuthFieldLabel('이름'),
               const SizedBox(height: 8),
               AppTextFormField(
                 controller: _nameController,
                 hintText: '이름을 입력해주세요',
               ),
               const SizedBox(height: 20),
-
-              // ── 이메일 ────────────────────────────────────
-              const _FieldLabel('이메일'),
+              const AuthFieldLabel('아이디'),
+              const SizedBox(height: 8),
+              AppTextFormField(
+                controller: _idController,
+                hintText: '아이디를 입력해주세요',
+                errorText: _idError,
+              ),
+              const SizedBox(height: 20),
+              const AuthFieldLabel('이메일'),
               const SizedBox(height: 8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,7 +428,7 @@ class _SignUpState extends State<SignUp> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  _EmailActionButton(
+                  EmailVerificationButton(
                     isVerified: _isEmailVerified,
                     isCodeSent: _isCodeSent,
                     onSend: _handleSendCode,
@@ -313,8 +437,6 @@ class _SignUpState extends State<SignUp> {
                   ),
                 ],
               ),
-
-              // ── 인증코드 입력칸 (코드 전송 후 ~ 인증 완료 전) ───
               if (_isCodeSent && !_isEmailVerified) ...[
                 const SizedBox(height: 12),
                 Row(
@@ -374,8 +496,6 @@ class _SignUpState extends State<SignUp> {
                   ),
                 ),
               ],
-
-              // ── 인증 완료 안내 ────────────────────────────
               if (_isEmailVerified) ...[
                 const SizedBox(height: 6),
                 const Row(
@@ -396,11 +516,8 @@ class _SignUpState extends State<SignUp> {
                   ],
                 ),
               ],
-
               const SizedBox(height: 20),
-
-              // ── 비밀번호 ──────────────────────────────────
-              const _FieldLabel('비밀번호'),
+              const AuthFieldLabel('비밀번호'),
               const SizedBox(height: 8),
               AppTextFormField(
                 controller: _passwordController,
@@ -409,9 +526,7 @@ class _SignUpState extends State<SignUp> {
                 errorText: _passwordError,
               ),
               const SizedBox(height: 20),
-
-              // ── 비밀번호 확인 ─────────────────────────────
-              const _FieldLabel('비밀번호 확인'),
+              const AuthFieldLabel('비밀번호 확인'),
               const SizedBox(height: 8),
               AppTextFormField(
                 controller: _passwordConfirmController,
@@ -420,16 +535,17 @@ class _SignUpState extends State<SignUp> {
                 errorText: _passwordConfirmError,
               ),
               const SizedBox(height: 20),
-
-              // ── 전공 ──────────────────────────────────────
-              const _FieldLabel('전공'),
+              const AuthFieldLabel('전공'),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 initialValue: _selectedMajor,
                 isExpanded: true,
                 dropdownColor: Colors.white,
                 menuMaxHeight: 360,
-                hint: const Text('전공을 선택해주세요', style: AppTextStyles.fieldHint),
+                hint: const Text(
+                  '전공을 선택해주세요',
+                  style: AppTextStyles.fieldHint,
+                ),
                 icon: const Icon(
                   Icons.keyboard_arrow_down,
                   color: AppColors.grayText,
@@ -454,77 +570,68 @@ class _SignUpState extends State<SignUp> {
                     ),
                   ),
                 ),
-                items: _majors.map((m) {
+                items: _majorOptions.map((option) {
                   return DropdownMenuItem<String>(
-                    value: m,
-                    child: Text(m, style: AppTextStyles.fieldText),
+                    value: option.value,
+                    child: Text(option.label, style: AppTextStyles.fieldText),
                   );
                 }).toList(),
-                onChanged: (v) => setState(() => _selectedMajor = v),
+                onChanged: _isSubmitting
+                    ? null
+                    : (value) => setState(() => _selectedMajor = value),
               ),
               const SizedBox(height: 20),
-
-              // ── 성별 ──────────────────────────────────────
-              const _FieldLabel('성별'),
+              const AuthFieldLabel('성별'),
               const SizedBox(height: 8),
               Row(
-                children: [
-                  Expanded(
-                    child: AppSelectableButton(
-                      text: '남자',
-                      isSelected: _selectedGender == '남자',
-                      width: double.infinity,
-                      onTap: () => setState(() => _selectedGender = '남자'),
+                children: _genderOptions.map((option) {
+                  final int index = _genderOptions.indexOf(option);
+                  return Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: index == _genderOptions.length - 1 ? 0 : 8,
+                      ),
+                      child: AppSelectableButton(
+                        text: option.label,
+                        isSelected: _selectedGender == option.value,
+                        width: double.infinity,
+                        onTap: () {
+                          setState(() {
+                            _selectedGender = option.value;
+                          });
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: AppSelectableButton(
-                      text: '여자',
-                      isSelected: _selectedGender == '여자',
-                      width: double.infinity,
-                      onTap: () => setState(() => _selectedGender = '여자'),
-                    ),
-                  ),
-                ],
+                  );
+                }).toList(),
               ),
               const SizedBox(height: 20),
-
-              // ── 기수 ──────────────────────────────────────
-              const _FieldLabel('기수'),
+              const AuthFieldLabel('기수'),
               const SizedBox(height: 8),
               Row(
-                children: [
-                  Expanded(
-                    child: _TermButton(
-                      text: '8기',
-                      isSelected: _selectedTerm == '8기',
-                      onTap: () => setState(() => _selectedTerm = '8기'),
+                children: _termOptions.map((option) {
+                  final int index = _termOptions.indexOf(option);
+                  return Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: index == _termOptions.length - 1 ? 0 : 8,
+                      ),
+                      child: SignUpTermButton(
+                        text: option.label,
+                        isSelected: _selectedTerm == option.value,
+                        onTap: () {
+                          setState(() {
+                            _selectedTerm = option.value;
+                          });
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _TermButton(
-                      text: '9기',
-                      isSelected: _selectedTerm == '9기',
-                      onTap: () => setState(() => _selectedTerm = '9기'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _TermButton(
-                      text: '10기',
-                      isSelected: _selectedTerm == '10기',
-                      onTap: () => setState(() => _selectedTerm = '10기'),
-                    ),
-                  ),
-                ],
+                  );
+                }).toList(),
               ),
               const SizedBox(height: 40),
-
-              // ── 회원가입 버튼 ─────────────────────────────
               AppButton(
-                text: '회원가입',
+                text: _isSubmitting ? '가입 중...' : '회원가입',
                 isActive: _isButtonActive,
                 onPressed: _handleSignUp,
               ),
@@ -536,123 +643,9 @@ class _SignUpState extends State<SignUp> {
   }
 }
 
-// ── 이메일 옆 버튼 ────────────────────────────────────────
-// 상태에 따라 [인증하기] / [인증완료(비활성)] / [확인] 세 가지로 전환
-class _EmailActionButton extends StatelessWidget {
-  const _EmailActionButton({
-    required this.isVerified,
-    required this.isCodeSent,
-    required this.onSend,
-    required this.onVerify,
-    required this.isCodeFilled,
-  });
+class _Option {
+  const _Option({required this.label, required this.value});
 
-  final bool isVerified;
-  final bool isCodeSent;
-  final VoidCallback onSend;
-  final VoidCallback onVerify;
-  final bool isCodeFilled;
-
-  @override
-  Widget build(BuildContext context) {
-    // 인증 완료 → 회색 비활성 버튼
-    if (isVerified) {
-      return SizedBox(
-        width: 88,
-        height: 43,
-        child: ElevatedButton(
-          onPressed: null,
-          style: ElevatedButton.styleFrom(
-            disabledBackgroundColor: const Color(0xFFEFF0F2),
-            disabledForegroundColor: Colors.white,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: EdgeInsets.zero,
-          ),
-          child: const Text('인증완료', style: AppTextStyles.disabledButtonText),
-        ),
-      );
-    }
-
-    // 코드 전송 후 → [확인] 버튼 (코드 다 입력해야 활성화)
-    if (isCodeSent) {
-      return SizedBox(
-        width: 88,
-        height: 43,
-        child: ElevatedButton(
-          onPressed: isCodeFilled ? onVerify : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.mainColor,
-            disabledBackgroundColor: const Color(0xFFEFF0F2),
-            disabledForegroundColor: Colors.white,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: EdgeInsets.zero,
-          ),
-          child: Text(
-            '확인',
-            style: AppTextStyles.disabledButtonText.copyWith(
-              color: isCodeFilled ? Colors.white : null,
-            ),
-          ),
-        ),
-      );
-    }
-
-    // 기본 → [인증하기] OutlinedButton
-    return SizedBox(
-      width: 88,
-      height: 43,
-      child: OutlinedButton(
-        onPressed: onSend,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.mainColor,
-          side: const BorderSide(color: AppColors.mainColor),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          padding: EdgeInsets.zero,
-        ),
-        child: const Text('인증하기', style: AppTextStyles.outlineButtonText),
-      ),
-    );
-  }
-}
-
-// ── 기수 버튼 ────────────────────────────────────────────
-class _TermButton extends StatelessWidget {
-  const _TermButton({
-    required this.text,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String text;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppSelectableButton(
-      text: text,
-      isSelected: isSelected,
-      width: double.infinity,
-      onTap: onTap,
-    );
-  }
-}
-
-// ── 필드 레이블 ──────────────────────────────────────────
-class _FieldLabel extends StatelessWidget {
-  const _FieldLabel(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(text, style: AppTextStyles.fieldLabel);
-  }
+  final String label;
+  final String value;
 }
