@@ -1,4 +1,4 @@
-import 'package:anabada_app/screen/sign_up.dart';
+import 'package:anabada_app/pages/auth/sign_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
