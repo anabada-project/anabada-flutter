@@ -15,4 +15,8 @@ class ApiClient {
       'Authorization': 'Bearer $accessToken',
     };
   }
+
+  static Map<String, String> refreshHeaders(String refreshToken) {
+    return {'Content-Type': 'application/json', 'RefreshToken': refreshToken};
+  }
 }

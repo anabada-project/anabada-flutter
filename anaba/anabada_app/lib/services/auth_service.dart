@@ -120,6 +120,39 @@ class AuthService extends ChangeNotifier {
     return _apiCurrentUser;
   }
 
+  Future<bool> refreshTokenWithApi() async {
+    final String? savedRefreshToken = _refreshToken;
+
+    if (savedRefreshToken == null || savedRefreshToken.isEmpty) {
+      logout();
+      return false;
+    }
+
+    try {
+      final AuthApiTokenResult result = await _authApiService.reissueToken(
+        refreshToken: savedRefreshToken,
+      );
+
+      _accessToken = result.accessToken;
+      _refreshToken = result.refreshToken;
+
+      notifyListeners();
+
+      return true;
+    } on AuthApiException catch (error) {
+      debugPrint('토큰 재발급 실패: ${error.message}');
+
+      if (error.statusCode == 401 || error.statusCode == 403) {
+        logout();
+      }
+
+      return false;
+    } catch (error) {
+      debugPrint('토큰 재발급 처리 실패: $error');
+      return false;
+    }
+  }
+
   Future<void> logoutWithApi() async {
     final String? savedAccessToken = _accessToken;
 
