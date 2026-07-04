@@ -164,10 +164,10 @@ class TradeItemMapper {
     }
 
     int removeCount = likedUserIds.length - likeCount;
-    final List<String> dummyIds = likedUserIds
+    final List<String> placeholderIds = likedUserIds
         .where((id) => id.startsWith('like-user-'))
         .toList(growable: false);
-    for (final String id in dummyIds) {
+    for (final String id in placeholderIds) {
       if (removeCount <= 0) break;
       likedUserIds.remove(id);
       removeCount--;

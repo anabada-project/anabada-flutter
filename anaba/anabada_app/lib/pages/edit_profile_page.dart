@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../controllers/app_controller.dart';
-import '../screen/find_password.dart';
-import '../screen/login.dart';
+
 import '../services/auth_api_service.dart';
 import 'auth/find_password_page.dart';
 import 'auth/login_page.dart';

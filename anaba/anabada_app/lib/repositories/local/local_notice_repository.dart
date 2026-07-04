@@ -1,4 +1,3 @@
-import '../../models/app_notification.dart';
 import '../../models/notice.dart';
 import 'local_store.dart';
 
@@ -32,18 +31,6 @@ class LocalNoticeRepository {
       createdAt: createdAt,
     );
     _store.notices.insert(0, notice);
-    _store.notifications.insert(
-      0,
-      AppNotification(
-        id: _store.newId('notification'),
-        userId: 'fake-user-1',
-        type: AppNotificationType.notice,
-        title: '공지사항',
-        content: title,
-        createdAt: createdAt,
-        relatedNoticeId: notice.id,
-      ),
-    );
     return notice;
   }
 

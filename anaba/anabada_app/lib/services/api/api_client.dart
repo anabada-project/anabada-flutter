@@ -17,7 +17,7 @@ class ApiClient {
   }) : _baseUri = Uri.parse(_normalizeBaseUrl(baseUrl)),
        _httpClient = httpClient ?? http.Client();
 
-  static const String defaultBaseUrl = 'https://anabada.shop/';
+  static const String defaultBaseUrl = 'https://anabada.shop:22124/';
 
   final Uri _baseUri;
   final http.Client _httpClient;

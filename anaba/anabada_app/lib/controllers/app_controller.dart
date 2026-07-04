@@ -6,9 +6,16 @@ import '../models/notice.dart';
 import '../models/trade_item.dart';
 import '../models/trade_request.dart';
 import '../repositories/app_repository.dart';
-import '../repositories/local_app_repository.dart';
+import '../repositories/api/api_app_repository.dart';
+import '../services/api/api_client.dart';
+import '../services/auth_service.dart';
 
-final AppController appController = AppController(LocalAppRepository());
+final AppController appController = AppController(
+  ApiAppRepository(
+    ApiClient(tokenProvider: () => authService.accessToken),
+    currentUserIdProvider: () => authService.currentUser?.id,
+  ),
+);
 
 class AppController extends ChangeNotifier {
   AppController(this._repository) {

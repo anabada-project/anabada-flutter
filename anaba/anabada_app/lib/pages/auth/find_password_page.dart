@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../services/auth_api_service.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
@@ -47,16 +48,27 @@ class _FindPasswordState extends State<FindPassword> {
       _passwordConfirmController.text.isNotEmpty;
 
   // ── 핸들러 ───────────────────────────────────────────────
-  void _handleSendCode() {
+  Future<void> _handleSendCode() async {
     final String email = _emailController.text.trim();
-    final String? code = authService.requestVerificationCode(
-      email: email,
-      purpose: EmailVerificationPurpose.passwordReset,
-    );
-    if (code == null) {
+
+    AuthApiMessageResult result;
+    try {
+      result = await authService.requestVerificationCode(
+        email: email,
+        purpose: EmailVerificationPurpose.passwordReset,
+      );
+    } on AuthApiException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
-        _emailError = '가입된 이메일을 입력해주세요.';
+        _emailError = error.message;
       });
+      return;
+    }
+
+    if (!mounted) {
       return;
     }
 
@@ -67,14 +79,31 @@ class _FindPasswordState extends State<FindPassword> {
     });
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text('테스트 인증코드: $code')));
+    ).showSnackBar(SnackBar(content: Text(result.message)));
   }
 
-  void _handleResendCode() {
-    final String? code = authService.requestVerificationCode(
-      email: _emailController.text,
-      purpose: EmailVerificationPurpose.passwordReset,
-    );
+  Future<void> _handleResendCode() async {
+    AuthApiMessageResult result;
+    try {
+      result = await authService.requestVerificationCode(
+        email: _emailController.text,
+        purpose: EmailVerificationPurpose.passwordReset,
+      );
+    } on AuthApiException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _codeError = error.message;
+      });
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
     for (final c in _codeControllers) {
       c.clear();
     }
@@ -82,21 +111,30 @@ class _FindPasswordState extends State<FindPassword> {
     setState(() {
       _codeError = null;
     });
-    if (code != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('테스트 인증코드: $code')));
-    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(result.message)));
   }
 
-  void _handleVerifyCode() {
+  Future<void> _handleVerifyCode() async {
     final String code = _codeControllers
         .map((controller) => controller.text)
         .join();
-    if (!authService.verifyCode(email: _emailController.text, code: code)) {
+
+    try {
+      await authService.verifyCode(email: _emailController.text, code: code);
+    } on AuthApiException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
-        _codeError = '인증코드가 올바르지 않습니다.';
+        _codeError = error.message;
       });
+      return;
+    }
+
+    if (!mounted) {
       return;
     }
 

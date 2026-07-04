@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../constants/app_routes.dart';
+import '../../controllers/app_controller.dart';
 import '../../models/app_user.dart';
 import '../../services/auth_api_service.dart';
 import '../../services/auth_service.dart';
@@ -91,6 +92,16 @@ class _LoginState extends State<Login> {
       debugPrint('로그인 성공');
       debugPrint('accessToken: ${authService.accessToken}');
       debugPrint('refreshToken: ${authService.refreshToken}');
+
+      try {
+        await appController.refresh();
+      } catch (error) {
+        debugPrint('Initial API data refresh failed: $error');
+      }
+
+      if (!mounted) {
+        return;
+      }
 
       Navigator.pushReplacementNamed(
         context,

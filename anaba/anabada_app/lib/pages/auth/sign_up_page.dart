@@ -165,7 +165,7 @@ class _SignUpState extends State<SignUp> {
     });
   }
 
-  void _handleSendCode() {
+  Future<void> _handleSendCode() async {
     final String email = _emailController.text.trim();
 
     if (email.isEmpty) {
@@ -175,17 +175,24 @@ class _SignUpState extends State<SignUp> {
       return;
     }
 
-    final String? code = authService.requestVerificationCode(
-      email: email,
-      purpose: EmailVerificationPurpose.signUp,
-    );
+    AuthApiMessageResult result;
+    try {
+      result = await authService.requestVerificationCode(
+        email: email,
+        purpose: EmailVerificationPurpose.signUp,
+      );
+    } on AuthApiException catch (error) {
+      if (!mounted) {
+        return;
+      }
 
-    if (code == null) {
       setState(() {
-        _emailError = authService.isEmailRegistered(email)
-            ? '이미 가입된 이메일입니다.'
-            : '올바른 이메일을 입력해주세요.';
+        _emailError = error.message;
       });
+      return;
+    }
+
+    if (!mounted) {
       return;
     }
 
@@ -198,7 +205,7 @@ class _SignUpState extends State<SignUp> {
 
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text('테스트 인증코드: $code')));
+    ).showSnackBar(SnackBar(content: Text(result.message)));
 
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
@@ -207,11 +214,27 @@ class _SignUpState extends State<SignUp> {
     });
   }
 
-  void _handleResendCode() {
-    final String? code = authService.requestVerificationCode(
-      email: _emailController.text,
-      purpose: EmailVerificationPurpose.signUp,
-    );
+  Future<void> _handleResendCode() async {
+    AuthApiMessageResult result;
+    try {
+      result = await authService.requestVerificationCode(
+        email: _emailController.text,
+        purpose: EmailVerificationPurpose.signUp,
+      );
+    } on AuthApiException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _emailError = error.message;
+      });
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
 
     for (final TextEditingController controller in _codeControllers) {
       controller.clear();
@@ -220,32 +243,46 @@ class _SignUpState extends State<SignUp> {
     _codeFocusNodes[0].requestFocus();
     setState(() {});
 
-    if (code != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('테스트 인증코드: $code')));
-    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(result.message)));
   }
 
-  void _handleVerifyCode() {
+  Future<void> _handleVerifyCode() async {
     final String code = _codeControllers.map((controller) {
       return controller.text;
     }).join();
 
-    if (!authService.verifyCode(email: _emailController.text, code: code)) {
+    try {
+      final AuthApiMessageResult result = await authService.verifyCode(
+        email: _emailController.text,
+        code: code,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      FocusScope.of(context).unfocus();
+
       setState(() {
-        _emailError = '인증코드가 올바르지 않습니다.';
+        _emailError = null;
+        _isEmailVerified = true;
+        _isCodeSent = false;
       });
-      return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.message)));
+    } on AuthApiException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _emailError = error.message;
+      });
     }
-
-    FocusScope.of(context).unfocus();
-
-    setState(() {
-      _emailError = null;
-      _isEmailVerified = true;
-      _isCodeSent = false;
-    });
   }
 
   void _onCodeChanged(String value, int index) {

@@ -15,25 +15,6 @@ class AuthApiLoginResult {
   final String refreshToken;
 }
 
-class AuthApiTokenResult {
-  final String accessToken;
-  final String refreshToken;
-  final String accessTokenExpiresIn;
-  final String refreshTokenExpiresIn;
-
-  const AuthApiTokenResult({
-    required this.accessToken,
-    required this.refreshToken,
-    required this.accessTokenExpiresIn,
-    required this.refreshTokenExpiresIn,
-  });
-}
-
-class AuthApiException implements Exception {
-  final String message;
-  final int? statusCode;
-
-  const AuthApiException(this.message, {this.statusCode});
 class AuthApiSignUpResult {
   const AuthApiSignUpResult({
     required this.success,
@@ -44,6 +25,32 @@ class AuthApiSignUpResult {
   final bool success;
   final String message;
   final String? data;
+}
+
+class AuthApiMessageResult {
+  const AuthApiMessageResult({
+    required this.success,
+    required this.message,
+    this.data,
+  });
+
+  final bool success;
+  final String message;
+  final Object? data;
+}
+
+class AuthApiTokenResult {
+  const AuthApiTokenResult({
+    required this.accessToken,
+    required this.refreshToken,
+    required this.accessTokenExpiresIn,
+    required this.refreshTokenExpiresIn,
+  });
+
+  final String accessToken;
+  final String refreshToken;
+  final String accessTokenExpiresIn;
+  final String refreshTokenExpiresIn;
 }
 
 class AuthApiException implements Exception {
@@ -59,6 +66,9 @@ class AuthApiException implements Exception {
 }
 
 class AuthApiService {
+  static const String _serverErrorMessage =
+      '\uC11C\uBC84 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4. \uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574\uC8FC\uC138\uC694.';
+
   Future<AuthApiSignUpResult> signUp({
     required String name,
     required String id,
@@ -123,6 +133,85 @@ class AuthApiService {
     );
   }
 
+  Future<AuthApiMessageResult> sendEmailCode({required String email}) async {
+    debugPrint('Email code send API request start');
+    debugPrint('Request URL: ${ApiClient.uri('/api/auth/email/send')}');
+    debugPrint('Request email: $email');
+
+    final http.Response response = await http.post(
+      ApiClient.uri('/api/auth/email/send'),
+      headers: ApiClient.jsonHeaders,
+      body: jsonEncode({'email': email.trim()}),
+    );
+
+    final int statusCode = response.statusCode;
+    final String responseBody = utf8.decode(response.bodyBytes);
+
+    debugPrint('Email code send response statusCode: $statusCode');
+    debugPrint('Email code send response body: $responseBody');
+
+    if (statusCode >= 500) {
+      throw AuthApiException(_serverErrorMessage, statusCode: statusCode);
+    }
+
+    final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
+
+    if (statusCode < 200 || statusCode >= 300) {
+      final String message =
+          body['message']?.toString() ??
+          body['error']?.toString() ??
+          '이메일 인증 코드 발송에 실패했습니다.';
+      throw AuthApiException(message, statusCode: statusCode);
+    }
+
+    return AuthApiMessageResult(
+      success: body['success'] as bool? ?? true,
+      message: body['message']?.toString() ?? '인증 코드를 발송했습니다.',
+      data: body['data'],
+    );
+  }
+
+  Future<AuthApiMessageResult> verifyEmailCode({
+    required String email,
+    required String code,
+  }) async {
+    debugPrint('Email code verify API request start');
+    debugPrint('Request URL: ${ApiClient.uri('/api/auth/email/verify')}');
+    debugPrint('Request email: $email');
+
+    final http.Response response = await http.post(
+      ApiClient.uri('/api/auth/email/verify'),
+      headers: ApiClient.jsonHeaders,
+      body: jsonEncode({'email': email.trim(), 'code': code.trim()}),
+    );
+
+    final int statusCode = response.statusCode;
+    final String responseBody = utf8.decode(response.bodyBytes);
+
+    debugPrint('Email code verify response statusCode: $statusCode');
+    debugPrint('Email code verify response body: $responseBody');
+
+    if (statusCode >= 500) {
+      throw AuthApiException(_serverErrorMessage, statusCode: statusCode);
+    }
+
+    final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
+
+    if (statusCode < 200 || statusCode >= 300) {
+      final String message =
+          body['message']?.toString() ??
+          body['error']?.toString() ??
+          '이메일 인증 코드가 올바르지 않습니다.';
+      throw AuthApiException(message, statusCode: statusCode);
+    }
+
+    return AuthApiMessageResult(
+      success: body['success'] as bool? ?? true,
+      message: body['message']?.toString() ?? '이메일 인증이 완료되었습니다.',
+      data: body['data'],
+    );
+  }
+
   Future<AuthApiLoginResult> signIn({
     required String id,
     required String password,
@@ -144,10 +233,6 @@ class AuthApiService {
     debugPrint('Signin response body: $responseBody');
 
     if (statusCode >= 500) {
-      throw AuthApiException(
-        '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
-        statusCode: statusCode,
-      );
       throw AuthApiException(_serverErrorMessage, statusCode: statusCode);
     }
 
@@ -157,7 +242,6 @@ class AuthApiService {
     );
 
     if (statusCode == 400 || statusCode == 401 || statusCode == 403) {
-      final String message = body['message']?.toString() ?? '로그인에 실패했습니다.';
       final String message =
           body['message']?.toString() ??
           '\uB85C\uADF8\uC778\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.';
@@ -165,7 +249,6 @@ class AuthApiService {
     }
 
     if (statusCode != 200) {
-      final String message = body['message']?.toString() ?? '로그인 요청에 실패했습니다.';
       final String message =
           body['message']?.toString() ??
           '\uB85C\uADF8\uC778 \uC694\uCCAD\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.';
@@ -196,8 +279,8 @@ class AuthApiService {
   }
 
   Future<void> signOut({required String accessToken}) async {
-    debugPrint('로그아웃 API 요청 시작');
-    debugPrint('요청 주소: ${ApiClient.uri('/api/auth/signout')}');
+    debugPrint('Signout API request start');
+    debugPrint('Request URL: ${ApiClient.uri('/api/auth/signout')}');
 
     final http.Response response = await http.delete(
       ApiClient.uri('/api/auth/signout'),
@@ -207,44 +290,44 @@ class AuthApiService {
     final int statusCode = response.statusCode;
     final String responseBody = utf8.decode(response.bodyBytes);
 
-    debugPrint('응답 statusCode: $statusCode');
-    debugPrint('응답 body: $responseBody');
+    debugPrint('Signout response statusCode: $statusCode');
+    debugPrint('Signout response body: $responseBody');
 
     if (statusCode >= 200 && statusCode < 300) {
       return;
     }
 
     if (statusCode >= 500) {
-      throw AuthApiException(
-        '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
-        statusCode: statusCode,
-      );
-      throw const AuthApiException('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      throw AuthApiException(_serverErrorMessage, statusCode: statusCode);
     }
 
     final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
 
     if (statusCode == 401) {
       final String message =
-          body['message']?.toString() ?? '유효하지 않거나 만료된 액세스 토큰입니다.';
+          body['message']?.toString() ??
+          '\uC720\uD6A8\uD558\uC9C0 \uC54A\uAC70\uB098 \uB9CC\uB8CC\uB41C \uC561\uC138\uC2A4 \uD1A0\uD070\uC785\uB2C8\uB2E4.';
       throw AuthApiException(message, statusCode: statusCode);
-      throw AuthApiException(message);
     }
 
     if (statusCode == 403) {
-      final String message = body['message']?.toString() ?? '접근 권한이 없습니다.';
+      final String message =
+          body['message']?.toString() ??
+          '\uC811\uADFC \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.';
       throw AuthApiException(message, statusCode: statusCode);
     }
 
-    final String message = body['message']?.toString() ?? '로그아웃에 실패했습니다.';
+    final String message =
+        body['message']?.toString() ??
+        '\uB85C\uADF8\uC544\uC6C3\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.';
     throw AuthApiException(message, statusCode: statusCode);
   }
 
   Future<AuthApiTokenResult> reissueToken({
     required String refreshToken,
   }) async {
-    debugPrint('토큰 재발급 API 요청 시작');
-    debugPrint('요청 주소: ${ApiClient.uri('/auth/retoken')}');
+    debugPrint('Token reissue API request start');
+    debugPrint('Request URL: ${ApiClient.uri('/auth/retoken')}');
 
     final http.Response response = await http.post(
       ApiClient.uri('/auth/retoken'),
@@ -254,39 +337,39 @@ class AuthApiService {
     final int statusCode = response.statusCode;
     final String responseBody = utf8.decode(response.bodyBytes);
 
-    debugPrint('응답 statusCode: $statusCode');
-    debugPrint('응답 body: $responseBody');
+    debugPrint('Token reissue response statusCode: $statusCode');
+    debugPrint('Token reissue response body: $responseBody');
 
     if (statusCode >= 500) {
-      throw AuthApiException(
-        '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
-        statusCode: statusCode,
-      );
+      throw AuthApiException(_serverErrorMessage, statusCode: statusCode);
     }
 
     final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
 
     if (statusCode == 401) {
       final String message =
-          body['message']?.toString() ?? '유효하지 않거나 만료된 리프레시 토큰입니다.';
+          body['message']?.toString() ??
+          '\uC720\uD6A8\uD558\uC9C0 \uC54A\uAC70\uB098 \uB9CC\uB8CC\uB41C \uB9AC\uD504\uB808\uC2DC \uD1A0\uD070\uC785\uB2C8\uB2E4.';
       throw AuthApiException(message, statusCode: statusCode);
     }
 
     if (statusCode == 403) {
-      final String message = body['message']?.toString() ?? '토큰 재발급 권한이 없습니다.';
+      final String message =
+          body['message']?.toString() ??
+          '\uD1A0\uD070 \uC7AC\uBC1C\uAE09 \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.';
       throw AuthApiException(message, statusCode: statusCode);
     }
 
     if (statusCode != 200) {
-      final String message = body['message']?.toString() ?? '토큰 재발급에 실패했습니다.';
+      final String message =
+          body['message']?.toString() ??
+          '\uD1A0\uD070 \uC7AC\uBC1C\uAE09\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.';
       throw AuthApiException(message, statusCode: statusCode);
     }
 
     final dynamic rawData = body['data'];
-
-    final Map<String, dynamic> tokenBody = rawData is Map<String, dynamic>
-        ? rawData
-        : body;
+    final Map<String, dynamic> tokenBody =
+        rawData is Map<String, dynamic> ? rawData : body;
 
     final String? newAccessToken = tokenBody['accessToken'] as String?;
     final String? newRefreshToken = tokenBody['refreshToken'] as String?;
@@ -296,7 +379,9 @@ class AuthApiService {
         tokenBody['refreshTokenExpiresIn'] as String?;
 
     if (newAccessToken == null || newRefreshToken == null) {
-      throw const AuthApiException('재발급된 토큰 정보를 받을 수 없습니다.');
+      throw const AuthApiException(
+        '\uC7AC\uBC1C\uAE09\uB41C \uD1A0\uD070 \uC815\uBCF4\uB97C \uBC1B\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.',
+      );
     }
 
     return AuthApiTokenResult(
@@ -305,16 +390,7 @@ class AuthApiService {
       accessTokenExpiresIn: accessTokenExpiresIn ?? '',
       refreshTokenExpiresIn: refreshTokenExpiresIn ?? '',
     );
-      throw AuthApiException(message);
-    }
-
-    final String message = body['message']?.toString() ?? '로그아웃에 실패했습니다.';
-    throw AuthApiException(message);
   }
-
-  Map<String, dynamic> _decodeJsonObject(String responseBody) {
-  static const String _serverErrorMessage =
-      '\uC11C\uBC84 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4. \uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574\uC8FC\uC138\uC694.';
 
   String _signUpFallbackMessage(int statusCode) {
     return switch (statusCode) {
@@ -358,7 +434,7 @@ class AuthApiService {
 
   Map<String, dynamic> _decodeJsonObjectOrEmpty(String responseBody) {
     if (responseBody.trim().isEmpty) {
-      return {};
+      return <String, dynamic>{};
     }
 
     try {
@@ -367,28 +443,10 @@ class AuthApiService {
       if (decodedBody is Map<String, dynamic>) {
         return decodedBody;
       }
-
-      return {};
     } on FormatException {
-      return {};
-    }
-  }
-
-  Map<String, dynamic> _decodeJsonObjectOrEmpty(String responseBody) {
-    if (responseBody.trim().isEmpty) {
-      return {};
+      return <String, dynamic>{};
     }
 
-    try {
-      final dynamic decodedBody = jsonDecode(responseBody);
-
-      if (decodedBody is Map<String, dynamic>) {
-        return decodedBody;
-      }
-
-      return {};
-    } on FormatException {
-      return {};
-    }
+    return <String, dynamic>{};
   }
 }
