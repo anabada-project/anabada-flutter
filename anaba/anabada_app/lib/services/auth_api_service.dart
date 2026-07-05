@@ -137,7 +137,7 @@ class AuthApiService {
       throw AuthApiException(message, statusCode: statusCode);
     }
 
-    final bool success = body['success'] as bool? ?? true;
+    final bool success = body['success'] != false;
     final String message =
         body['message']?.toString() ??
         '\uD68C\uC6D0\uAC00\uC785\uC774 \uC644\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4.';
@@ -346,7 +346,7 @@ class AuthApiService {
       throw AuthApiException(message, statusCode: statusCode);
     }
 
-    final bool success = body['success'] as bool? ?? true;
+    final bool success = body['success'] != false;
     final String message =
         body['message']?.toString() ?? fallbackMessage(statusCode);
 

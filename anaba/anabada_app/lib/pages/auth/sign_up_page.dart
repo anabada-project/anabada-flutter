@@ -192,6 +192,14 @@ class _SignUpState extends State<SignUp> {
       return;
     }
 
+    final RegExp emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegex.hasMatch(email)) {
+      setState(() {
+        _emailError = '올바른 이메일 형식을 입력해주세요.';
+      });
+      return;
+    }
+
     FocusScope.of(context).unfocus();
 
     setState(() {
@@ -223,7 +231,7 @@ class _SignUpState extends State<SignUp> {
         context,
       ).showSnackBar(SnackBar(content: Text(result.message)));
 
-      Future.delayed(const Duration(milliseconds: 100), () {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _codeFocusNodes[0].requestFocus();
         }
@@ -276,6 +284,13 @@ class _SignUpState extends State<SignUp> {
     final String code = _codeControllers.map((controller) {
       return controller.text;
     }).join();
+
+    if (code.length < 6) {
+      setState(() {
+        _emailError = '인증번호 6자리를 모두 입력해주세요.';
+      });
+      return;
+    }
 
     setState(() {
       _emailError = null;
@@ -586,7 +601,9 @@ class _SignUpState extends State<SignUp> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
-                    onTap: _isEmailActionLoading ? null : _handleResendCode,
+                    onTap: (_isEmailActionLoading || _isSubmitting)
+                        ? null
+                        : _handleResendCode,
                     child: const Text('재전송', style: AppTextStyles.helperText),
                   ),
                 ),
