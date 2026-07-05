@@ -16,7 +16,7 @@ import 'package:anabada_app/widgets/item_list_card.dart';
 Future<void> login(WidgetTester tester) async {
   final fields = find.byType(TextFormField);
   await tester.enterText(fields.at(0), 's26010@gsm.hs.kr');
-  await tester.enterText(fields.at(1), 'password123!');
+  await tester.enterText(fields.at(1), 'test-password');
   await tester.pump();
 
   final loginButton = find.widgetWithText(ElevatedButton, '로그인');
