@@ -93,7 +93,7 @@ class AuthApiService {
     required String email,
   }) async {
     return _postMessage(
-      path: '/password/send',
+      path: '/api/auth/password/send',
       requestName: 'Password reset send',
       requestBody: {'email': email.trim()},
       fallbackMessage: _passwordResetSendFallbackMessage,
@@ -105,7 +105,7 @@ class AuthApiService {
     required String code,
   }) async {
     return _postMessage(
-      path: '/password/verify',
+      path: '/api/auth/password/verify',
       requestName: 'Password reset verify',
       requestBody: {'email': email.trim(), 'code': code.trim()},
       fallbackMessage: _passwordResetVerifyFallbackMessage,
@@ -118,7 +118,7 @@ class AuthApiService {
     required String confirmPassword,
   }) async {
     return _postMessage(
-      path: '/password/reset',
+      path: '/api/auth/password/reset',
       requestName: 'Password reset',
       requestBody: {
         'email': email.trim(),
@@ -126,17 +126,6 @@ class AuthApiService {
         'confirmPassword': confirmPassword,
       },
       fallbackMessage: _passwordResetFallbackMessage,
-    );
-  }
-
-  Future<AuthApiMessageResult> sendPasswordEmailCode({
-    required String email,
-  }) async {
-    return _postMessage(
-      path: '/email/password/sent',
-      requestName: 'Password email send',
-      requestBody: {'email': email.trim()},
-      fallbackMessage: _passwordResetSendFallbackMessage,
     );
   }
 
@@ -399,7 +388,8 @@ class AuthApiService {
 
     final bool success = body['success'] != false;
     final String message =
-        body['message']?.toString() ?? fallbackMessage(statusCode);
+        body['message']?.toString() ??
+        (success ? fallbackMessage(statusCode) : fallbackMessage(-1));
 
     if (!success) {
       throw AuthApiException(message, statusCode: statusCode);

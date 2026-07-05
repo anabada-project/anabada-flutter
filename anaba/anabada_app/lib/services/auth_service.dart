@@ -103,12 +103,6 @@ class AuthService extends ChangeNotifier {
     return _authApiService.sendPasswordResetCode(email: email);
   }
 
-  Future<AuthApiMessageResult> requestPasswordEmailCodeWithApi({
-    required String email,
-  }) {
-    return _authApiService.sendPasswordEmailCode(email: email);
-  }
-
   Future<AuthApiMessageResult> verifyPasswordResetCodeWithApi({
     required String email,
     required String code,

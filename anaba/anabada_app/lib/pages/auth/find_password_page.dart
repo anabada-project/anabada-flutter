@@ -57,7 +57,7 @@ class _FindPasswordState extends State<FindPassword> {
 
     if (!_isValidEmail(email)) {
       setState(() {
-        _emailError = '가입된 이메일을 입력해주세요.';
+        _emailError = '올바른 이메일 형식을 입력해주세요.';
       });
       return;
     }
