@@ -89,6 +89,57 @@ class AuthApiService {
     );
   }
 
+  Future<AuthApiMessageResult> sendPasswordResetCode({
+    required String email,
+  }) async {
+    return _postMessage(
+      path: '/password/send',
+      requestName: 'Password reset send',
+      requestBody: {'email': email.trim()},
+      fallbackMessage: _passwordResetSendFallbackMessage,
+    );
+  }
+
+  Future<AuthApiMessageResult> verifyPasswordResetCode({
+    required String email,
+    required String code,
+  }) async {
+    return _postMessage(
+      path: '/password/verify',
+      requestName: 'Password reset verify',
+      requestBody: {'email': email.trim(), 'code': code.trim()},
+      fallbackMessage: _passwordResetVerifyFallbackMessage,
+    );
+  }
+
+  Future<AuthApiMessageResult> resetPassword({
+    required String email,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    return _postMessage(
+      path: '/password/reset',
+      requestName: 'Password reset',
+      requestBody: {
+        'email': email.trim(),
+        'newPassword': newPassword,
+        'confirmPassword': confirmPassword,
+      },
+      fallbackMessage: _passwordResetFallbackMessage,
+    );
+  }
+
+  Future<AuthApiMessageResult> sendPasswordEmailCode({
+    required String email,
+  }) async {
+    return _postMessage(
+      path: '/email/password/sent',
+      requestName: 'Password email send',
+      requestBody: {'email': email.trim()},
+      fallbackMessage: _passwordResetSendFallbackMessage,
+    );
+  }
+
   Future<AuthApiSignUpResult> signUp({
     required String name,
     required String id,
@@ -357,7 +408,7 @@ class AuthApiService {
     return AuthApiMessageResult(
       success: success,
       message: message,
-      data: body['data']?.toString(),
+      data: (body['data'] ?? body['code'])?.toString(),
     );
   }
 
@@ -390,6 +441,54 @@ class AuthApiService {
         '\uC778\uC99D \uC2DC\uB3C4 \uD69F\uC218\uAC00 \uB108\uBB34 \uB9CE\uC2B5\uB2C8\uB2E4. \uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574\uC8FC\uC138\uC694.',
       _ =>
         '\uC774\uBA54\uC77C \uC778\uC99D\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.',
+    };
+  }
+
+  String _passwordResetSendFallbackMessage(int statusCode) {
+    return switch (statusCode) {
+      200 =>
+        '\uBE44\uBC00\uBC88\uD638 \uC7AC\uC124\uC815 \uC778\uC99D\uBC88\uD638\uAC00 \uBC1C\uC1A1\uB418\uC5C8\uC2B5\uB2C8\uB2E4.',
+      400 =>
+        '\uC62C\uBC14\uB978 \uC774\uBA54\uC77C\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694.',
+      401 =>
+        '\uC778\uC99D\uBC88\uD638 \uBC1C\uC1A1 \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.',
+      403 =>
+        '\uC778\uC99D\uBC88\uD638 \uBC1C\uC1A1 \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.',
+      409 =>
+        '\uC774\uBBF8 \uC694\uCCAD\uB41C \uC774\uBA54\uC77C\uC785\uB2C8\uB2E4.',
+      429 =>
+        '\uC778\uC99D\uBC88\uD638\uB97C \uB108\uBB34 \uB9CE\uC774 \uC694\uCCAD\uD588\uC2B5\uB2C8\uB2E4. \uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574\uC8FC\uC138\uC694.',
+      _ =>
+        '\uBE44\uBC00\uBC88\uD638 \uC7AC\uC124\uC815 \uC778\uC99D\uBC88\uD638 \uBC1C\uC1A1\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.',
+    };
+  }
+
+  String _passwordResetVerifyFallbackMessage(int statusCode) {
+    return switch (statusCode) {
+      200 => '\uC778\uC99D\uC5D0 \uC131\uACF5\uD588\uC2B5\uB2C8\uB2E4.',
+      400 =>
+        '\uC778\uC99D\uBC88\uD638 \uD615\uC2DD\uC774 \uC62C\uBC14\uB974\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.',
+      401 =>
+        '\uC778\uC99D\uBC88\uD638\uAC00 \uC77C\uCE58\uD558\uC9C0 \uC54A\uAC70\uB098 \uB9CC\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4.',
+      403 =>
+        '\uC778\uC99D\uBC88\uD638 \uAC80\uC99D \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.',
+      _ =>
+        '\uC778\uC99D\uBC88\uD638 \uAC80\uC99D\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.',
+    };
+  }
+
+  String _passwordResetFallbackMessage(int statusCode) {
+    return switch (statusCode) {
+      200 =>
+        '\uBE44\uBC00\uBC88\uD638\uAC00 \uBCC0\uACBD\uB418\uC5C8\uC2B5\uB2C8\uB2E4.',
+      400 =>
+        '\uBE44\uBC00\uBC88\uD638 \uD615\uC2DD\uC744 \uD655\uC778\uD574\uC8FC\uC138\uC694.',
+      401 =>
+        '\uBE44\uBC00\uBC88\uD638 \uBCC0\uACBD \uC778\uC99D\uC774 \uB9CC\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4.',
+      403 =>
+        '\uBE44\uBC00\uBC88\uD638 \uBCC0\uACBD \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.',
+      _ =>
+        '\uBE44\uBC00\uBC88\uD638 \uBCC0\uACBD\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.',
     };
   }
 
