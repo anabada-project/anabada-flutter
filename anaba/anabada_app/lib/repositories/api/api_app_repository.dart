@@ -191,7 +191,7 @@ class ApiAppRepository implements AppRepository {
 
     try {
       await _recentApi.fetchViewedProduct(productId: itemId);
-    } on ApiException {
+    } catch (_) {
       // Recent view tracking should not block opening the item detail page.
     }
   }
