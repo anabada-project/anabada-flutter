@@ -9,6 +9,7 @@ import '../../services/api/comment_api.dart';
 import '../../services/api/like_api.dart';
 import '../../services/api/notice_api.dart';
 import '../../services/api/post_api.dart';
+import '../../services/api/recent_api.dart';
 import '../app_repository.dart';
 import 'mappers/item_comment_mapper.dart';
 import 'mappers/notice_mapper.dart';
@@ -21,12 +22,14 @@ class ApiAppRepository implements AppRepository {
     : _postApi = PostApi(apiClient),
       _commentApi = CommentApi(apiClient),
       _likeApi = LikeApi(apiClient),
-      _noticeApi = NoticeApi(apiClient);
+      _noticeApi = NoticeApi(apiClient),
+      _recentApi = RecentApi(apiClient);
 
   final PostApi _postApi;
   final CommentApi _commentApi;
   final LikeApi _likeApi;
   final NoticeApi _noticeApi;
+  final RecentApi _recentApi;
   final CurrentUserIdProvider? currentUserIdProvider;
 
   final List<TradeItem> _items = [];
@@ -185,6 +188,12 @@ class ApiAppRepository implements AppRepository {
       ..remove(itemId)
       ..insert(0, itemId);
     if (ids.length > 20) ids.removeRange(20, ids.length);
+
+    try {
+      await _recentApi.fetchViewedProduct(productId: itemId);
+    } on ApiException {
+      // Recent view tracking should not block opening the item detail page.
+    }
   }
 
   @override
@@ -222,11 +231,8 @@ class ApiAppRepository implements AppRepository {
 
   Future<List<ItemComment>> fetchCommentThread(String commentId) async {
     final List<String> listKeys = const ['content', 'comments', 'replies'];
-    final ApiResponse<List<ItemComment>> response =
-        await _commentApi.fetchThread(
-          commentId,
-          (json) => _mapComment(json),
-        );
+    final ApiResponse<List<ItemComment>> response = await _commentApi
+        .fetchThread(commentId, (json) => _mapComment(json));
     final List<ItemComment> comments = response.data;
 
     if (comments.isEmpty) {
