@@ -501,6 +501,7 @@ class AuthApiService {
         json['id']?.toString() ??
         json['memberId']?.toString() ??
         '';
+    final String role = json['role']?.toString().toUpperCase() ?? '';
 
     return AppUser(
       id: id,
@@ -509,7 +510,7 @@ class AuthApiService {
       major: json['specialism']?.toString() ?? json['major']?.toString() ?? '',
       gender: json['gender']?.toString() ?? '',
       generation: json['generation']?.toString() ?? '',
-      isAdmin: json['role']?.toString().toUpperCase() == 'ADMIN',
+      isAdmin: role == 'ADMIN',
     );
   }
 }

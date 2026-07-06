@@ -83,6 +83,11 @@ class ApiAppRepository implements AppRepository {
       (json) => _mapTradeItem(json),
     );
     final List<TradeItem> items = response.data;
+    final Set<String> fetchedIds = items.map((item) => item.id).toSet();
+
+    _items.removeWhere(
+      (item) => item.ownerId == userId && !fetchedIds.contains(item.id),
+    );
 
     for (final TradeItem item in items) {
       _upsertItem(item);

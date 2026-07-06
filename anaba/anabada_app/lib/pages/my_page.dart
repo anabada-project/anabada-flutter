@@ -18,22 +18,26 @@ class MyPage extends StatefulWidget {
 
 class _MyPageState extends State<MyPage> {
   String? _loadedUserId;
-  bool _isLoadingAccount = false;
+  String? _loadingUserId;
 
   void _scheduleAccountLoad(String userId) {
     _loadedUserId = userId;
+    _loadingUserId = userId;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted || _isLoadingAccount) return;
+      if (!mounted || _loadingUserId != userId) return;
 
-      _isLoadingAccount = true;
       try {
         final refreshedUser = await authService.refreshCurrentUserWithApi();
         final String effectiveUserId = refreshedUser?.id ?? userId;
-        await appController.fetchUserItems(effectiveUserId);
+        if (effectiveUserId == _loadedUserId) {
+          await appController.fetchUserItems(effectiveUserId);
+        }
       } catch (error) {
         debugPrint('Account API load failed: $error');
       } finally {
-        _isLoadingAccount = false;
+        if (_loadingUserId == userId) {
+          _loadingUserId = null;
+        }
       }
     });
   }

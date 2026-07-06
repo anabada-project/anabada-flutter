@@ -106,6 +106,12 @@ class AuthService extends ChangeNotifier {
       notifyListeners();
     } on AuthApiException catch (error) {
       debugPrint('Account me failed: ${error.message}');
+      if (error.statusCode == 401) {
+        final bool refreshed = await refreshTokenWithApi();
+        if (refreshed) {
+          return refreshCurrentUserWithApi();
+        }
+      }
     } catch (error) {
       debugPrint('Account me handling failed: $error');
     }
