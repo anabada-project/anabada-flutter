@@ -89,6 +89,22 @@ class ApiClient {
     );
   }
 
+  Future<ApiResponse<T>> postMultipartResponse<T>(
+    String path, {
+    required ApiResponseParser<T> parser,
+    Map<String, String> fields = const {},
+    List<ApiMultipartFile> files = const [],
+    bool authenticated = true,
+  }) async {
+    final dynamic response = await _sendMultipart(
+      path,
+      fields: fields,
+      files: files,
+      authenticated: authenticated,
+    );
+    return ApiResponse<T>.fromRaw(response, parser: parser);
+  }
+
   Future<ApiResponse<T>> putResponse<T>(
     String path, {
     required ApiResponseParser<T> parser,
@@ -203,6 +219,59 @@ class ApiClient {
     return decodedBody;
   }
 
+  Future<dynamic> _sendMultipart(
+    String path, {
+    required Map<String, String> fields,
+    required List<ApiMultipartFile> files,
+    required bool authenticated,
+  }) async {
+    final Uri uri = _uri(path, const {});
+    final http.MultipartRequest request = http.MultipartRequest('POST', uri)
+      ..headers['Accept'] = 'application/json'
+      ..fields.addAll(fields);
+
+    final String? token = await tokenProvider?.call();
+    if (authenticated && token != null && token.trim().isNotEmpty) {
+      request.headers['Authorization'] = 'Bearer ${token.trim()}';
+    }
+
+    for (final ApiMultipartFile file in files) {
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          file.fieldName,
+          file.bytes,
+          filename: file.filename,
+        ),
+      );
+    }
+
+    final http.StreamedResponse streamedResponse = await _httpClient.send(
+      request,
+    );
+    final String responseBody = await streamedResponse.stream.bytesToString();
+    final dynamic decodedBody = _decodeBody(responseBody);
+
+    if (streamedResponse.statusCode < 200 ||
+        streamedResponse.statusCode >= 300) {
+      throw ApiException(
+        statusCode: streamedResponse.statusCode,
+        message: _messageFrom(decodedBody) ?? 'Request failed.',
+        body: decodedBody,
+      );
+    }
+
+    if (decodedBody is Map<String, dynamic> &&
+        decodedBody['success'] == false) {
+      throw ApiException(
+        statusCode: streamedResponse.statusCode,
+        message: _messageFrom(decodedBody) ?? 'Request failed.',
+        body: decodedBody,
+      );
+    }
+
+    return decodedBody;
+  }
+
   Uri _uri(String path, Map<String, String?> queryParameters) {
     final String normalizedPath = path.startsWith('/')
         ? path.substring(1)
@@ -262,4 +331,16 @@ class ApiException implements Exception {
     if (code == null) return message;
     return '$message ($code)';
   }
+}
+
+class ApiMultipartFile {
+  const ApiMultipartFile({
+    required this.fieldName,
+    required this.filename,
+    required this.bytes,
+  });
+
+  final String fieldName;
+  final String filename;
+  final Uint8List bytes;
 }
