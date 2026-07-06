@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/app_user.dart';
 import 'api_client.dart';
 
 class AuthApiLoginResult {
@@ -51,6 +52,12 @@ class AuthApiTokenResult {
   final String refreshToken;
   final String accessTokenExpiresIn;
   final String refreshTokenExpiresIn;
+}
+
+class AuthApiAccountResult {
+  const AuthApiAccountResult({required this.user});
+
+  final AppUser user;
 }
 
 class AuthApiException implements Exception {
@@ -278,6 +285,43 @@ class AuthApiService {
     );
   }
 
+  Future<AuthApiAccountResult> fetchMe({required String accessToken}) async {
+    debugPrint('Account me API request start');
+    debugPrint('Request URL: ${ApiClient.uri('/api/account/me')}');
+
+    final http.Response response = await http.get(
+      ApiClient.uri('/api/account/me'),
+      headers: ApiClient.authHeaders(accessToken),
+    );
+
+    final int statusCode = response.statusCode;
+    final String responseBody = utf8.decode(response.bodyBytes);
+
+    debugPrint('Account me response statusCode: $statusCode');
+    debugPrint('Account me response body: $responseBody');
+
+    if (statusCode >= 500) {
+      throw AuthApiException(_serverErrorMessage, statusCode: statusCode);
+    }
+
+    final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
+
+    if (statusCode < 200 || statusCode >= 300) {
+      final String message =
+          body['message']?.toString() ??
+          body['error']?.toString() ??
+          '\uD68C\uC6D0 \uC815\uBCF4 \uC870\uD68C\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.';
+      throw AuthApiException(message, statusCode: statusCode);
+    }
+
+    final dynamic rawData = body['data'];
+    final Map<String, dynamic> data = rawData is Map<String, dynamic>
+        ? rawData
+        : body;
+
+    return AuthApiAccountResult(user: _accountUserFromJson(data));
+  }
+
   Future<void> signOut({required String accessToken}) async {
     debugPrint('Signout API request start');
     debugPrint('Request URL: ${ApiClient.uri('/api/auth/signout')}');
@@ -368,8 +412,9 @@ class AuthApiService {
     }
 
     final dynamic rawData = body['data'];
-    final Map<String, dynamic> tokenBody =
-        rawData is Map<String, dynamic> ? rawData : body;
+    final Map<String, dynamic> tokenBody = rawData is Map<String, dynamic>
+        ? rawData
+        : body;
 
     final String? newAccessToken = tokenBody['accessToken'] as String?;
     final String? newRefreshToken = tokenBody['refreshToken'] as String?;
@@ -448,5 +493,23 @@ class AuthApiService {
     }
 
     return <String, dynamic>{};
+  }
+
+  AppUser _accountUserFromJson(Map<String, dynamic> json) {
+    final String id =
+        json['userId']?.toString() ??
+        json['id']?.toString() ??
+        json['memberId']?.toString() ??
+        '';
+
+    return AppUser(
+      id: id,
+      name: json['name']?.toString() ?? id,
+      email: json['email']?.toString() ?? '',
+      major: json['specialism']?.toString() ?? json['major']?.toString() ?? '',
+      gender: json['gender']?.toString() ?? '',
+      generation: json['generation']?.toString() ?? '',
+      isAdmin: json['role']?.toString().toUpperCase() == 'ADMIN',
+    );
   }
 }

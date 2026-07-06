@@ -53,6 +53,13 @@ class LocalAppRepository implements AppRepository {
   Future<void> refresh() async {}
 
   @override
+  Future<List<TradeItem>> fetchUserItems(String userId) async {
+    return _store.items
+        .where((item) => item.ownerId == userId)
+        .toList(growable: false);
+  }
+
+  @override
   Future<TradeItem> createItem(CreateTradeItemInput input) {
     return _items.create(input);
   }
@@ -202,9 +209,6 @@ class LocalAppRepository implements AppRepository {
       ownerName: ownerName,
       ownerGeneration: ownerGeneration,
     );
-    await _comments.updateAuthorName(
-      authorId: ownerId,
-      authorName: ownerName,
-    );
+    await _comments.updateAuthorName(authorId: ownerId, authorName: ownerName);
   }
 }

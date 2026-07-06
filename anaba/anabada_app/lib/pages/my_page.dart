@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../controllers/app_controller.dart';
 import '../services/auth_service.dart';
 import '../widgets/common/custom_bottom_navigation_bar.dart';
 import '../widgets/edit_profile_button.dart';
@@ -8,8 +9,34 @@ import '../widgets/my_page_section_title.dart';
 import '../widgets/my_page_top_bar.dart';
 import '../widgets/profile_card.dart';
 
-class MyPage extends StatelessWidget {
+class MyPage extends StatefulWidget {
   const MyPage({super.key});
+
+  @override
+  State<MyPage> createState() => _MyPageState();
+}
+
+class _MyPageState extends State<MyPage> {
+  String? _loadedUserId;
+  bool _isLoadingAccount = false;
+
+  void _scheduleAccountLoad(String userId) {
+    _loadedUserId = userId;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || _isLoadingAccount) return;
+
+      _isLoadingAccount = true;
+      try {
+        final refreshedUser = await authService.refreshCurrentUserWithApi();
+        final String effectiveUserId = refreshedUser?.id ?? userId;
+        await appController.fetchUserItems(effectiveUserId);
+      } catch (error) {
+        debugPrint('Account API load failed: $error');
+      } finally {
+        _isLoadingAccount = false;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +49,10 @@ class MyPage extends StatelessWidget {
             backgroundColor: Colors.white,
             body: Center(child: Text('로그인이 필요합니다.')),
           );
+        }
+
+        if (_loadedUserId != user.id) {
+          _scheduleAccountLoad(user.id);
         }
 
         return Scaffold(

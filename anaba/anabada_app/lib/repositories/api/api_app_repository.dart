@@ -5,6 +5,7 @@ import '../../models/trade_item.dart';
 import '../../models/trade_request.dart';
 import '../../services/api/api_client.dart';
 import '../../services/api/api_response.dart';
+import '../../services/api/account_api.dart';
 import '../../services/api/comment_api.dart';
 import '../../services/api/like_api.dart';
 import '../../services/api/notice_api.dart';
@@ -18,11 +19,13 @@ typedef CurrentUserIdProvider = String? Function();
 
 class ApiAppRepository implements AppRepository {
   ApiAppRepository(ApiClient apiClient, {this.currentUserIdProvider})
-    : _postApi = PostApi(apiClient),
+    : _accountApi = AccountApi(apiClient),
+      _postApi = PostApi(apiClient),
       _commentApi = CommentApi(apiClient),
       _likeApi = LikeApi(apiClient),
       _noticeApi = NoticeApi(apiClient);
 
+  final AccountApi _accountApi;
   final PostApi _postApi;
   final CommentApi _commentApi;
   final LikeApi _likeApi;
@@ -71,6 +74,20 @@ class ApiAppRepository implements AppRepository {
       ..clear()
       ..addAll(items);
     _syncCommentsFromPosts(response.raw);
+    return List.unmodifiable(items);
+  }
+
+  @override
+  Future<List<TradeItem>> fetchUserItems(String userId) async {
+    final ApiResponse<List<TradeItem>> response = await _accountApi.fetchPosts(
+      (json) => _mapTradeItem(json),
+    );
+    final List<TradeItem> items = response.data;
+
+    for (final TradeItem item in items) {
+      _upsertItem(item);
+    }
+
     return List.unmodifiable(items);
   }
 
@@ -222,11 +239,8 @@ class ApiAppRepository implements AppRepository {
 
   Future<List<ItemComment>> fetchCommentThread(String commentId) async {
     final List<String> listKeys = const ['content', 'comments', 'replies'];
-    final ApiResponse<List<ItemComment>> response =
-        await _commentApi.fetchThread(
-          commentId,
-          (json) => _mapComment(json),
-        );
+    final ApiResponse<List<ItemComment>> response = await _commentApi
+        .fetchThread(commentId, (json) => _mapComment(json));
     final List<ItemComment> comments = response.data;
 
     if (comments.isEmpty) {

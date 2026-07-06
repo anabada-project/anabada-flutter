@@ -83,9 +83,34 @@ class AuthService extends ChangeNotifier {
       generation: '',
     );
 
+    await refreshCurrentUserWithApi();
+
     notifyListeners();
 
     return _apiCurrentUser;
+  }
+
+  Future<AppUser?> refreshCurrentUserWithApi() async {
+    final String? savedAccessToken = _accessToken;
+
+    if (savedAccessToken == null || savedAccessToken.isEmpty) {
+      return currentUser;
+    }
+
+    try {
+      final AuthApiAccountResult result = await _authApiService.fetchMe(
+        accessToken: savedAccessToken,
+      );
+
+      _apiCurrentUser = result.user;
+      notifyListeners();
+    } on AuthApiException catch (error) {
+      debugPrint('Account me failed: ${error.message}');
+    } catch (error) {
+      debugPrint('Account me handling failed: $error');
+    }
+
+    return currentUser;
   }
 
   Future<bool> refreshTokenWithApi() async {

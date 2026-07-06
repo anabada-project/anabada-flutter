@@ -19,6 +19,8 @@ abstract class AppRepository {
 
   Future<void> refresh();
 
+  Future<List<TradeItem>> fetchUserItems(String userId);
+
   Future<TradeItem> createItem(CreateTradeItemInput input);
 
   Future<void> updateItemStatus(String itemId, ItemTradeStatus status);
@@ -32,10 +34,7 @@ abstract class AppRepository {
     required bool isLiked,
   });
 
-  Future<void> recordItemView({
-    required String itemId,
-    required String userId,
-  });
+  Future<void> recordItemView({required String itemId, required String userId});
 
   Future<ItemComment> createComment({
     required String itemId,
