@@ -15,11 +15,27 @@ class ImageApi {
     return _client.postMultipartResponse<UploadedImage>(
       '/api/image',
       files: [
-        ApiMultipartFile(fieldName: 'file', filename: filename, bytes: bytes),
+        ApiMultipartFile(
+          fieldName: 'file',
+          filename: filename,
+          bytes: bytes,
+          contentType: _contentTypeFor(filename),
+        ),
       ],
       parser: (response) =>
           ApiResponse.parseData(response, UploadedImage.fromJson),
     );
+  }
+
+  static String _contentTypeFor(String filename) {
+    return switch (filename.split('.').last.toLowerCase()) {
+      'png' => 'image/png',
+      'gif' => 'image/gif',
+      'webp' => 'image/webp',
+      'heic' => 'image/heic',
+      'heif' => 'image/heif',
+      _ => 'image/jpeg',
+    };
   }
 }
 

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 import 'api_request.dart';
 import 'api_response.dart';
@@ -241,6 +242,7 @@ class ApiClient {
           file.fieldName,
           file.bytes,
           filename: file.filename,
+          contentType: MediaType.parse(file.contentType),
         ),
       );
     }
@@ -338,9 +340,11 @@ class ApiMultipartFile {
     required this.fieldName,
     required this.filename,
     required this.bytes,
+    required this.contentType,
   });
 
   final String fieldName;
   final String filename;
   final Uint8List bytes;
+  final String contentType;
 }
