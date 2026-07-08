@@ -117,7 +117,7 @@ class AuthApiService {
       throw AuthApiException(message, statusCode: statusCode);
     }
 
-    final bool success = body['success'] as bool? ?? true;
+    final bool success = body['success'] != false;
     final String message =
         body['message']?.toString() ??
         '\uD68C\uC6D0\uAC00\uC785\uC774 \uC644\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4.';
@@ -133,82 +133,35 @@ class AuthApiService {
     );
   }
 
-  Future<AuthApiMessageResult> sendEmailCode({required String email}) async {
-    debugPrint('Email code send API request start');
-    debugPrint('Request URL: ${ApiClient.uri('/api/auth/email/send')}');
-    debugPrint('Request email: $email');
+  Future<AuthApiMessageResult> sendSignUpEmailCode({required String email}) {
+    return sendEmailCode(email: email);
+  }
 
-    final http.Response response = await http.post(
-      ApiClient.uri('/api/auth/email/send'),
-      headers: ApiClient.jsonHeaders,
-      body: jsonEncode({'email': email.trim()}),
-    );
+  Future<AuthApiMessageResult> verifySignUpEmailCode({
+    required String email,
+    required String code,
+  }) {
+    return verifyEmailCode(email: email, code: code);
+  }
 
-    final int statusCode = response.statusCode;
-    final String responseBody = utf8.decode(response.bodyBytes);
-
-    debugPrint('Email code send response statusCode: $statusCode');
-    debugPrint('Email code send response body: $responseBody');
-
-    if (statusCode >= 500) {
-      throw AuthApiException(_serverErrorMessage, statusCode: statusCode);
-    }
-
-    final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
-
-    if (statusCode < 200 || statusCode >= 300) {
-      final String message =
-          body['message']?.toString() ??
-          body['error']?.toString() ??
-          '이메일 인증 코드 발송에 실패했습니다.';
-      throw AuthApiException(message, statusCode: statusCode);
-    }
-
-    return AuthApiMessageResult(
-      success: body['success'] as bool? ?? true,
-      message: body['message']?.toString() ?? '인증 코드를 발송했습니다.',
-      data: body['data'],
+  Future<AuthApiMessageResult> sendEmailCode({required String email}) {
+    return _postMessage(
+      path: '/api/auth/email/send',
+      requestName: 'Email code send',
+      requestBody: {'email': email.trim()},
+      fallbackMessage: _emailSendFallbackMessage,
     );
   }
 
   Future<AuthApiMessageResult> verifyEmailCode({
     required String email,
     required String code,
-  }) async {
-    debugPrint('Email code verify API request start');
-    debugPrint('Request URL: ${ApiClient.uri('/api/auth/email/verify')}');
-    debugPrint('Request email: $email');
-
-    final http.Response response = await http.post(
-      ApiClient.uri('/api/auth/email/verify'),
-      headers: ApiClient.jsonHeaders,
-      body: jsonEncode({'email': email.trim(), 'code': code.trim()}),
-    );
-
-    final int statusCode = response.statusCode;
-    final String responseBody = utf8.decode(response.bodyBytes);
-
-    debugPrint('Email code verify response statusCode: $statusCode');
-    debugPrint('Email code verify response body: $responseBody');
-
-    if (statusCode >= 500) {
-      throw AuthApiException(_serverErrorMessage, statusCode: statusCode);
-    }
-
-    final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
-
-    if (statusCode < 200 || statusCode >= 300) {
-      final String message =
-          body['message']?.toString() ??
-          body['error']?.toString() ??
-          '이메일 인증 코드가 올바르지 않습니다.';
-      throw AuthApiException(message, statusCode: statusCode);
-    }
-
-    return AuthApiMessageResult(
-      success: body['success'] as bool? ?? true,
-      message: body['message']?.toString() ?? '이메일 인증이 완료되었습니다.',
-      data: body['data'],
+  }) {
+    return _postMessage(
+      path: '/api/auth/email/verify',
+      requestName: 'Email code verify',
+      requestBody: {'email': email.trim(), 'code': code.trim()},
+      fallbackMessage: _emailVerifyFallbackMessage,
     );
   }
 
@@ -258,8 +211,9 @@ class AuthApiService {
     final dynamic rawData = body['data'];
 
     if (rawData is! Map<String, dynamic>) {
-      throw const AuthApiException(
+      throw AuthApiException(
         '\uB85C\uADF8\uC778 \uC751\uB2F5 \uB370\uC774\uD130\uAC00 \uC62C\uBC14\uB974\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.',
+        statusCode: statusCode,
       );
     }
 
@@ -267,8 +221,9 @@ class AuthApiService {
     final String? refreshToken = rawData['refreshToken'] as String?;
 
     if (accessToken == null || refreshToken == null) {
-      throw const AuthApiException(
+      throw AuthApiException(
         '\uD1A0\uD070 \uC815\uBCF4\uB97C \uBC1B\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.',
+        statusCode: statusCode,
       );
     }
 
@@ -302,24 +257,9 @@ class AuthApiService {
     }
 
     final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
-
-    if (statusCode == 401) {
-      final String message =
-          body['message']?.toString() ??
-          '\uC720\uD6A8\uD558\uC9C0 \uC54A\uAC70\uB098 \uB9CC\uB8CC\uB41C \uC561\uC138\uC2A4 \uD1A0\uD070\uC785\uB2C8\uB2E4.';
-      throw AuthApiException(message, statusCode: statusCode);
-    }
-
-    if (statusCode == 403) {
-      final String message =
-          body['message']?.toString() ??
-          '\uC811\uADFC \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.';
-      throw AuthApiException(message, statusCode: statusCode);
-    }
-
     final String message =
-        body['message']?.toString() ??
-        '\uB85C\uADF8\uC544\uC6C3\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.';
+        body['message']?.toString() ?? _signOutFallbackMessage(statusCode);
+
     throw AuthApiException(message, statusCode: statusCode);
   }
 
@@ -346,30 +286,16 @@ class AuthApiService {
 
     final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
 
-    if (statusCode == 401) {
-      final String message =
-          body['message']?.toString() ??
-          '\uC720\uD6A8\uD558\uC9C0 \uC54A\uAC70\uB098 \uB9CC\uB8CC\uB41C \uB9AC\uD504\uB808\uC2DC \uD1A0\uD070\uC785\uB2C8\uB2E4.';
-      throw AuthApiException(message, statusCode: statusCode);
-    }
-
-    if (statusCode == 403) {
-      final String message =
-          body['message']?.toString() ??
-          '\uD1A0\uD070 \uC7AC\uBC1C\uAE09 \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.';
-      throw AuthApiException(message, statusCode: statusCode);
-    }
-
     if (statusCode != 200) {
       final String message =
-          body['message']?.toString() ??
-          '\uD1A0\uD070 \uC7AC\uBC1C\uAE09\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.';
+          body['message']?.toString() ?? _retokenFallbackMessage(statusCode);
       throw AuthApiException(message, statusCode: statusCode);
     }
 
     final dynamic rawData = body['data'];
-    final Map<String, dynamic> tokenBody =
-        rawData is Map<String, dynamic> ? rawData : body;
+    final Map<String, dynamic> tokenBody = rawData is Map<String, dynamic>
+        ? rawData
+        : body;
 
     final String? newAccessToken = tokenBody['accessToken'] as String?;
     final String? newRefreshToken = tokenBody['refreshToken'] as String?;
@@ -379,8 +305,9 @@ class AuthApiService {
         tokenBody['refreshTokenExpiresIn'] as String?;
 
     if (newAccessToken == null || newRefreshToken == null) {
-      throw const AuthApiException(
+      throw AuthApiException(
         '\uC7AC\uBC1C\uAE09\uB41C \uD1A0\uD070 \uC815\uBCF4\uB97C \uBC1B\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.',
+        statusCode: statusCode,
       );
     }
 
@@ -390,6 +317,85 @@ class AuthApiService {
       accessTokenExpiresIn: accessTokenExpiresIn ?? '',
       refreshTokenExpiresIn: refreshTokenExpiresIn ?? '',
     );
+  }
+
+  Future<AuthApiMessageResult> _postMessage({
+    required String path,
+    required String requestName,
+    required Map<String, dynamic> requestBody,
+    required String Function(int statusCode) fallbackMessage,
+  }) async {
+    debugPrint('$requestName API request start');
+    debugPrint('Request URL: ${ApiClient.uri(path)}');
+
+    final http.Response response = await http.post(
+      ApiClient.uri(path),
+      headers: ApiClient.jsonHeaders,
+      body: jsonEncode(requestBody),
+    );
+
+    final int statusCode = response.statusCode;
+    final String responseBody = utf8.decode(response.bodyBytes);
+
+    debugPrint('$requestName response statusCode: $statusCode');
+    debugPrint('$requestName response body: $responseBody');
+
+    if (statusCode >= 500) {
+      throw AuthApiException(_serverErrorMessage, statusCode: statusCode);
+    }
+
+    final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
+
+    if (statusCode < 200 || statusCode >= 300) {
+      final String message =
+          body['message']?.toString() ??
+          body['error']?.toString() ??
+          fallbackMessage(statusCode);
+      throw AuthApiException(message, statusCode: statusCode);
+    }
+
+    final bool success = body['success'] != false;
+    final String message =
+        body['message']?.toString() ?? fallbackMessage(statusCode);
+
+    if (!success) {
+      throw AuthApiException(message, statusCode: statusCode);
+    }
+
+    return AuthApiMessageResult(
+      success: success,
+      message: message,
+      data: body['data'] ?? body['code'],
+    );
+  }
+
+  String _emailSendFallbackMessage(int statusCode) {
+    return switch (statusCode) {
+      200 =>
+        '\uC778\uC99D\uBC88\uD638\uAC00 \uC815\uC0C1\uC801\uC73C\uB85C \uBC1C\uC1A1\uB418\uC5C8\uC2B5\uB2C8\uB2E4.',
+      400 =>
+        '\uC62C\uBC14\uB978 \uC774\uBA54\uC77C\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694.',
+      409 =>
+        '\uC774\uBBF8 \uAC00\uC785\uB41C \uC774\uBA54\uC77C\uC785\uB2C8\uB2E4.',
+      429 =>
+        '\uC778\uC99D\uBC88\uD638\uB97C \uB108\uBB34 \uB9CE\uC774 \uC694\uCCAD\uD588\uC2B5\uB2C8\uB2E4. \uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574\uC8FC\uC138\uC694.',
+      _ =>
+        '\uC778\uC99D\uBC88\uD638 \uBC1C\uC1A1\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.',
+    };
+  }
+
+  String _emailVerifyFallbackMessage(int statusCode) {
+    return switch (statusCode) {
+      200 => '\uC778\uC99D\uC5D0 \uC131\uACF5\uD588\uC2B5\uB2C8\uB2E4.',
+      400 =>
+        '\uC778\uC99D\uBC88\uD638 \uD615\uC2DD\uC774 \uC62C\uBC14\uB974\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.',
+      401 =>
+        '\uC778\uC99D\uBC88\uD638\uAC00 \uC77C\uCE58\uD558\uC9C0 \uC54A\uAC70\uB098 \uB9CC\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4.',
+      429 =>
+        '\uC778\uC99D \uC2DC\uB3C4 \uD69F\uC218\uAC00 \uB108\uBB34 \uB9CE\uC2B5\uB2C8\uB2E4. \uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574\uC8FC\uC138\uC694.',
+      _ =>
+        '\uC774\uBA54\uC77C \uC778\uC99D\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.',
+    };
   }
 
   String _signUpFallbackMessage(int statusCode) {
@@ -402,6 +408,28 @@ class AuthApiService {
         '\uC774\uBBF8 \uC0AC\uC6A9 \uC911\uC778 \uC815\uBCF4\uAC00 \uC788\uC2B5\uB2C8\uB2E4.',
       _ =>
         '\uD68C\uC6D0\uAC00\uC785 \uC694\uCCAD\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.',
+    };
+  }
+
+  String _signOutFallbackMessage(int statusCode) {
+    return switch (statusCode) {
+      401 =>
+        '\uC720\uD6A8\uD558\uC9C0 \uC54A\uAC70\uB098 \uB9CC\uB8CC\uB41C \uC561\uC138\uC2A4 \uD1A0\uD070\uC785\uB2C8\uB2E4.',
+      403 =>
+        '\uB85C\uADF8\uC544\uC6C3 \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.',
+      _ =>
+        '\uB85C\uADF8\uC544\uC6C3\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.',
+    };
+  }
+
+  String _retokenFallbackMessage(int statusCode) {
+    return switch (statusCode) {
+      401 =>
+        '\uC720\uD6A8\uD558\uC9C0 \uC54A\uAC70\uB098 \uB9CC\uB8CC\uB41C \uB9AC\uD504\uB808\uC2DC \uD1A0\uD070\uC785\uB2C8\uB2E4.',
+      403 =>
+        '\uD1A0\uD070 \uC7AC\uBC1C\uAE09 \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.',
+      _ =>
+        '\uD1A0\uD070 \uC7AC\uBC1C\uAE09\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.',
     };
   }
 

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../controllers/app_controller.dart';
-
 import '../services/auth_api_service.dart';
-import 'auth/find_password_page.dart';
-import 'auth/login_page.dart';
 import '../services/auth_service.dart';
 import '../widgets/edit_profile_header.dart';
 import '../widgets/edit_profile_input_field.dart';
 import '../widgets/generation_button.dart';
 import '../widgets/save_profile_button.dart';
+import 'auth/find_password_page.dart';
+import 'auth/login_page.dart';
 
 class EditProfileResult {
   final String name;
