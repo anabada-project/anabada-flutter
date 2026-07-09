@@ -71,6 +71,31 @@ class AuthService extends ChangeNotifier {
     return _authApiService.verifySignUpEmailCode(email: email, code: code);
   }
 
+  Future<AuthApiMessageResult> requestPasswordResetCodeWithApi({
+    required String email,
+  }) {
+    return _authApiService.sendPasswordResetCode(email: email);
+  }
+
+  Future<AuthApiMessageResult> verifyPasswordResetCodeWithApi({
+    required String email,
+    required String code,
+  }) {
+    return _authApiService.verifyPasswordResetCode(email: email, code: code);
+  }
+
+  Future<AuthApiMessageResult> resetPasswordWithApi({
+    required String email,
+    required String newPassword,
+    required String confirmPassword,
+  }) {
+    return _authApiService.resetPassword(
+      email: email,
+      newPassword: newPassword,
+      confirmPassword: confirmPassword,
+    );
+  }
+
   AppUser? login({required String email, required String password}) {
     return null;
   }
