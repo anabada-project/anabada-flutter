@@ -1,8 +1,11 @@
 class ApiClient {
-  static const String baseUrl = 'https://anabada.shop:22124';
+  static const String baseUrl = 'https://anabada.shop:22124/';
 
   static Uri uri(String path) {
-    return Uri.parse('$baseUrl$path');
+    final String normalizedPath = path.startsWith('/')
+        ? path.substring(1)
+        : path;
+    return Uri.parse('$baseUrl$normalizedPath');
   }
 
   static const Map<String, String> jsonHeaders = {

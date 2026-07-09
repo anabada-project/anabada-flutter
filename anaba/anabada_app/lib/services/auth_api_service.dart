@@ -5,6 +5,16 @@ import 'package:http/http.dart' as http;
 
 import 'api_client.dart';
 
+class AuthApiLoginResult {
+  const AuthApiLoginResult({
+    required this.accessToken,
+    required this.refreshToken,
+  });
+
+  final String accessToken;
+  final String refreshToken;
+}
+
 class AuthApiSignUpResult {
   const AuthApiSignUpResult({
     required this.success,
@@ -26,17 +36,7 @@ class AuthApiMessageResult {
 
   final bool success;
   final String message;
-  final String? data;
-}
-
-class AuthApiLoginResult {
-  const AuthApiLoginResult({
-    required this.accessToken,
-    required this.refreshToken,
-  });
-
-  final String accessToken;
-  final String refreshToken;
+  final Object? data;
 }
 
 class AuthApiTokenResult {
@@ -66,28 +66,8 @@ class AuthApiException implements Exception {
 }
 
 class AuthApiService {
-  Future<AuthApiMessageResult> sendSignUpEmailCode({
-    required String email,
-  }) async {
-    return _postMessage(
-      path: '/api/auth/email/send',
-      requestName: 'Signup email send',
-      requestBody: {'email': email.trim()},
-      fallbackMessage: _emailSendFallbackMessage,
-    );
-  }
-
-  Future<AuthApiMessageResult> verifySignUpEmailCode({
-    required String email,
-    required String code,
-  }) async {
-    return _postMessage(
-      path: '/api/auth/email/verify',
-      requestName: 'Signup email verify',
-      requestBody: {'email': email.trim(), 'code': code.trim()},
-      fallbackMessage: _emailVerifyFallbackMessage,
-    );
-  }
+  static const String _serverErrorMessage =
+      '\uC11C\uBC84 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4. \uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574\uC8FC\uC138\uC694.';
 
   Future<AuthApiMessageResult> sendPasswordResetCode({
     required String email,
@@ -193,6 +173,38 @@ class AuthApiService {
     );
   }
 
+  Future<AuthApiMessageResult> sendSignUpEmailCode({required String email}) {
+    return sendEmailCode(email: email);
+  }
+
+  Future<AuthApiMessageResult> verifySignUpEmailCode({
+    required String email,
+    required String code,
+  }) {
+    return verifyEmailCode(email: email, code: code);
+  }
+
+  Future<AuthApiMessageResult> sendEmailCode({required String email}) {
+    return _postMessage(
+      path: '/api/auth/email/send',
+      requestName: 'Email code send',
+      requestBody: {'email': email.trim()},
+      fallbackMessage: _emailSendFallbackMessage,
+    );
+  }
+
+  Future<AuthApiMessageResult> verifyEmailCode({
+    required String email,
+    required String code,
+  }) {
+    return _postMessage(
+      path: '/api/auth/email/verify',
+      requestName: 'Email code verify',
+      requestBody: {'email': email.trim(), 'code': code.trim()},
+      fallbackMessage: _emailVerifyFallbackMessage,
+    );
+  }
+
   Future<AuthApiLoginResult> signIn({
     required String id,
     required String password,
@@ -294,7 +306,7 @@ class AuthApiService {
   Future<AuthApiTokenResult> reissueToken({
     required String refreshToken,
   }) async {
-    debugPrint('Retoken API request start');
+    debugPrint('Token reissue API request start');
     debugPrint('Request URL: ${ApiClient.uri('/auth/retoken')}');
 
     final http.Response response = await http.post(
@@ -305,17 +317,14 @@ class AuthApiService {
     final int statusCode = response.statusCode;
     final String responseBody = utf8.decode(response.bodyBytes);
 
-    debugPrint('Retoken response statusCode: $statusCode');
-    debugPrint('Retoken response body: $responseBody');
+    debugPrint('Token reissue response statusCode: $statusCode');
+    debugPrint('Token reissue response body: $responseBody');
 
     if (statusCode >= 500) {
       throw AuthApiException(_serverErrorMessage, statusCode: statusCode);
     }
 
-    final Map<String, dynamic> body = _decodeJsonObject(
-      responseBody,
-      statusCode: statusCode,
-    );
+    final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
 
     if (statusCode != 200) {
       final String message =
@@ -375,14 +384,13 @@ class AuthApiService {
       throw AuthApiException(_serverErrorMessage, statusCode: statusCode);
     }
 
-    final Map<String, dynamic> body = _decodeJsonObject(
-      responseBody,
-      statusCode: statusCode,
-    );
+    final Map<String, dynamic> body = _decodeJsonObjectOrEmpty(responseBody);
 
-    if (statusCode != 200) {
+    if (statusCode < 200 || statusCode >= 300) {
       final String message =
-          body['message']?.toString() ?? fallbackMessage(statusCode);
+          body['message']?.toString() ??
+          body['error']?.toString() ??
+          fallbackMessage(statusCode);
       throw AuthApiException(message, statusCode: statusCode);
     }
 
@@ -398,12 +406,9 @@ class AuthApiService {
     return AuthApiMessageResult(
       success: success,
       message: message,
-      data: (body['data'] ?? body['code'])?.toString(),
+      data: body['data'] ?? body['code'],
     );
   }
-
-  static const String _serverErrorMessage =
-      '\uC11C\uBC84 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4. \uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574\uC8FC\uC138\uC694.';
 
   String _emailSendFallbackMessage(int statusCode) {
     return switch (statusCode) {
@@ -555,10 +560,10 @@ class AuthApiService {
       if (decodedBody is Map<String, dynamic>) {
         return decodedBody;
       }
-
-      return <String, dynamic>{};
     } on FormatException {
       return <String, dynamic>{};
     }
+
+    return <String, dynamic>{};
   }
 }
