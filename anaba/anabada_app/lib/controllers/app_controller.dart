@@ -60,10 +60,7 @@ class AppController extends ChangeNotifier {
 
   List<TradeItem> recentItems(String userId) {
     final List<String> ids = _repository.recentItemIdsFor(userId);
-    return ids
-        .map(itemById)
-        .whereType<TradeItem>()
-        .toList(growable: false);
+    return ids.map(itemById).whereType<TradeItem>().toList(growable: false);
   }
 
   List<ItemComment> commentsFor(String itemId) {
@@ -90,16 +87,19 @@ class AppController extends ChangeNotifier {
     _notifyFromRepository();
   }
 
+  Future<List<TradeItem>> fetchUserItems(String userId) async {
+    final List<TradeItem> items = await _repository.fetchUserItems(userId);
+    _notifyFromRepository();
+    return items;
+  }
+
   Future<TradeItem> createItem(CreateTradeItemInput input) async {
     final TradeItem item = await _repository.createItem(input);
     _notifyFromRepository();
     return item;
   }
 
-  Future<void> updateItemStatus(
-    String itemId,
-    ItemTradeStatus status,
-  ) async {
+  Future<void> updateItemStatus(String itemId, ItemTradeStatus status) async {
     await _repository.updateItemStatus(itemId, status);
     _notifyFromRepository();
   }
@@ -169,10 +169,7 @@ class AppController extends ChangeNotifier {
     required String commentId,
     required String authorId,
   }) async {
-    await _repository.deleteComment(
-      commentId: commentId,
-      authorId: authorId,
-    );
+    await _repository.deleteComment(commentId: commentId, authorId: authorId);
     _notifyFromRepository();
   }
 
