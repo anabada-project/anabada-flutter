@@ -6,6 +6,7 @@ import '../../models/trade_request.dart';
 import '../../services/api/api_client.dart';
 import '../../services/api/api_response.dart';
 import '../../services/api/comment_api.dart';
+import '../../services/api/image_api.dart';
 import '../../services/api/like_api.dart';
 import '../../services/api/notice_api.dart';
 import '../../services/api/post_api.dart';
@@ -20,11 +21,13 @@ class ApiAppRepository implements AppRepository {
   ApiAppRepository(ApiClient apiClient, {this.currentUserIdProvider})
     : _postApi = PostApi(apiClient),
       _commentApi = CommentApi(apiClient),
+      _imageApi = ImageApi(apiClient),
       _likeApi = LikeApi(apiClient),
       _noticeApi = NoticeApi(apiClient);
 
   final PostApi _postApi;
   final CommentApi _commentApi;
+  final ImageApi _imageApi;
   final LikeApi _likeApi;
   final NoticeApi _noticeApi;
   final CurrentUserIdProvider? currentUserIdProvider;
@@ -222,11 +225,8 @@ class ApiAppRepository implements AppRepository {
 
   Future<List<ItemComment>> fetchCommentThread(String commentId) async {
     final List<String> listKeys = const ['content', 'comments', 'replies'];
-    final ApiResponse<List<ItemComment>> response =
-        await _commentApi.fetchThread(
-          commentId,
-          (json) => _mapComment(json),
-        );
+    final ApiResponse<List<ItemComment>> response = await _commentApi
+        .fetchThread(commentId, (json) => _mapComment(json));
     final List<ItemComment> comments = response.data;
 
     if (comments.isEmpty) {
@@ -414,15 +414,17 @@ class ApiAppRepository implements AppRepository {
     }
   }
 
-  Future<List<String>> _uploadPostImage(CreateTradeItemInput input) {
+  Future<List<String>> _uploadPostImage(CreateTradeItemInput input) async {
     final String filename =
         _fileNameFromPath(input.imagePath) ??
         'item-${DateTime.now().millisecondsSinceEpoch}.jpg';
-    return _postApi.uploadImages(
+    final ApiResponse<UploadedImage> response = await _imageApi.upload(
       filename: filename,
-      contentType: _contentTypeFor(filename),
       bytes: input.imageBytes,
     );
+
+    final String imageUrl = response.data.imageUrl;
+    return imageUrl.isEmpty ? const [] : [imageUrl];
   }
 
   void _syncCommentsFromPosts(dynamic response) {
@@ -513,16 +515,5 @@ class ApiAppRepository implements AppRepository {
     if (path == null || path.trim().isEmpty) return null;
     final String filename = path.replaceAll('\\', '/').split('/').last;
     return filename.contains('.') ? filename : null;
-  }
-
-  static String _contentTypeFor(String filename) {
-    return switch (filename.split('.').last.toLowerCase()) {
-      'png' => 'image/png',
-      'gif' => 'image/gif',
-      'webp' => 'image/webp',
-      'heic' => 'image/heic',
-      'heif' => 'image/heif',
-      _ => 'image/jpeg',
-    };
   }
 }
