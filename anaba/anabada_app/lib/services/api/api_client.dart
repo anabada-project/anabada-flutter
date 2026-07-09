@@ -142,26 +142,6 @@ class ApiClient {
     return ApiResponse<T>.fromRaw(response, parser: parser);
   }
 
-  Future<void> putBytes(
-    Uri uploadUrl, {
-    required Uint8List bytes,
-    required String contentType,
-  }) async {
-    final http.Response response = await _httpClient.put(
-      uploadUrl,
-      headers: {'Content-Type': contentType},
-      body: bytes,
-    );
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: '이미지 업로드에 실패했습니다.',
-        body: _decodeBody(response.body),
-      );
-    }
-  }
-
   Future<dynamic> _send(ApiRequest request) async {
     final Uri uri = _uri(request.path, request.queryParameters);
     final Map<String, String> headers = {'Accept': 'application/json'};
