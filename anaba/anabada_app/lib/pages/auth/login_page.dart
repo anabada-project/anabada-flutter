@@ -162,12 +162,12 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.03),
-                const Text('이메일', style: AppTextStyles.fieldLabel),
+                const Text('아이디', style: AppTextStyles.fieldLabel),
                 const SizedBox(height: 8),
                 AppTextFormField(
                   controller: _emailController,
-                  hintText: '이메일을 입력해주세요',
-                  keyboardType: TextInputType.emailAddress,
+                  hintText: '아이디를 입력해주세요',
+                  keyboardType: TextInputType.text,
                   textInputAction: TextInputAction.next,
                   onChanged: _clearEmailError,
                   errorText: _emailError,
@@ -251,16 +251,16 @@ class _LoginState extends State<Login> {
                   height: 43,
                   child: OutlinedButton(
                     onPressed: () async {
-                      final String? email = await Navigator.push<String>(
+                      final String? signedUpId = await Navigator.push<String>(
                         context,
                         MaterialPageRoute(builder: (_) => const SignUp()),
                       );
 
-                      if (!context.mounted || email == null) {
+                      if (!context.mounted || signedUpId == null) {
                         return;
                       }
 
-                      _emailController.text = email;
+                      _emailController.text = signedUpId;
                     },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(
