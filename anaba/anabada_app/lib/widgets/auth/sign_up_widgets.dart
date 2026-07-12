@@ -12,6 +12,7 @@ class EmailVerificationButton extends StatelessWidget {
     required this.onSend,
     required this.onVerify,
     required this.isCodeFilled,
+    required this.isLoading,
   });
 
   final bool isVerified;
@@ -19,9 +20,22 @@ class EmailVerificationButton extends StatelessWidget {
   final VoidCallback onSend;
   final VoidCallback onVerify;
   final bool isCodeFilled;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return SizedBox(
+        width: 88,
+        height: 43,
+        child: ElevatedButton(
+          onPressed: null,
+          style: _elevatedStyle(),
+          child: const Text('전송중', style: AppTextStyles.disabledButtonText),
+        ),
+      );
+    }
+
     if (isVerified) {
       return SizedBox(
         width: 88,

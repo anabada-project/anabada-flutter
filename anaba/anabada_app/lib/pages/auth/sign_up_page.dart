@@ -544,6 +544,7 @@ class _SignUpState extends State<SignUp> {
                     onSend: _handleSendCode,
                     onVerify: _handleVerifyCode,
                     isCodeFilled: _isCodeFilled,
+                    isLoading: _isEmailActionLoading,
                   ),
                 ],
               ),

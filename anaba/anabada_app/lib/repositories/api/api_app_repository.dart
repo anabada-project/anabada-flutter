@@ -7,7 +7,6 @@ import '../../services/api/api_client.dart';
 import '../../services/api/api_response.dart';
 import '../../services/api/account_api.dart';
 import '../../services/api/comment_api.dart';
-import '../../services/api/image_api.dart';
 import '../../services/api/like_api.dart';
 import '../../services/api/notice_api.dart';
 import '../../services/api/post_api.dart';
@@ -24,7 +23,6 @@ class ApiAppRepository implements AppRepository {
     : _accountApi = AccountApi(apiClient),
       _postApi = PostApi(apiClient),
       _commentApi = CommentApi(apiClient),
-      _imageApi = ImageApi(apiClient),
       _likeApi = LikeApi(apiClient),
       _noticeApi = NoticeApi(apiClient),
       _recentApi = RecentApi(apiClient);
@@ -32,7 +30,6 @@ class ApiAppRepository implements AppRepository {
   final AccountApi _accountApi;
   final PostApi _postApi;
   final CommentApi _commentApi;
-  final ImageApi _imageApi;
   final LikeApi _likeApi;
   final NoticeApi _noticeApi;
   final RecentApi _recentApi;
@@ -132,7 +129,7 @@ class ApiAppRepository implements AppRepository {
 
   @override
   Future<TradeItem> createItem(CreateTradeItemInput input) async {
-    final List<String> imageUrls = await _uploadPostImage(input);
+    const List<String> imageUrls = [];
     final TradeItem fallback = TradeItem(
       id: _generateUniqueId(),
       title: input.title,
@@ -146,7 +143,6 @@ class ApiAppRepository implements AppRepository {
       ownerGeneration: input.ownerGeneration,
       createdAt: DateTime.now(),
       imageBytes: input.imageBytes,
-      imageUrl: imageUrls.firstOrNull,
     );
     final ApiResponse<TradeItem> response = await _postApi.create(
       TradeItemMapper.createBody(input, imageUrls),
@@ -445,19 +441,6 @@ class ApiAppRepository implements AppRepository {
     }
   }
 
-  Future<List<String>> _uploadPostImage(CreateTradeItemInput input) async {
-    final String filename =
-        _fileNameFromPath(input.imagePath) ??
-        'item-${DateTime.now().millisecondsSinceEpoch}.jpg';
-    final ApiResponse<UploadedImage> response = await _imageApi.upload(
-      filename: filename,
-      bytes: input.imageBytes,
-    );
-
-    final String imageUrl = response.data.imageUrl;
-    return imageUrl.isEmpty ? const [] : [imageUrl];
-  }
-
   void _syncCommentsFromPosts(dynamic response) {
     for (final Map<String, dynamic> post in ApiResponse.dataList(response)) {
       final String itemId =
@@ -540,11 +523,5 @@ class ApiAppRepository implements AppRepository {
 
   Notice? _noticeById(String noticeId) {
     return _notices.where((notice) => notice.id == noticeId).firstOrNull;
-  }
-
-  static String? _fileNameFromPath(String? path) {
-    if (path == null || path.trim().isEmpty) return null;
-    final String filename = path.replaceAll('\\', '/').split('/').last;
-    return filename.contains('.') ? filename : null;
   }
 }

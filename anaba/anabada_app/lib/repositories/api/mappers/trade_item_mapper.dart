@@ -16,8 +16,12 @@ class TradeItemMapper {
     final bool? isLiked = _boolValue(json['isLiked'] ?? json['liked']);
     final int? likeCount = _intValue(json['likeCount'] ?? json['likes']);
 
-    if (isLiked == true && currentUserId != null && currentUserId.isNotEmpty) {
-      likedUserIds.add(currentUserId);
+    if (currentUserId != null && currentUserId.isNotEmpty) {
+      if (isLiked == true) {
+        likedUserIds.add(currentUserId);
+      } else if (isLiked == false) {
+        likedUserIds.remove(currentUserId);
+      }
     }
     _syncLikeCount(likedUserIds, likeCount);
 
