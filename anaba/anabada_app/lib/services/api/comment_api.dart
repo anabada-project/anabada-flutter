@@ -25,9 +25,14 @@ class CommentApi {
     required String content,
     required JsonMapper<T> mapper,
   }) {
+    final Object productId = int.tryParse(itemId) ?? itemId;
+
     return _client.postResponse<T>(
       '/api/comment',
-      body: {'productId': int.tryParse(itemId) ?? itemId, 'content': content},
+      body: {
+        'product_id': productId,
+        'content': content,
+      },
       parser: (response) => ApiResponse.parseData(response, mapper),
     );
   }

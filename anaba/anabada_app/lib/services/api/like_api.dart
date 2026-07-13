@@ -6,10 +6,6 @@ class LikeApi {
   final ApiClient _client;
 
   Future<void> setLiked({required String itemId, required bool isLiked}) async {
-    if (isLiked) {
-      await _client.post('/api/like/$itemId');
-    } else {
-      await _client.delete('/api/like/$itemId');
-    }
+    await _client.post('/api/like/$itemId');
   }
 }

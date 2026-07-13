@@ -686,6 +686,17 @@ class _SignUpState extends State<SignUp> {
                     child: Text(option.label, style: AppTextStyles.fieldText),
                   );
                 }).toList(),
+                selectedItemBuilder: (context) {
+                  return _majorOptions.map((option) {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        option.label,
+                        style: AppTextStyles.fieldText,
+                      ),
+                    );
+                  }).toList();
+                },
                 onChanged: _isSubmitting
                     ? null
                     : (value) => setState(() => _selectedMajor = value),

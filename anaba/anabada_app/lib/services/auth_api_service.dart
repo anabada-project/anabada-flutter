@@ -432,9 +432,7 @@ class AuthApiService {
 
     if (statusCode < 200 || statusCode >= 300) {
       final String message =
-          body['message']?.toString() ??
-          body['error']?.toString() ??
-          fallbackMessage(statusCode);
+          body['message']?.toString() ?? fallbackMessage(statusCode);
       throw AuthApiException(message, statusCode: statusCode);
     }
 
@@ -493,6 +491,8 @@ class AuthApiService {
         '\uC778\uC99D\uBC88\uD638 \uBC1C\uC1A1 \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.',
       403 =>
         '\uC778\uC99D\uBC88\uD638 \uBC1C\uC1A1 \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.',
+      404 =>
+        '\uAC00\uC785\uB41C \uC774\uBA54\uC77C\uC744 \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.',
       409 =>
         '\uC774\uBBF8 \uC694\uCCAD\uB41C \uC774\uBA54\uC77C\uC785\uB2C8\uB2E4.',
       429 =>
@@ -511,6 +511,8 @@ class AuthApiService {
         '\uC778\uC99D\uBC88\uD638\uAC00 \uC77C\uCE58\uD558\uC9C0 \uC54A\uAC70\uB098 \uB9CC\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4.',
       403 =>
         '\uC778\uC99D\uBC88\uD638 \uAC80\uC99D \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.',
+      404 =>
+        '\uAC00\uC785\uB41C \uC774\uBA54\uC77C\uC744 \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.',
       _ =>
         '\uC778\uC99D\uBC88\uD638 \uAC80\uC99D\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.',
     };
@@ -526,6 +528,8 @@ class AuthApiService {
         '\uBE44\uBC00\uBC88\uD638 \uBCC0\uACBD \uC778\uC99D\uC774 \uB9CC\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4.',
       403 =>
         '\uBE44\uBC00\uBC88\uD638 \uBCC0\uACBD \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.',
+      404 =>
+        '\uAC00\uC785\uB41C \uC774\uBA54\uC77C\uC744 \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.',
       _ =>
         '\uBE44\uBC00\uBC88\uD638 \uBCC0\uACBD\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.',
     };

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../controllers/app_controller.dart';
 import '../models/item_comment.dart';
 import '../models/trade_item.dart';
+import '../services/api/api_client.dart';
 import '../services/auth_service.dart';
 import '../utils/time_formatter.dart';
 import '../widgets/item_detail_comment_empty_state.dart';
@@ -38,7 +39,13 @@ class _ItemDetailCommentPageState extends State<ItemDetailCommentPage> {
   Future<void> _submitComment() async {
     final String content = _commentController.text.trim();
     final user = authService.currentUser;
-    if (content.isEmpty || user == null) return;
+    if (content.isEmpty) return;
+    if (user == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('로그인 후 댓글을 등록해주세요.')));
+      return;
+    }
 
     try {
       if (_editingCommentId != null) {
@@ -63,6 +70,18 @@ class _ItemDetailCommentPageState extends State<ItemDetailCommentPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error.message.toString())),
       );
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      debugPrint('Comment submit failed: ${error.statusCode} ${error.body}');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (error) {
+      if (!mounted) return;
+      debugPrint('Comment submit failed: $error');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('댓글 등록에 실패했습니다.')));
     }
   }
 
