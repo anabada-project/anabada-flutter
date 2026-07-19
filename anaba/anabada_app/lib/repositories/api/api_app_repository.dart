@@ -17,15 +17,19 @@ import 'mappers/notice_mapper.dart';
 import 'mappers/trade_item_mapper.dart';
 
 typedef CurrentUserIdProvider = String? Function();
+typedef CurrentUserNameProvider = String? Function();
 
 class ApiAppRepository implements AppRepository {
-  ApiAppRepository(ApiClient apiClient, {this.currentUserIdProvider})
-    : _accountApi = AccountApi(apiClient),
-      _postApi = PostApi(apiClient),
-      _commentApi = CommentApi(apiClient),
-      _likeApi = LikeApi(apiClient),
-      _noticeApi = NoticeApi(apiClient),
-      _recentApi = RecentApi(apiClient);
+  ApiAppRepository(
+    ApiClient apiClient, {
+    this.currentUserIdProvider,
+    this.currentUserNameProvider,
+  }) : _accountApi = AccountApi(apiClient),
+       _postApi = PostApi(apiClient),
+       _commentApi = CommentApi(apiClient),
+       _likeApi = LikeApi(apiClient),
+       _noticeApi = NoticeApi(apiClient),
+       _recentApi = RecentApi(apiClient);
 
   final AccountApi _accountApi;
   final PostApi _postApi;
@@ -34,6 +38,7 @@ class ApiAppRepository implements AppRepository {
   final NoticeApi _noticeApi;
   final RecentApi _recentApi;
   final CurrentUserIdProvider? currentUserIdProvider;
+  final CurrentUserNameProvider? currentUserNameProvider;
 
   final List<TradeItem> _items = [];
   final List<ItemComment> _comments = [];
@@ -245,7 +250,16 @@ class ApiAppRepository implements AppRepository {
             content: content,
             mapper: (json) => _mapComment(json, fallback: fallback),
           );
-    final ItemComment comment = response.data;
+    final ItemComment mappedComment = response.data;
+    final ItemComment comment = ItemComment(
+      id: mappedComment.id,
+      itemId: itemId,
+      authorId: authorId,
+      authorName: authorName,
+      content: mappedComment.content.isEmpty ? content : mappedComment.content,
+      createdAt: mappedComment.createdAt,
+      parentCommentId: parentCommentId,
+    );
     _upsertComment(comment);
     return comment;
   }
@@ -276,12 +290,14 @@ class ApiAppRepository implements AppRepository {
   @override
   Future<void> updateComment({
     required String commentId,
+    required String itemId,
     required String authorId,
     required String content,
   }) async {
     final ItemComment? current = _commentById(commentId);
     final ApiResponse<ItemComment> response = await _commentApi.update(
       commentId: commentId,
+      itemId: itemId,
       content: content,
       mapper: (json) => _mapComment(json, fallback: current),
     );
@@ -482,6 +498,8 @@ class ApiAppRepository implements AppRepository {
     return ItemCommentMapper.fromJson(
       json,
       fallback: fallback,
+      currentUserId: currentUserIdProvider?.call(),
+      currentUserName: currentUserNameProvider?.call(),
       fallbackId: _generateUniqueId,
     );
   }

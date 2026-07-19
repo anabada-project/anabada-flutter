@@ -46,6 +46,7 @@ abstract class AppRepository {
 
   Future<void> updateComment({
     required String commentId,
+    required String itemId,
     required String authorId,
     required String content,
   });

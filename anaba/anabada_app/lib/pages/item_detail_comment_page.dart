@@ -51,6 +51,7 @@ class _ItemDetailCommentPageState extends State<ItemDetailCommentPage> {
       if (_editingCommentId != null) {
         await appController.updateComment(
           commentId: _editingCommentId!,
+          itemId: widget.itemId,
           authorId: user.id,
           content: content,
         );
@@ -67,9 +68,9 @@ class _ItemDetailCommentPageState extends State<ItemDetailCommentPage> {
       _cancelInputMode();
     } on StateError catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message.toString())));
     } on ApiException catch (error) {
       if (!mounted) return;
       debugPrint('Comment submit failed: ${error.statusCode} ${error.body}');
@@ -115,15 +116,14 @@ class _ItemDetailCommentPageState extends State<ItemDetailCommentPage> {
         commentId: commentId,
         authorId: user.id,
       );
-      if (_editingCommentId == commentId ||
-          _replyingToCommentId == commentId) {
+      if (_editingCommentId == commentId || _replyingToCommentId == commentId) {
         _cancelInputMode();
       }
     } on StateError catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message.toString())));
     }
   }
 
@@ -187,6 +187,8 @@ class _ItemDetailCommentPageState extends State<ItemDetailCommentPage> {
                         const ItemDetailCommentEmptyState()
                       else
                         ...orderedComments.map((comment) {
+                          final bool isCurrentUserComment =
+                              user != null && user.id == comment.authorId;
                           final ItemComment? parent =
                               comment.parentCommentId == null
                               ? null
@@ -198,11 +200,13 @@ class _ItemDetailCommentPageState extends State<ItemDetailCommentPage> {
                               left: comment.parentCommentId == null ? 0 : 32,
                             ),
                             child: ItemDetailCommentTile(
-                              author: comment.authorName,
+                              author: isCurrentUserComment
+                                  ? user.name
+                                  : comment.authorName,
                               content: comment.content,
                               time: formatRelativeTime(comment.createdAt),
                               isWriter: comment.authorId == item.ownerId,
-                              canManage: user?.id == comment.authorId,
+                              canManage: isCurrentUserComment,
                               replyToName: parent?.authorName,
                               onReply: () => _startReply(comment),
                               onEdit: () => _startEditComment(comment),

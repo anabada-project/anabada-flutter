@@ -117,6 +117,7 @@ class LocalAppRepository implements AppRepository {
   @override
   Future<void> updateComment({
     required String commentId,
+    required String itemId,
     required String authorId,
     required String content,
   }) {

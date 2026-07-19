@@ -29,10 +29,7 @@ class CommentApi {
 
     return _client.postResponse<T>(
       '/api/comment',
-      body: {
-        'product_id': productId,
-        'content': content,
-      },
+      body: {'product_id': productId, 'comment_content': content},
       parser: (response) => ApiResponse.parseData(response, mapper),
     );
   }
@@ -51,12 +48,15 @@ class CommentApi {
 
   Future<ApiResponse<T>> update<T>({
     required String commentId,
+    required String itemId,
     required String content,
     required JsonMapper<T> mapper,
   }) {
+    final Object productId = int.tryParse(itemId) ?? itemId;
+
     return _client.patchResponse<T>(
       '/api/comment/$commentId',
-      body: {'content': content},
+      body: {'product_id': productId, 'comment_content': content},
       parser: (response) => ApiResponse.parseData(response, mapper),
     );
   }

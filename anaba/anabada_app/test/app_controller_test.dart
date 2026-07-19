@@ -13,66 +13,67 @@ void main() {
     controller = AppController(LocalAppRepository());
   });
 
-  test('item registration, like, comment, and request flow work locally', () async {
-    final item = await controller.createItem(
-      CreateTradeItemInput(
-        title: '테스트 물건',
-        description: '테스트 설명',
-        wantedItem: '테스트 교환품',
-        category: ItemCategory.etc,
-        tradeMethod: TradeMethod.exchange,
-        ownerId: 'owner',
-        ownerName: '소유자',
-        ownerGeneration: '10기',
-        imageBytes: Uint8List.fromList([1, 2, 3]),
-      ),
-    );
+  test(
+    'item registration, like, comment, and request flow work locally',
+    () async {
+      final item = await controller.createItem(
+        CreateTradeItemInput(
+          title: '테스트 물건',
+          description: '테스트 설명',
+          wantedItem: '테스트 교환품',
+          category: ItemCategory.etc,
+          tradeMethod: TradeMethod.exchange,
+          ownerId: 'owner',
+          ownerName: '소유자',
+          ownerGeneration: '10기',
+          imageBytes: Uint8List.fromList([1, 2, 3]),
+        ),
+      );
 
-    expect(controller.itemById(item.id)?.title, '테스트 물건');
+      expect(controller.itemById(item.id)?.title, '테스트 물건');
 
-    await controller.toggleLike(
-      itemId: item.id,
-      userId: 'requester',
-      userName: '요청자',
-    );
-    expect(controller.itemById(item.id)?.isLikedBy('requester'), isTrue);
+      await controller.toggleLike(
+        itemId: item.id,
+        userId: 'requester',
+        userName: '요청자',
+      );
+      expect(controller.itemById(item.id)?.isLikedBy('requester'), isTrue);
 
-    final comment = await controller.createComment(
-      itemId: item.id,
-      authorId: 'requester',
-      authorName: '요청자',
-      content: '댓글',
-    );
-    expect(controller.commentsFor(item.id), hasLength(1));
+      final comment = await controller.createComment(
+        itemId: item.id,
+        authorId: 'requester',
+        authorName: '요청자',
+        content: '댓글',
+      );
+      expect(controller.commentsFor(item.id), hasLength(1));
 
-    await controller.updateComment(
-      commentId: comment.id,
-      authorId: 'requester',
-      content: '수정 댓글',
-    );
-    expect(controller.commentById(comment.id)?.content, '수정 댓글');
+      await controller.updateComment(
+        commentId: comment.id,
+        itemId: item.id,
+        authorId: 'requester',
+        content: '수정 댓글',
+      );
+      expect(controller.commentById(comment.id)?.content, '수정 댓글');
 
-    final request = await controller.createTradeRequest(
-      itemId: item.id,
-      requesterId: 'requester',
-      requesterName: '요청자',
-    );
-    await controller.updateTradeRequestStatus(
-      requestId: request.id,
-      status: TradeRequestStatus.accepted,
-    );
+      final request = await controller.createTradeRequest(
+        itemId: item.id,
+        requesterId: 'requester',
+        requesterName: '요청자',
+      );
+      await controller.updateTradeRequestStatus(
+        requestId: request.id,
+        status: TradeRequestStatus.accepted,
+      );
 
-    expect(
-      controller.itemById(item.id)?.status,
-      ItemTradeStatus.completed,
-    );
+      expect(controller.itemById(item.id)?.status, ItemTradeStatus.completed);
 
-    await controller.deleteComment(
-      commentId: comment.id,
-      authorId: 'requester',
-    );
-    expect(controller.commentsFor(item.id), isEmpty);
-  });
+      await controller.deleteComment(
+        commentId: comment.id,
+        authorId: 'requester',
+      );
+      expect(controller.commentsFor(item.id), isEmpty);
+    },
+  );
 
   test('notice create, update, and delete flow works locally', () async {
     final notice = await controller.createNotice(

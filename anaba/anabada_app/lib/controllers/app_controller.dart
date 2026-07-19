@@ -14,6 +14,7 @@ final AppController appController = AppController(
   ApiAppRepository(
     ApiClient(tokenProvider: () => authService.accessToken),
     currentUserIdProvider: () => authService.currentUser?.id,
+    currentUserNameProvider: () => authService.currentUser?.name,
   ),
 );
 
@@ -154,11 +155,13 @@ class AppController extends ChangeNotifier {
 
   Future<void> updateComment({
     required String commentId,
+    required String itemId,
     required String authorId,
     required String content,
   }) async {
     await _repository.updateComment(
       commentId: commentId,
+      itemId: itemId,
       authorId: authorId,
       content: content,
     );
