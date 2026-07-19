@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_colors.dart';
+import '../constants/app_text_styles.dart';
 import '../controllers/app_controller.dart';
 import '../services/auth_api_service.dart';
 import '../services/auth_service.dart';
@@ -43,11 +45,22 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
+  static const List<_MajorOption> _majorOptions = [
+    _MajorOption(label: '백엔드', value: 'BACKEND'),
+    _MajorOption(label: '프론트엔드', value: 'FRONTEND'),
+    _MajorOption(label: '디자인', value: 'DESIGN'),
+    _MajorOption(label: '플러터', value: 'FLUTTER'),
+    _MajorOption(label: 'iOS', value: 'IOS'),
+    _MajorOption(label: '안드로이드', value: 'ANDROID'),
+    _MajorOption(label: '기획', value: 'PM'),
+    _MajorOption(label: 'AI', value: 'AI'),
+  ];
+
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
-  late final TextEditingController _majorController;
 
   late String selectedGeneration;
+  String? _selectedMajor;
 
   String? nameErrorText;
   String? majorErrorText;
@@ -60,7 +73,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     _nameController = TextEditingController(text: widget.initialName);
     _emailController = TextEditingController(text: widget.initialEmail);
-    _majorController = TextEditingController(text: widget.initialMajor);
+    _selectedMajor = _normalizeMajor(widget.initialMajor);
     selectedGeneration = widget.initialGeneration;
   }
 
@@ -68,9 +81,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
-    _majorController.dispose();
 
     super.dispose();
+  }
+
+  String? _normalizeMajor(String major) {
+    final String normalizedMajor = major.trim().toUpperCase();
+
+    for (final _MajorOption option in _majorOptions) {
+      if (option.value == normalizedMajor || option.label == major.trim()) {
+        return option.value;
+      }
+    }
+
+    return null;
   }
 
   void _selectGeneration(String generation) {
@@ -89,26 +113,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
     });
   }
 
-  void _clearMajorError(String value) {
-    if (majorErrorText == null) {
-      return;
-    }
-
+  void _selectMajor(String? major) {
     setState(() {
+      _selectedMajor = major;
       majorErrorText = null;
     });
   }
 
   Future<void> _saveProfile() async {
     final String name = _nameController.text.trim();
-    final String major = _majorController.text.trim();
+    final String? major = _selectedMajor;
 
     setState(() {
       nameErrorText = name.isEmpty ? '이름을 입력해주세요.' : null;
-      majorErrorText = major.isEmpty ? '전공을 입력해주세요.' : null;
+      majorErrorText = major == null ? '전공을 선택해주세요.' : null;
     });
 
-    if (name.isEmpty || major.isEmpty) {
+    if (name.isEmpty || major == null) {
       return;
     }
 
@@ -215,12 +236,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
               const SizedBox(height: 30),
 
-              EditProfileInputField(
-                label: '전공',
-                hintText: '전공을 입력해주세요.',
-                controller: _majorController,
+              _MajorDropdown(
+                options: _majorOptions,
+                selectedMajor: _selectedMajor,
                 errorText: majorErrorText,
-                onChanged: _clearMajorError,
+                onChanged: _selectMajor,
               ),
 
               const SizedBox(height: 30),
@@ -312,6 +332,101 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
     );
   }
+}
+
+class _MajorDropdown extends StatelessWidget {
+  const _MajorDropdown({
+    required this.options,
+    required this.selectedMajor,
+    required this.errorText,
+    required this.onChanged,
+  });
+
+  final List<_MajorOption> options;
+  final String? selectedMajor;
+  final String? errorText;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool hasError = errorText != null && errorText!.isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('전공', style: AppTextStyles.editLabel),
+        const SizedBox(height: 10),
+        DropdownButtonFormField<String>(
+          initialValue: selectedMajor,
+          isExpanded: true,
+          dropdownColor: Colors.white,
+          menuMaxHeight: 360,
+          hint: const Text(
+            '전공을 선택해주세요.',
+            style: AppTextStyles.hintText,
+          ),
+          icon: const Icon(
+            Icons.keyboard_arrow_down,
+            color: AppColors.grayText,
+            size: 22,
+          ),
+          style: const TextStyle(fontSize: 15, color: Colors.black),
+          decoration: InputDecoration(
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 14,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: hasError ? Colors.red : const Color(0xFFDADADA),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: hasError ? Colors.red : AppColors.mainColor,
+              ),
+            ),
+          ),
+          items: options.map((option) {
+            return DropdownMenuItem<String>(
+              value: option.value,
+              child: Text(option.label),
+            );
+          }).toList(),
+          selectedItemBuilder: (context) {
+            return options.map((option) {
+              return Align(
+                alignment: Alignment.centerLeft,
+                child: Text(option.label),
+              );
+            }).toList();
+          },
+          onChanged: onChanged,
+        ),
+        if (hasError) ...[
+          const SizedBox(height: 8),
+          Text(
+            errorText!,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.red,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _MajorOption {
+  const _MajorOption({required this.label, required this.value});
+
+  final String label;
+  final String value;
 }
 
 class _AccountSecurityTile extends StatelessWidget {
